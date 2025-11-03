@@ -1,0 +1,31 @@
+# Struktur Dasar & Pengguna
+php artisan make:migration buat_tabel_jurusan
+php artisan make:migration buat_tabel_prodi
+php artisan make:migration buat_tabel_mahasiswa
+php artisan make:migration buat_tabel_dosen
+php artisan make:migration buat_tabel_admin
+php artisan make:migration buat_tabel_admin_prodi
+php artisan make:migration buat_tabel_prodi_dosen
+
+# Master Jadwal
+php artisan make:migration buat_tabel_ruangan
+php artisan make:migration buat_tabel_sesi
+
+# Proses Tugas Akhir & Bimbingan
+php artisan make:migration buat_tabel_tugas_akhir
+php artisan make:migration buat_tabel_tugas_akhir_anggota
+php artisan make:migration buat_tabel_bimbingan
+php artisan make:migration buat_tabel_bimbingan_log
+
+# Proses Sidang & Syarat
+php artisan make:migration buat_tabel_syarat_sidang
+php artisan make:migration buat_tabel_jadwal_sidang
+php artisan make:migration buat_tabel_sidang_Tugas_Akhir
+php artisan make:migration buat_tabel_dosen_penguji
+
+# Proses Penilaian & Revisi
+php artisan make:migration buat_tabel_unsur_nilai_pembimbing
+php artisan make:migration buat_tabel_unsur_nilai_penguji
+php artisan make:migration buat_tabel_nilai_dosen_pembimbing
+php artisan make:migration buat_tabel_nilai_dosen_penguji
+php artisan make:migration buat_tabel_revisi_tugas_akhir
