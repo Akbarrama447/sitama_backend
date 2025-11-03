@@ -38,6 +38,11 @@ class TugasAkhir extends Model
         return $this->hasMany(Bimbingan::class, 'tugas_akhir_id', 'id');
     }
 
+    public function anggota(): HasMany
+    {
+        return $this->hasMany(TugasAkhirAnggota::class, 'tugas_akhir_id');
+    }
+
     /**
      * Relasi ke Mahasiswa (untuk ambil anggota kelompok).
      */

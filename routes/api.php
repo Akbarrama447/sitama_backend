@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ProfilController;
 use App\Http\Controllers\Api\TugasAkhirController;
 // --- TAMBAHKAN IMPORT INI ---
 use App\Http\Controllers\Api\SyaratSidangController;
+use App\Http\Controllers\Api\JadwalSidangController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- TAMBAKAN RUTE BARU INI ---
     // Endpoint untuk upload file (e.g., draft, persetujuan)
+    
     Route::post('/syarat-sidang', [SyaratSidangController::class, 'store']);
+
+    // Jadwal Sidang (untuk Tab Home)
+    Route::get('/jadwal-sidang', [JadwalSidangController::class, 'index']);
+
 });
+
 
