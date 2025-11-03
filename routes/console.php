@@ -1,8 +1,10 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+Route::get('/', function () {
+    return view('login');
+});
+
+Route::post('/login', [AuthController::class, 'login'])->name('login');
