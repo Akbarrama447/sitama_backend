@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\TugasAkhirController;
 // --- TAMBAHKAN IMPORT INI ---
 use App\Http\Controllers\Api\SyaratSidangController;
 use App\Http\Controllers\Api\JadwalSidangController;
-
+use App\Http\Controllers\Api\LogBimbinganController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -42,6 +42,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Jadwal Sidang (untuk Tab Home)
     Route::get('/jadwal-sidang', [JadwalSidangController::class, 'index']);
+
+    Route::get('/log-bimbingan', [LogBimbinganController::class, 'index']); // Lihat histori
+    Route::post('/log-bimbingan', [LogBimbinganController::class, 'store']); // Tambah log baru
 
 });
 
