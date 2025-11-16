@@ -47,19 +47,21 @@ class LogBimbinganController extends Controller
                 'status'  => $log->status, // 0: Pending, 1: Disetujui
                 'dosen'   => $log->bimbingan->dosen->dosen_nama ?? 'N/A',
                 'pembimbing_ke' => $log->bimbingan->urutan, // Pembimbing 1 atau 2
+                'file_path' => $log->file_path ? asset('storage/' . $log->file_path) : null,
             ];
         });
 
         return response()->json($formattedLogs);
     }
 
-    // POST: Tambah log baru
+    // POST: Tambah log ba  ru
     public function store(Request $request)
     {
         $request->validate([
             'tanggal' => 'required|date',
             'catatan' => 'required|string',
             'dosen_nip' => 'required|string', // Frontend harus kirim NIP dosen yang dibimbing
+            'file' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // File BAB, max 10MB
         ]);
 
         $user = Auth::user();
@@ -82,12 +84,21 @@ class LogBimbinganController extends Controller
             return response()->json(['message' => 'Dosen ini bukan pembimbing Anda'], 403);
         }
 
-        // 3. Simpan Log
+        // 3. Handle file upload jika ada
+        $filePath = null;
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = time() . '_' . $mahasiswa->mhs_nim . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('bimbingan_logs', $fileName, 'public');
+        }
+
+        // 4. Simpan Log
         $log = LogBimbingan::create([
             'bimbingan_id' => $bimbingan->id,
             'tanggal' => $request->tanggal,
             'catatan' => $request->catatan,
             'status' => 0, // Default: Belum diverifikasi dosen
+            'file_path' => $filePath,
         ]);
 
         return response()->json([

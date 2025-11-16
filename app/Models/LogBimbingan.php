@@ -16,6 +16,7 @@ class LogBimbingan extends Model
         'tanggal',
         'catatan',
         'status', // 0 = Menunggu verifikasi, 1 = Disetujui (misalnya)
+        'file_path',
     ];
 
     // Relasi ke tabel 'bimbingan'
