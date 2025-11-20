@@ -11,6 +11,10 @@
     <link rel="stylesheet" href="{{ asset('') }}plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
     @stack('css')
     <link rel="stylesheet" href="{{ asset('') }}dist/css/adminlte.min.css">
+    <!-- bootstrap already included -->
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <!-- custom overrides -->
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
