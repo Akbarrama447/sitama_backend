@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--favicon-->
-    <link rel="icon" href="{{ asset('') }}assets/images/favicon-32x32.png" type="image/png" />
+    <link rel="icon" href="{{ asset('') }}assets/images/logopolines.png" type="image/png" />
     <!-- loader-->
     <link href="{{ asset('') }}assets/css/pace.min.css" rel="stylesheet" />
     <script src="{{ asset('') }}assets/js/pace.min.js"></script>
@@ -43,9 +43,10 @@
                             <div class="card-body p-sm-5">
                                 <div class="">
                                     <div class="mb-3 text-center">
-                                        {{-- <img src="assets/images/logo-icon.png" width="60" alt=""> --}}
+                                        <img src="assets/images/logopolines.png" width="80" alt="Polines Logo">
                                     </div>
                                     <div class="text-center mb-4">
+                                        
                                         <h3 class="">{{ env('APP_NAME', 'PBL IK-TI') }}</h3>
                                         <p class="mb-0"></p>
                                     </div>
@@ -98,9 +99,7 @@
                                             </div>
                                             <div class="col-12">
                                                 <div class="text-center ">
-                                                    <p class="mb-0">Belum memuliki akun ? <a
-                                                            href="{{ route('register') }}">Klik daftar</a>
-                                                    </p>
+                                                   
                                                 </div>
                                             </div>
                                         </form>

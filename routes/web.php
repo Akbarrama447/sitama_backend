@@ -5,7 +5,9 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SidangController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\BimbinganController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -38,3 +40,14 @@ Route::resource('manage-permission', PermissionController::class)->only('store',
 
 
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
+
+Route::get('/mhsw-bimbingan', [BimbinganController::class, 'index'])
+     ->name('mhsw-bimbingan');
+
+Route::get('/bimbingan/verify/{id}', [BimbinganController::class, 'verify'])->name('bimbingan.verify');
+Route::get('/bimbingan/reject/{id}', [BimbinganController::class, 'reject'])->name('bimbingan.reject');
+
+Route::get('/sidang-ta', [SidangController::class, 'index'])
+     ->name('sidang-ta');
+
+Route::post('/sidang-ta/store', [SidangController::class, 'store'])->name('sidang.store');

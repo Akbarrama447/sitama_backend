@@ -12,107 +12,95 @@ use Illuminate\Support\Facades\Hash;
 
 class MasterSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
-        $menu = Menu::create([
-            'nama_menu' => 'Menu Manajemen',
-            'url' => '#',
-            'icon' => '',
-            'parent_id' => '0',
-            'urutan' => 1
-        ]);
+        // =============== MENU ===============
+        $menu = Menu::firstOrCreate(
+            ['nama_menu' => 'Menu Manajemen'],
+            ['url' => '#', 'icon' => '', 'parent_id' => 0, 'urutan' => 1]
+        );
 
-        Menu::create([
-            'nama_menu' => 'Dashboard',
-            'url' => 'home',
-            'icon' => 'fas fa-home',
-            'parent_id' => $menu->id,
-            'urutan' => 1
-        ]);
+        Menu::firstOrCreate(
+            ['nama_menu' => 'Dashboard'],
+            ['url' => 'home', 'icon' => 'fas fa-home', 'parent_id' => $menu->id, 'urutan' => 1]
+        );
 
-        $submenu = Menu::create([
-            'nama_menu' => 'Manajemen Pengguna',
-            'url' => '#',
-            'icon' => 'fas fa-users-cog',
-            'parent_id' => $menu->id,
-            'urutan' => 2
-        ]);
-        $menu_id = Menu::create([
-            'nama_menu' => 'Kelola Pengguna',
-            'url' => 'manage-user',
-            'parent_id' => $submenu->id,
-            'urutan' => 1
-        ]);
+        $submenu = Menu::firstOrCreate(
+            ['nama_menu' => 'Manajemen Pengguna'],
+            ['url' => '#', 'icon' => 'fas fa-users-cog', 'parent_id' => $menu->id, 'urutan' => 2]
+        );
 
-        Permission::create(['name' => 'create_user', 'menu_id' => $menu_id->id]);
-        Permission::create(['name' => 'read_user', 'menu_id' => $menu_id->id]);
-        Permission::create(['name' => 'update_user', 'menu_id' => $menu_id->id]);
-        Permission::create(['name' => 'delete_user', 'menu_id' => $menu_id->id]);
+        // Kelola Pengguna
+        $menuUser = Menu::firstOrCreate(
+            ['nama_menu' => 'Kelola Pengguna'],
+            ['url' => 'manage-user', 'parent_id' => $submenu->id, 'urutan' => 1]
+        );
 
-        $menu_id = Menu::create([
-            'nama_menu' => 'Kelola Role',
-            'url' => 'manage-role',
-            'parent_id' => $submenu->id,
-            'urutan' => 2
-        ]);
+        foreach (['create_user', 'read_user', 'update_user', 'delete_user'] as $perm) {
+            Permission::firstOrCreate(['name' => $perm], ['menu_id' => $menuUser->id]);
+        }
 
-        Permission::create(['name' => 'create_role', 'menu_id' => $menu_id->id]);
-        Permission::create(['name' => 'read_role', 'menu_id' => $menu_id->id]);
-        Permission::create(['name' => 'update_role', 'menu_id' => $menu_id->id]);
-        Permission::create(['name' => 'delete_role', 'menu_id' => $menu_id->id]);
+        // Kelola Role
+        $menuRole = Menu::firstOrCreate(
+            ['nama_menu' => 'Kelola Role'],
+            ['url' => 'manage-role', 'parent_id' => $submenu->id, 'urutan' => 2]
+        );
 
-        $menu_id = Menu::create([
-            'nama_menu' => 'Kelola Menu',
-            'url' => 'manage-menu',
-            'parent_id' => $submenu->id,
-            'urutan' => 3
-        ]);
+        foreach (['create_role', 'read_role', 'update_role', 'delete_role'] as $perm) {
+            Permission::firstOrCreate(['name' => $perm], ['menu_id' => $menuRole->id]);
+        }
 
-        Permission::create(['name' => 'create_menu', 'menu_id' => $menu_id->id]);
-        Permission::create(['name' => 'read_menu', 'menu_id' => $menu_id->id]);
-        Permission::create(['name' => 'update_menu', 'menu_id' => $menu_id->id]);
-        Permission::create(['name' => 'delete_menu', 'menu_id' => $menu_id->id]);
+        // Kelola Menu
+        $menuMenu = Menu::firstOrCreate(
+            ['nama_menu' => 'Kelola Menu'],
+            ['url' => 'manage-menu', 'parent_id' => $submenu->id, 'urutan' => 3]
+        );
 
-        $menu = Menu::create([
-            'nama_menu' => 'Backup Server',
-            'url' => '#',
-            'icon' => '',
-            'parent_id' => '0',
-            'urutan' => 2
-        ]);
+        foreach (['create_menu', 'read_menu', 'update_menu', 'delete_menu'] as $perm) {
+            Permission::firstOrCreate(['name' => $perm], ['menu_id' => $menuMenu->id]);
+        }
 
-        $menu_id = Menu::create([
-            'nama_menu' => 'Backup Database',
-            'url' => 'dbbackup',
-            'icon' => 'fas fa-database',
-            'parent_id' => $menu->id,
-            'urutan' => 1
-        ]);
+        // Backup Server
+        $menuBackupServer = Menu::firstOrCreate(
+            ['nama_menu' => 'Backup Server'],
+            ['url' => '#', 'icon' => '', 'parent_id' => 0, 'urutan' => 2]
+        );
 
-        Permission::create(['name' => 'backup_database', 'menu_id' => $menu_id->id]);
+        $menuBackup = Menu::firstOrCreate(
+            ['nama_menu' => 'Backup Database'],
+            ['url' => 'dbbackup', 'icon' => 'fas fa-database', 'parent_id' => $menuBackupServer->id, 'urutan' => 1]
+        );
 
-        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [1, 1]);
-        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [2, 1]);
-        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [3, 1]);
-        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [4, 1]);
-        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [5, 1]);
-        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [6, 1]);
-        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [7, 1]);
-        DB::insert('insert into role_has_menus (menu_id, role_id) values (?, ?)', [8, 1]);
+        Permission::firstOrCreate(['name' => 'backup_database'], ['menu_id' => $menuBackup->id]);
 
-        User::factory()->create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@gmail.com',
-            'password' => Hash::make("adminadmin")
-        ]);
 
-        $superadmin = Role::create(['name' => 'superadmin']);
-        $superadmin->givePermissionTo(Permission::all());
-        User::firstWhere('email', 'superadmin@gmail.com')->assignRole('superadmin');
+        // =============== ROLE HAS MENU ===============
+        foreach (Menu::all() as $m) {
+            DB::table('role_has_menus')->updateOrInsert(
+                ['menu_id' => $m->id, 'role_id' => 1],
+                [] // No extra data
+            );
+        }
+
+
+        // =============== SUPER ADMIN USER ===============
+        $user = User::firstOrCreate(
+            ['email' => 'superadmin@gmail.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => Hash::make('adminadmin')
+            ]
+        );
+
+        // =============== ROLE SUPERADMIN ===============
+        $superadmin = Role::firstOrCreate(['name' => 'superadmin']);
+
+        // assign all permissions ke superadmin
+        $superadmin->syncPermissions(Permission::all());
+
+        // assign role ke user
+        if (!$user->hasRole('superadmin')) {
+            $user->assignRole('superadmin');
+        }
     }
 }
