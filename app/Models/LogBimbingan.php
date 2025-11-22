@@ -13,10 +13,11 @@ class LogBimbingan extends Model
     // Kolom yang boleh diisi massal
     protected $fillable = [
         'bimbingan_id',
+        'judul',
+        'deskripsi',
         'tanggal',
-        'catatan',
-        'status', // 0 = Menunggu verifikasi, 1 = Disetujui (misalnya)
         'file_path',
+        'status'
     ];
 
     // Relasi ke tabel 'bimbingan'
