@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use App\Models\TugasAkhir; // <-- Import Model TA
+use App\Models\Mahasiswa; // <-- Import Model Mahasiswa
 use Illuminate\Support\Facades\DB; // <-- TAMBAHAN IMPORT UNTUK TRANSAKSI
 
 class TugasAkhirController extends Controller
@@ -79,10 +80,31 @@ class TugasAkhirController extends Controller
             ], 409); // 409 Conflict
         }
 
+        // 1.5. Cek apakah anggota lain sudah punya TA aktif
+        $anggotaNims = $request->input('anggota', []);
+        foreach ($anggotaNims as $nim) {
+            $member = Mahasiswa::find($nim);
+            if (!$member) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Mahasiswa dengan NIM {$nim} tidak ditemukan."
+                ], 404);
+            }
+            $existingForMember = $member->tugasAkhir()->where('status', '!=', 'Selesai')->first();
+            if ($existingForMember) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Mahasiswa dengan NIM {$nim} sudah memiliki Tugas Akhir yang aktif."
+                ], 409);
+            }
+        }
+
         // 2. Validasi input
         $validator = Validator::make($request->all(), [
             'judul' => 'required|string|max:500',
             'deskripsi' => 'required|string',
+            'anggota' => 'required|array|min:1',
+            'anggota.*' => 'integer|exists:mahasiswa,mhs_nim',
         ]);
 
         if ($validator->fails()) {
@@ -108,9 +130,9 @@ class TugasAkhirController extends Controller
                     'tahun_akademik' => '2024/2025' // TODO: Harusnya dinamis
                 ]);
 
-                // 5. Sambungkan TA baru ini ke mahasiswa yang login
+                // 5. Sambungkan TA baru ini ke mahasiswa yang dipilih
                 // (Insert ke tabel 'tugas_akhir_anggota')
-                $tugasAkhir->mahasiswa()->attach($mahasiswa->mhs_nim);
+                $tugasAkhir->mahasiswa()->attach($request->input('anggota'));
 
                 // 6. Siapkan data balikan (load relasi biar lengkap)
                 $tugasAkhir->load('bimbingan.dosen', 'mahasiswa');

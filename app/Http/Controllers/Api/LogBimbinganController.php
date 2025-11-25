@@ -12,6 +12,41 @@ use App\Models\LogBimbingan;
 
 class LogBimbinganController extends Controller
 {
+    // GET: Ambil daftar pembimbing untuk mahasiswa yang login
+    public function getAdvisors(Request $request)
+    {
+        $user = Auth::user();
+        // 1. Cari Mahasiswa dari User ID
+        $mahasiswa = Mahasiswa::where('user_id', $user->id)->first();
+        if (!$mahasiswa) return response()->json(['message' => 'Data mahasiswa tidak ditemukan'], 404);
+
+        // 2. Cari TA Mahasiswa (ambil yang terbaru/aktif)
+        $ta = TugasAkhir::whereHas('anggota', function ($q) use ($mahasiswa) {
+            $q->where('mhs_nim', $mahasiswa->mhs_nim);
+        })->latest()->first();
+
+        if (!$ta) return response()->json(['message' => 'Belum ada Tugas Akhir'], 404);
+
+        // 3. Ambil semua bimbingan terkait TA ini
+        $bimbingans = Bimbingan::where('tugas_akhir_id', $ta->id)
+            ->with('dosen')
+            ->orderBy('urutan')
+            ->get();
+
+        // 4. Format data biar enak dibaca frontend
+        $formattedAdvisors = $bimbingans->map(function ($bimbingan) {
+            return [
+                'bimbingan_id' => $bimbingan->id,
+                'dosen_nip' => $bimbingan->dosen_nip,
+                'dosen_nama' => $bimbingan->dosen->dosen_nama ?? 'N/A',
+                'urutan' => $bimbingan->urutan,
+                'label' => 'Pembimbing ' . $bimbingan->urutan . ' - ' . ($bimbingan->dosen->dosen_nama ?? 'N/A'),
+            ];
+        });
+
+        return response()->json($formattedAdvisors);
+    }
+
     // GET: Ambil semua histori log mahasiswa yang login
     public function index(Request $request)
     {
@@ -32,8 +67,9 @@ class LogBimbinganController extends Controller
         // (Bisa jadi dia punya Pembimbing 1 dan Pembimbing 2)
         $bimbinganIds = Bimbingan::where('tugas_akhir_id', $ta->id)->pluck('id');
 
-        // 4. Ambil log berdasarkan bimbingan_id tadi
+        // 4. Ambil log berdasarkan bimbingan_id tadi dan mhs_nim mahasiswa ini
         $logs = LogBimbingan::whereIn('bimbingan_id', $bimbinganIds)
+            ->where('mhs_nim', $mahasiswa->mhs_nim)
             ->with(['bimbingan.dosen']) // Load data dosen biar tahu log ini sama siapa
             ->orderBy('tanggal', 'desc')
             ->get();
@@ -44,6 +80,8 @@ class LogBimbinganController extends Controller
                 'id' => $log->id,
                 'tanggal' => $log->tanggal,
                 'catatan' => $log->catatan,
+                'judul' => $log->judul,
+                'deskripsi' => $log->deskripsi,
                 'status'  => $log->status, // 0: Pending, 1: Disetujui
                 'dosen'   => $log->bimbingan->dosen->dosen_nama ?? 'N/A',
                 'pembimbing_ke' => $log->bimbingan->urutan, // Pembimbing 1 atau 2
@@ -59,7 +97,9 @@ class LogBimbinganController extends Controller
     {
         $request->validate([
             'tanggal' => 'required|date',
-            'catatan' => 'required|string',
+            'catatan' => 'string',
+            'judul' => 'required|string',
+            'deskripsi' => 'required|string',
             'dosen_nip' => 'required|string', // Frontend harus kirim NIP dosen yang dibimbing
             'file' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // File BAB, max 10MB
         ]);
@@ -95,8 +135,11 @@ class LogBimbinganController extends Controller
         // 4. Simpan Log
         $log = LogBimbingan::create([
             'bimbingan_id' => $bimbingan->id,
+            'mhs_nim' => $mahasiswa->mhs_nim,
             'tanggal' => $request->tanggal,
             'catatan' => $request->catatan,
+            'judul' => $request->judul,
+            'deskripsi' => $request->deskripsi,
             'status' => 0, // Default: Belum diverifikasi dosen
             'file_path' => $filePath,
         ]);

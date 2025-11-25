@@ -1,0 +1,4 @@
+- [ ] Add getAdvisors method to LogBimbinganController to return list of advisors for the student
+- [ ] Modify store method in LogBimbinganController to accept bimbingan_id instead of dosen_nip
+- [ ] Add route for getAdvisors endpoint in routes/api.php
+- [ ] Test the new functionality

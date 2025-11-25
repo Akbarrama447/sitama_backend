@@ -43,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Jadwal Sidang (untuk Tab Home)
     Route::get('/jadwal-sidang', [JadwalSidangController::class, 'index']);
 
+    Route::get('/log-bimbingan/advisors', [LogBimbinganController::class, 'getAdvisors']); // Ambil daftar pembimbing
     Route::get('/log-bimbingan', [LogBimbinganController::class, 'index']); // Lihat histori
     Route::post('/log-bimbingan', [LogBimbinganController::class, 'store']); // Tambah log baru
 

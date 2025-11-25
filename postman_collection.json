@@ -1,0 +1,222 @@
+{
+  "info": {
+    "name": "Log Bimbingan API Test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password\"\n}"
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/login",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Advisors List",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/log-bimbingan/advisors",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "log-bimbingan",
+            "advisors"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Store Log Bimbingan",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "tanggal",
+              "value": "2023-10-01",
+              "type": "text"
+            },
+            {
+              "key": "judul",
+              "value": "Judul Bimbingan Test",
+              "type": "text"
+            },
+            {
+              "key": "deskripsi",
+              "value": "Deskripsi bimbingan test",
+              "type": "text"
+            },
+            {
+              "key": "dosen_nip",
+              "value": "1981000001",
+              "type": "text",
+              "description": "NIP dosen pembimbing (dapatkan dari endpoint advisors)"
+            },
+            {
+              "key": "catatan",
+              "value": "Catatan opsional",
+              "type": "text"
+            },
+            {
+              "key": "file",
+              "type": "file",
+              "description": "File BAB (optional, PDF/DOC max 10MB)"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/log-bimbingan",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "log-bimbingan"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Log Bimbingan History",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/log-bimbingan",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "log-bimbingan"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Upload Syarat Sidang",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "nama_syarat",
+              "value": "Persetujuan Pembimbing",
+              "type": "text",
+              "description": "Nama syarat sidang (required)"
+            },
+            {
+              "key": "file",
+              "type": "file",
+              "description": "File syarat (PDF/DOC/DOCX, max 5MB, required)"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/syarat-sidang",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "syarat-sidang"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
