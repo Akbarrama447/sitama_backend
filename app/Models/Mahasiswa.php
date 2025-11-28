@@ -14,5 +14,5 @@ class Mahasiswa extends Model
     {
         // hasOne artinya "Mahasiswa ini PUNYA SATU Tugas Akhir"
         return $this->hasOne(TugasAkhir::class, 'mahasiswa_nim', 'nim');
-}
+    }
 }

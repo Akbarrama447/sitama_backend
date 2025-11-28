@@ -41,13 +41,18 @@ Route::resource('manage-permission', PermissionController::class)->only('store',
 
 Route::get('dbbackup', [DBBackupController::class, 'DBDataBackup']);
 
-Route::get('/mhsw-bimbingan', [BimbinganController::class, 'index'])
-     ->name('mhsw-bimbingan');
+Route::get('sidang-ta', [App\Http\Controllers\SidangController::class, 'index'])->name('sidang.index');
+Route::get('sidang-ta/{ta_id}/role', [App\Http\Controllers\SidangController::class, 'determineRole'])->name('sidang.role');
 
-Route::get('/bimbingan/verify/{id}', [BimbinganController::class, 'verify'])->name('bimbingan.verify');
-Route::get('/bimbingan/reject/{id}', [BimbinganController::class, 'reject'])->name('bimbingan.reject');
+Route::get('bimbingan', [App\Http\Controllers\BimbinganController::class, 'index'])->name('bimbingan.index');
+Route::get('bimbingan/{ta}', [App\Http\Controllers\BimbinganController::class, 'show'])->name('bimbingan.show');
+Route::post('bimbingan/{id}/verify', [App\Http\Controllers\BimbinganController::class, 'verify'])->name('bimbingan.verify');
+Route::post('bimbingan/{id}/reject', [App\Http\Controllers\BimbinganController::class, 'reject'])->name('bimbingan.reject');
 
-Route::get('/sidang-ta', [SidangController::class, 'index'])
-     ->name('sidang-ta');
 
 Route::post('/sidang-ta/store', [SidangController::class, 'store'])->name('sidang.store');
+
+// Nilai routes
+Route::get('nilai/{ta_id}', [App\Http\Controllers\NilaiController::class, 'show'])->name('nilai.show');
+Route::post('nilai/pembimbing/{ta_id}/{sidang_id}', [App\Http\Controllers\NilaiController::class, 'storePembimbing'])->name('nilai.pembimbing.store');
+Route::post('nilai/penguji/{ta_id}/{sidang_id}', [App\Http\Controllers\NilaiController::class, 'storePenguji'])->name('nilai.penguji.store');

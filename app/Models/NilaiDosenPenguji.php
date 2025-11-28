@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 
-class NilaiDosenPembimbing extends Model
+class NilaiDosenPenguji extends Model
 {
     use HasFactory;
 
@@ -19,10 +19,10 @@ class NilaiDosenPembimbing extends Model
         parent::__construct($attributes);
 
         // Check which table exists and set the table name accordingly
-        if (Schema::hasTable('unsur_nilai_pembimbing')) {
-            $this->table = 'unsur_nilai_pembimbing';
+        if (Schema::hasTable('unsur_nilai_penguji')) {
+            $this->table = 'unsur_nilai_penguji';
         } else {
-            $this->table = 'unsur_nilai_dosen_pembimbing';
+            $this->table = 'unsur_nilai_dosen_penguji'; // fallback name in case different
         }
 
         if (Schema::hasTable($this->table)) {
@@ -32,10 +32,12 @@ class NilaiDosenPembimbing extends Model
             $this->fillable = [
                 'sidang_id',
                 'dosen_nip',
+                'unsur_id',
                 'nilai',
-                'nilai_kedisiplinan',
-                'nilai_kreativitas',
-                'nilai_penguasaan_materi',
+                'nilai_sistematika',
+                'nilai_metodologi',
+                'nilai_pemahaman_materi',
+                'nilai_presentasi',
                 'nilai_kelengkapan',
                 'catatan'
             ];

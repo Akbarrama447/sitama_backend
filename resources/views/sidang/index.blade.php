@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <h3>Penilaian Sidang (Dosen Pembimbing)</h3>
+    <h3>Penilaian Sidang</h3>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -13,87 +13,91 @@
             <tr>
                 <th>Mahasiswa</th>
                 <th>Judul & Jadwal</th>
-                <th>Nilai </th>
-                <th>Keputusan</th>
-                {{-- Kolom Revisi Dihapus karena tidak ada di DB baru --}}
+                <th>Peran Saya</th>
                 <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($sidang as $s)
+            @foreach($daftarSidang as $s)
             <tr>
                 {{-- Nama --}}
                 <td>
-                    <strong>{{ $s->mhs_nama }}</strong><br>
-                    <small>{{ $s->mhs_nim }}</small>
+                    @php
+                        $mahasiswa_nama = 'N/A';
+                        $mahasiswa_nim = 'N/A';
+
+                        if (isset($s->tugasAkhir) && $s->tugasAkhir) {
+                            // Try to get mahasiswa data from the enhanced relationship
+                            if (isset($s->tugasAkhir->mahasiswa) && $s->tugasAkhir->mahasiswa) {
+                                $mahasiswa_nama = $s->tugasAkhir->mahasiswa->mhs_nama ?? 'N/A';
+                                $mahasiswa_nim = $s->tugasAkhir->mahasiswa->mhs_nim ?? 'N/A';
+                            } else {
+                                // If not available, try to get from the TA directly (in case there are other naming conventions)
+                                $mahasiswa_nama = $s->tugasAkhir->mhs_nama ?? 'N/A';
+                                $mahasiswa_nim = $s->tugasAkhir->mhs_nim ?? 'N/A';
+                            }
+                        }
+                    @endphp
+                    <strong>{{ $mahasiswa_nama }}</strong><br>
+                    <small>{{ $mahasiswa_nim }}</small>
                 </td>
 
                 {{-- Judul --}}
                 <td>
-                    {{ $s->judul }} <br>
-                    <span class="badge bg-info">{{ $s->status_jadwal }}</span>
+                    {{ $s->tugasAkhir->judul ?? 'N/A' }} <br>
+                    <span class="badge bg-info">{{ $s->status ?? 'Belum Ada Jadwal' }}</span>
                 </td>
 
-                {{-- Nilai (SINKRON: Panggil 'nilai') --}}
-                <td class="text-center fw-bold">
-                    {{ $s->nilai ?? '-' }}
-                </td>
-
-                {{-- Status (SINKRON: Panggil 'nilai') --}}
+                {{-- Peran Saya --}}
                 <td class="text-center">
-                    @if($s->nilai === null)
-                        <span class="badge bg-secondary">Belum Dinilai</span>
-                    @elseif($s->nilai > 75)
-                        <span class="badge bg-success">Lulus</span>
-                    @else
-                        <span class="badge bg-warning text-dark">Revisi</span>
-                    @endif
+                    @php
+                        $ta = $s->tugasAkhir;
+                        $dosen = \App\Models\Dosen::where('user_id', auth()->id())->first();
+                        $role = 'Tidak Ada';
+
+                        if ($ta && $dosen) {
+                            // Use schema info passed from controller
+                            if ($schemaInfo['hasPembimbingCols'] && ($ta->pembimbing_1_nip === $dosen->dosen_nip || $ta->pembimbing_2_nip === $dosen->dosen_nip)) {
+                                $role = 'Pembimbing';
+                            }
+                            // If pembimbing columns don't exist, check the bimbingan table
+                            elseif (!$schemaInfo['hasPembimbingCols']) {
+                                $bimbinganCount = DB::table('bimbingan')
+                                    ->where('tugas_akhir_id', $ta->id)
+                                    ->where('dosen_nip', $dosen->dosen_nip)
+                                    ->count();
+                                if ($bimbinganCount > 0) {
+                                    $role = 'Pembimbing';
+                                }
+                            }
+                            // Check if dosen_penguji table exists
+                            elseif ($schemaInfo['hasDosenPengujiTable'] && $s->dosenPenguji && $s->dosenPenguji->contains('dosen_nip', $dosen->dosen_nip)) {
+                                $role = 'Penguji';
+                            }
+                            // Fallback: check penguji columns in sidang table
+                            elseif (!$schemaInfo['hasDosenPengujiTable']) {
+                                if ($schemaInfo['hasPengujiCols'] && (
+                                    $s->penguji_1_nip === $dosen->dosen_nip ||
+                                    $s->penguji_2_nip === $dosen->dosen_nip ||
+                                    $s->penguji_3_nip === $dosen->dosen_nip
+                                )) {
+                                    $role = 'Penguji';
+                                }
+                            }
+                            // Check if sekretaris column exists
+                            elseif ($schemaInfo['hasSekretarisCol'] && $s->sekretaris_nip === $dosen->dosen_nip) {
+                                $role = 'Sekretaris';
+                            }
+                        }
+                    @endphp
+                    <span class="badge bg-primary">{{ $role }}</span>
                 </td>
 
-                {{-- Kolom Revisi Dihapus --}}
-
-                {{-- Tombol DAN MODAL (INI PERBAIKANNYA) --}}
+                {{-- Tombol Input Nilai --}}
                 <td>
-                    {{-- 1. TOMBOL --}}
-                    <button type="button" class="btn btn-primary btn-sm" 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#modalNilai{{ $s->sidang_id }}">
-                        <i class="bi bi-pencil"></i> {{ $s->nilai_id ? 'Edit Nilai' : 'Input Nilai' }}
-                    </button>
-                    
-                    {{-- 2. MODAL DIPINDAH KE DALAM TD --}}
-                    <div class="modal fade" id="modalNilai{{ $s->sidang_id }}" tabindex="-1">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <form action="{{ route('sidang.store') }}" method="POST">
-                                    @csrf
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Nilai Sidang: {{ $s->mhs_nama }}</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body text-start">
-                                        {{-- ID Sidang (Hidden) --}}
-                                        <input type="hidden" name="sidang_id" value="{{ $s->sidang_id }}">
-
-                                        <div class="mb-3">
-                                            <label>Nilai Angka (0-100)</label>
-                                            
-                                            {{-- SINKRON: name="nilai_angka" agar dibaca Controller --}}
-                                            {{-- SINKRON: value="{{ $s->nilai }}" --}}
-                                            <input type="number" name="nilai_angka" class="form-control" 
-                                                   step="0.01" min="0" max="100" required value="{{ $s->nilai }}">
-                                        </div>
-
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                        <button type="submit" class="btn btn-primary">Simpan</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- AKHIR DARI MODAL --}}
+                    <a href="{{ route('nilai.show', $s->tugasAkhir->id) }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-pencil"></i> Input Nilai
+                    </a>
                 </td>
             </tr>
             @endforeach
