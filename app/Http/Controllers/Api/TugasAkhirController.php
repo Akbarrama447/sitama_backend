@@ -103,7 +103,7 @@ class TugasAkhirController extends Controller
         $validator = Validator::make($request->all(), [
             'judul' => 'required|string|max:500',
             'deskripsi' => 'required|string',
-            'anggota' => 'required|array|min:1',
+            'anggota' => 'array|min:0', // Tidak required, minimal 0 karena pembuat request otomatis jadi anggota
             'anggota.*' => 'integer|exists:mahasiswa,mhs_nim',
         ]);
 
@@ -130,9 +130,12 @@ class TugasAkhirController extends Controller
                     'tahun_akademik' => '2024/2025' // TODO: Harusnya dinamis
                 ]);
 
-                // 5. Sambungkan TA baru ini ke mahasiswa yang dipilih
+                // 5. Gabungkan mahasiswa yang login dengan anggota yang dikirim
+                $allMembers = array_unique(array_merge([$mahasiswa->mhs_nim], $request->input('anggota', [])));
+
+                // Sambungkan TA baru ini ke semua mahasiswa (termasuk yang membuat request)
                 // (Insert ke tabel 'tugas_akhir_anggota')
-                $tugasAkhir->mahasiswa()->attach($request->input('anggota'));
+                $tugasAkhir->mahasiswa()->attach($allMembers);
 
                 // 6. Siapkan data balikan (load relasi biar lengkap)
                 $tugasAkhir->load('bimbingan.dosen', 'mahasiswa');
