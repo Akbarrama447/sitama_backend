@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SyaratSidang extends Model
 {
@@ -14,21 +13,16 @@ class SyaratSidang extends Model
     // Tentukan nama tabelnya
     protected $table = 'syarat_sidang';
 
-    // Primary key yang benar sesuai dengan database
-    protected $primaryKey = 'id';
-
-    // Kolom yang bisa diisi massal sesuai dengan struktur database sebenarnya
+    // Kolom yang boleh diisi
     protected $fillable = [
         'tugas_akhir_id',
         'nama_syarat',
+        'file_path',
         'status',
     ];
 
-    // Kolom yang tidak boleh diisi massal (guarded)
-    protected $guarded = ['id'];
-
     /**
-     * Relasi ke TugasAkhir (menggunakan tugas_akhir_id)
+     * Relasi ke TugasAkhir
      */
     public function tugasAkhir(): BelongsTo
     {
