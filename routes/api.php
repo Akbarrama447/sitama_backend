@@ -46,6 +46,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/log-bimbingan', [LogBimbinganController::class, 'index']); // Lihat histori
     Route::post('/log-bimbingan', [LogBimbinganController::class, 'store']); // Tambah log baru
 
+    Route::get('log-bimbingan', [\App\Http\Controllers\Api\LogBimbinganController::class, 'index']);
+    Route::post('log-bimbingan', [\App\Http\Controllers\Api\LogBimbinganController::class, 'store']);        //ini untuk daftar pembimbing ya (urutan), jangan dihapus
+    Route::get('pembimbing', [\App\Http\Controllers\Api\LogBimbinganController::class, 'pembimbing']);
+
+    Route::get('/pembimbing', [LogBimbinganController::class, 'pembimbing']);
+    Route::get('/log-bimbingan/{dosen_nip}', [LogBimbinganController::class, 'logsByDosen']);
+    
+    //biar bisa edit 
+    Route::put('/log-bimbingan/{id}', [LogBimbinganController::class, 'update']);
+    Route::patch('/log-bimbingan/{id}', [LogBimbinganController::class, 'update']);
 });
 
 
