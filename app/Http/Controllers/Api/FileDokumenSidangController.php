@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Models\SyaratSidang;
 use App\Models\FileDokumenSidang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Controller;
 
 class FileDokumenSidangController extends Controller
 {
@@ -16,7 +17,7 @@ class FileDokumenSidangController extends Controller
     public function index()
     {
         $fileDokumenSidang = FileDokumenSidang::with('syaratSidang')->get();
-        
+
         return response()->json([
             'status' => 'success',
             'data' => $fileDokumenSidang
@@ -131,7 +132,7 @@ class FileDokumenSidangController extends Controller
             ]);
         }
 
-        return response()->json([
+        return response->json([
             'status' => 'success',
             'message' => 'File dokumen sidang berhasil diperbarui',
             'data' => $fileDokumenSidang->load('syaratSidang')

@@ -4,29 +4,26 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DokumenSidang extends Model
 {
     use HasFactory;
 
-    // Tentukan nama tabelnya
     protected $table = 'dokumen_sidang';
+    protected $primaryKey = 'dokumen_id';
+    public $incrementing = true;
+    protected $keyType = 'int';
+    public $timestamps = false; // karena struktur dari PM tidak ada timestamps
 
-    // Kolom yang boleh diisi
     protected $fillable = [
-        'syarat_sidang_id',
-        'nama_dokumen',
-        'path_dokumen',
-        'tipe_dokumen',
+        'dokumen_syarat',
+        'dokumen_file',
+        'verified',
+        'keterangan',
+        'tipe_dokumen'
     ];
 
-    /**
-     * Relasi ke SyaratSidang
-     */
-    public function syaratSidang(): BelongsTo
-    {
-        // Primary key di tabel syarat_sidang adalah 'syarat_sidang_id'
-        return $this->belongsTo(\App\Models\SyaratSidang::class, 'syarat_sidang_id', 'syarat_sidang_id');
-    }
+    protected $casts = [
+        'verified' => 'boolean',
+    ];
 }

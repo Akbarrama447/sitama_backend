@@ -8,8 +8,9 @@ use App\Http\Controllers\Api\TugasAkhirController;
 use App\Http\Controllers\Api\JadwalSidangController;
 use App\Http\Controllers\Api\LogBimbinganController;
 use App\Http\Controllers\Api\DaftarSidangController;
-// Import controller yang baru
-use App\Http\Controllers\DokumenSidangController;
+use App\Http\Controllers\Api\DokumenSidangController;
+use App\Http\Controllers\Api\FileDokumenSidangController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -39,8 +40,19 @@ Route::middleware('auth:sanctum')->group(function () {
     // Jadwal Sidang (untuk Tab Home)
     Route::get('/jadwal-sidang', [JadwalSidangController::class, 'index']);
 
-    // Dokumen Sidang (dokumen terpisah untuk syarat sidang)
-    Route::apiResource('/dokumen-sidang', DokumenSidangController::class);
+    // Dokumen Sidang (dokumen te/api/dokumen-syaratrpisah untuk syarat sidang)
+    Route::apiResource('/dokumen-sidang', \App\Http\Controllers\Api\DokumenSidangController::class);
+    Route::post('/dokumen-sidang/upload-otomatis', [DokumenSidangController::class, 'storeOtomatis']);
+    // File Dokumen Sidang (file tambahan untuk syarat sidang)
+    Route::apiResource('/file-dokumen-sidang', \App\Http\Controllers\Api\FileDokumenSidangController::class);
+
+    // Dokumen Syarat Sidang (spesifik untuk syarat sidang sesuai struktur PM)
+        
+    Route::get('/status-upload/{tugasAkhirId}', [\App\Http\Controllers\Api\SyaratSidangController::class, 'getStatusUpload']);
+    Route::post('/upload-dokumen', [\App\Http\Controllers\Api\SyaratSidangController::class, 'uploadDokumen']);
+    Route::get('/my-uploaded-documents', [\App\Http\Controllers\Api\SyaratSidangController::class, 'getMyUploadedDocuments']);
+    Route::get('/uploaded-documents/{tugasAkhirId}', [\App\Http\Controllers\Api\SyaratSidangController::class, 'getUploadedDocuments']);
+    Route::delete('/hapus-dokumen/{id}', [\App\Http\Controllers\Api\SyaratSidangController::class, 'deleteDokumen']);
 
     Route::get('/log-bimbingan/advisors', [LogBimbinganController::class, 'getAdvisors']); // Ambil daftar pembimbing
     Route::get('/log-bimbingan', [LogBimbinganController::class, 'index']); // Lihat histori

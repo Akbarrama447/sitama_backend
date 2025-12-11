@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Models\DokumenSidang;
 use App\Models\SyaratSidang;
@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 
 class DokumenSidangController extends Controller
 {
@@ -20,7 +21,7 @@ class DokumenSidangController extends Controller
     {
         // Dapatkan user yang sedang login
         $user = Auth::user();
-        
+
         // Hubungan: users -> mahasiswa (via user_id) -> tugas_akhir_anggota (via mhs_nim) -> tugas_akhir -> syarat_sidang -> dokumen_sidang
         $dokumenSidangIds = DokumenSidang::join('syarat_sidang', 'dokumen_sidang.syarat_sidang_id', '=', 'syarat_sidang.id')
             ->join('tugas_akhir_anggota', 'syarat_sidang.tugas_akhir_id', '=', 'tugas_akhir_anggota.tugas_akhir_id')
@@ -45,7 +46,7 @@ class DokumenSidangController extends Controller
     {
         // Validasi user memiliki akses ke syarat_sidang_id yang akan diupdate
         $user = Auth::user();
-        
+
         $validator = Validator::make($request->all(), [
             'syarat_sidang_id' => 'required|integer|exists:syarat_sidang,id',
             'dokumen' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240', // Max 10MB
@@ -108,7 +109,7 @@ class DokumenSidangController extends Controller
     public function show($id)
     {
         $user = Auth::user();
-        
+
         $dokumenSidang = DokumenSidang::with('syaratSidang')
             ->join('syarat_sidang', 'dokumen_sidang.syarat_sidang_id', '=', 'syarat_sidang.id')
             ->join('tugas_akhir_anggota', 'syarat_sidang.tugas_akhir_id', '=', 'tugas_akhir_anggota.tugas_akhir_id')
@@ -137,7 +138,7 @@ class DokumenSidangController extends Controller
     public function update(Request $request, $id)
     {
         $user = Auth::user();
-        
+
         $dokumenSidang = DokumenSidang::with('syaratSidang')
             ->join('syarat_sidang', 'dokumen_sidang.syarat_sidang_id', '=', 'syarat_sidang.id')
             ->join('tugas_akhir_anggota', 'syarat_sidang.tugas_akhir_id', '=', 'tugas_akhir_anggota.tugas_akhir_id')
@@ -204,7 +205,7 @@ class DokumenSidangController extends Controller
     public function destroy($id)
     {
         $user = Auth::user();
-        
+
         $dokumenSidang = DokumenSidang::join('syarat_sidang', 'dokumen_sidang.syarat_sidang_id', '=', 'syarat_sidang.id')
             ->join('tugas_akhir_anggota', 'syarat_sidang.tugas_akhir_id', '=', 'tugas_akhir_anggota.tugas_akhir_id')
             ->join('mahasiswa', 'tugas_akhir_anggota.mhs_nim', '=', 'mahasiswa.mhs_nim')
@@ -231,5 +232,79 @@ class DokumenSidangController extends Controller
             'status' => 'success',
             'message' => 'Dokumen sidang berhasil dihapus'
         ]);
+    }
+
+    /**
+     * Menyimpan dokumen sidang baru secara otomatis berdasarkan jenis syarat sidang
+     */
+    public function storeOtomatis(Request $request)
+    {
+        $user = Auth::user();
+
+        $validator = Validator::make($request->all(), [
+            'jenis_syarat' => 'required|in:proposal,kemajuan,sidang', // Contoh jenis syarat sidang
+            'dokumen' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240', // Max 10MB
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Ambil tugas akhir milik user
+        $tugasAkhir = DB::table('mahasiswa')
+            ->join('tugas_akhir_anggota', 'mahasiswa.mhs_nim', '=', 'tugas_akhir_anggota.mhs_nim')
+            ->join('tugas_akhir', 'tugas_akhir_anggota.tugas_akhir_id', '=', 'tugas_akhir.id')
+            ->where('mahasiswa.user_id', $user->id)
+            ->select('tugas_akhir.id as tugas_akhir_id')
+            ->first();
+
+        if (!$tugasAkhir) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda tidak memiliki tugas akhir yang terkait'
+            ], 403);
+        }
+
+        // Ambil syarat sidang berdasarkan jenis dan tugas akhir
+        $jenisSyarat = $request->jenis_syarat;
+        $namaSyaratMap = [
+            'proposal' => 'Proposal',
+            'kemajuan' => 'Kemajuan',
+            'sidang' => 'Sidang'
+        ];
+
+        $namaSyarat = $namaSyaratMap[$jenisSyarat] ?? ucfirst($jenisSyarat);
+
+        $syaratSidang = SyaratSidang::where('tugas_akhir_id', $tugasAkhir->tugas_akhir_id)
+            ->where('nama_syarat', 'like', "%$namaSyarat%")
+            ->first();
+
+        if (!$syaratSidang) {
+            return response()->json([
+                'status' => 'error',
+                'message' => "Syarat sidang '$namaSyarat' tidak ditemukan untuk tugas akhir Anda"
+            ], 404);
+        }
+
+        $file = $request->file('dokumen');
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $filePath = $file->store('dokumen_sidang', 'public');
+
+        $dokumenSidang = DokumenSidang::create([
+            'syarat_sidang_id' => $syaratSidang->id,
+            'nama_dokumen' => $file->getClientOriginalName(),
+            'path_dokumen' => $filePath,
+            'tipe_dokumen' => $file->getClientOriginalExtension(),
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Dokumen sidang berhasil ditambahkan',
+            'data' => $dokumenSidang
+        ], 201);
     }
 }

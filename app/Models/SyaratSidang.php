@@ -4,34 +4,34 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SyaratSidang extends Model
 {
     use HasFactory;
 
-    // Tentukan nama tabelnya
     protected $table = 'syarat_sidang';
-
-    // Primary key yang benar sesuai dengan database
     protected $primaryKey = 'id';
+    public $incrementing = true;
+    protected $keyType = 'int';
+    public $timestamps = false; // karena struktur dari PM tidak ada timestamps
 
-    // Kolom yang bisa diisi massal sesuai dengan struktur database sebenarnya
     protected $fillable = [
         'tugas_akhir_id',
-        'nama_syarat',
-        'status',
+        'dokumen_id',
+        'dokumen_file_original',
+        'dokumen_file',
+        'verified',
+        'tanggal_upload'
     ];
 
-    // Kolom yang tidak boleh diisi massal (guarded)
-    protected $guarded = ['id'];
+    protected $casts = [
+        'verified' => 'integer',
+        'tanggal_upload' => 'datetime',
+    ];
 
-    /**
-     * Relasi ke TugasAkhir (menggunakan tugas_akhir_id)
-     */
-    public function tugasAkhir(): BelongsTo
+    // Relasi
+    public function dokumen()
     {
-        return $this->belongsTo(TugasAkhir::class, 'tugas_akhir_id', 'id');
+        return $this->belongsTo(DokumenSidang::class, 'dokumen_id', 'dokumen_id');
     }
 }

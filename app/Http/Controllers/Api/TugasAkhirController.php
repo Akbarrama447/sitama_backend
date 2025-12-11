@@ -35,7 +35,8 @@ class TugasAkhirController extends Controller
         $tugasAkhir = $mahasiswa->tugasAkhir()
                                 ->with(
                                     'bimbingan.dosen', // Ambil pembimbing
-                                    'mahasiswa'        // Ambil anggota
+                                    'mahasiswa',       // Ambil anggota
+                                    'sidangTugasAkhir.penguji.dosen' // Ambil sidang dan penguji
                                 )
                                 ->where('status', '!=', 'Selesai')
                                 ->first();
@@ -138,7 +139,7 @@ class TugasAkhirController extends Controller
                 $tugasAkhir->mahasiswa()->attach($allMembers);
 
                 // 6. Siapkan data balikan (load relasi biar lengkap)
-                $tugasAkhir->load('bimbingan.dosen', 'mahasiswa');
+                $tugasAkhir->load('bimbingan.dosen', 'mahasiswa', 'sidangTugasAkhir.penguji.dosen');
                 $dataTA = $this->formatTugasAkhirResponse($tugasAkhir);
             });
 
@@ -198,7 +199,7 @@ class TugasAkhirController extends Controller
         $tugasAkhir->refresh(); 
 
         // 5. Load ulang relasi untuk data yang baru (penting)
-        $tugasAkhir->load('bimbingan.dosen', 'mahasiswa');
+        $tugasAkhir->load('bimbingan.dosen', 'mahasiswa', 'sidangTugasAkhir.penguji.dosen');
         
         // 6. Format data balikan menggunakan helper (BIAR KONSISTEN)
         $dataTA = $this->formatTugasAkhirResponse($tugasAkhir);
@@ -232,7 +233,25 @@ class TugasAkhirController extends Controller
             }
         }
 
-        // 2. Olah data anggota kelompok
+        // 2. Olah data dosen penguji
+        $penguji = [];
+        // Pastikan relasi 'sidangTugasAkhir' sudah di-load
+        if ($tugasAkhir->relationLoaded('sidangTugasAkhir')) {
+            foreach ($tugasAkhir->sidangTugasAkhir as $sidang) {
+                if ($sidang->relationLoaded('penguji')) {
+                    foreach ($sidang->penguji as $dosenPenguji) {
+                        if ($dosenPenguji->relationLoaded('dosen')) {
+                            $penguji[] = [
+                                'nip' => $dosenPenguji->dosen->dosen_nip,
+                                'nama' => $dosenPenguji->dosen->dosen_nama,
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Olah data anggota kelompok
         $anggota = [];
         // Pastikan relasi 'mahasiswa' sudah di-load
         if ($tugasAkhir->relationLoaded('mahasiswa')) {
@@ -244,13 +263,14 @@ class TugasAkhirController extends Controller
             }
         }
 
-        // 3. Format data balikan
+        // 4. Format data balikan
         return [
             'judul' => $tugasAkhir->judul,
             'deskripsi' => $tugasAkhir->deskripsi,
             'status' => $tugasAkhir->status,
             'pembimbing_1' => $pembimbing1,
             'pembimbing_2' => $pembimbing2,
+            'penguji' => $penguji,
             'anggota_kelompok' => $anggota,
         ];
     }

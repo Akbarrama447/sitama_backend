@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany as ModelHasMany;
+use App\Models\DokumenSidang; // Tambahkan import ini untuk method syaratSidangLengkap
+use App\Models\SyaratSidang; // Tambahkan import ini untuk relasi syaratSidang
 
 class TugasAkhir extends Model
 {
@@ -58,30 +59,57 @@ class TugasAkhir extends Model
     }
 
     /**
-     * Relasi ke SyaratSidang
+     * Relasi ke SidangTugasAkhir (untuk ambil sidang terkait tugas akhir).
      */
-    public function syaratSidang(): ModelHasMany
+    public function sidangTugasAkhir(): HasMany
+    {
+        return $this->hasMany(SidangTugasAkhir::class, 'tugas_akhir_id', 'id');
+    }
+
+    /**
+     * Relasi ke SyaratSidang (untuk cek kelengkapan dokumen sidang).
+     */
+    public function syaratSidang(): HasMany
     {
         return $this->hasMany(SyaratSidang::class, 'tugas_akhir_id', 'id');
     }
 
     /**
-     * Fungsi buat cek apakah semua syarat sidang udah lengkap dan terverifikasi
+     * Method untuk mengecek apakah syarat sidang sudah lengkap.
+     * Syarat sidang dianggap lengkap jika semua dokumen WAJIB yang diperlukan
+     * telah diupload dan disetujui (verified = 1).
      *
      * @return bool
      */
     public function syaratSidangLengkap(): bool
     {
-        // Hitung total syarat sidang yang harus dipenuhi (misal: 8 surat)
-        $totalSyarat = 8;
+        // Ambil semua dokumen wajib untuk sidang (berdasarkan tabel dokumen_sidang)
+        $dokumenWajib = DokumenSidang::all();
 
-        // Hitung jumlah syarat sidang yang udah diterima untuk TA ini
-        $jumlahSyaratDiterima = $this->syaratSidang()
-            ->where('status', 'Diterima')
-            ->count();
+        // Jika ga ada dokumen wajib di sistem, anggap lengkap
+        if ($dokumenWajib->isEmpty()) {
+            return true;
+        }
 
-        // Kembalikan true jika semua syarat udah lengkap dan terverifikasi
-        return $jumlahSyaratDiterima >= $totalSyarat;
+        $totalDokumenWajib = $dokumenWajib->count();
+
+        // Ambil semua syarat sidang yang udah diupload oleh mahasiswa ini
+        $syaratUdahDiupload = $this->syaratSidang()->get();
+
+        // Hitung berapa banyak dokumen wajib yang udah disetujui
+        $dokumenLengkap = 0;
+        foreach ($dokumenWajib as $dokumenWajibItem) {
+            // Cek apakah dokumen ini udah diupload dan disetujui oleh mahasiswa
+            $dokumenIniDisetujui = $syaratUdahDiupload->contains(function ($syarat) use ($dokumenWajibItem) {
+                return $syarat->dokumen_id === $dokumenWajibItem->dokumen_id && $syarat->verified == 1;
+            });
+
+            if ($dokumenIniDisetujui) {
+                $dokumenLengkap++;
+            }
+        }
+
+        // Syarat sidang lengkap kalau semua dokumen wajib udah verified
+        return $dokumenLengkap === $totalDokumenWajib;
     }
 }
-

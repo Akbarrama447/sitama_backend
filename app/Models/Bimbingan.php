@@ -23,4 +23,15 @@ class Bimbingan extends Model
         // ke 'dosen_nip' di tabel 'dosen'
         return $this->belongsTo(Dosen::class, 'dosen_nip', 'dosen_nip');
     }
+
+    /**
+     * Definisikan relasi ke model TugasAkhir.
+     * Satu data bimbingan 'dimiliki oleh' satu Tugas Akhir.
+     */
+    public function tugasAkhir(): BelongsTo
+    {
+        // Relasi via 'tugas_akhir_id' di tabel 'bimbingan'
+        // ke 'id' di tabel 'tugas_akhir'
+        return $this->belongsTo(TugasAkhir::class, 'tugas_akhir_id', 'id');
+    }
 }
