@@ -271,4 +271,23 @@ class LogBimbinganController extends Controller
         ]);
     }
 
+<<<<<<< Updated upstream
+=======
+    public function destroy($id)
+    {
+        $log = LogBimbingan::find($id);
+
+        if (!$log) {
+            return response()->json([
+                'message' => 'Log bimbingan tidak ditemukan'
+            ], 404);
+        }
+
+        $log->delete();
+
+        return response()->json([
+            'message' => 'Log bimbingan berhasil dihapus'
+        ], 200);
+    }
+>>>>>>> Stashed changes
 }

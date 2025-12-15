@@ -43,8 +43,25 @@ Route::middleware('auth:sanctum')->group(function () {
     // Jadwal Sidang (untuk Tab Home)
     Route::get('/jadwal-sidang', [JadwalSidangController::class, 'index']);
 
+<<<<<<< Updated upstream
+=======
+    // Dokumen Sidang (dokumen terpisah untuk syarat sidang)
+    Route::apiResource('/dokumen-sidang', DokumenSidangController::class);
+
+    //bimbingan
+>>>>>>> Stashed changes
     Route::get('/log-bimbingan', [LogBimbinganController::class, 'index']); // Lihat histori
     Route::post('/log-bimbingan', [LogBimbinganController::class, 'store']); // Tambah log baru
+    //ini untuk daftar pembimbing ya (urutan), jangan dihapus
+    Route::get('log-bimbingan', [\App\Http\Controllers\Api\LogBimbinganController::class, 'index']);
+    Route::post('log-bimbingan', [\App\Http\Controllers\Api\LogBimbinganController::class, 'store']);       
+    Route::get('pembimbing', [\App\Http\Controllers\Api\LogBimbinganController::class, 'pembimbing']);
+    Route::get('/pembimbing', [LogBimbinganController::class, 'pembimbing']);
+    Route::get('/log-bimbingan/{dosen_nip}', [LogBimbinganController::class, 'logsByDosen']);
+    //biar bisa edit log bimbingan
+    Route::put('/log-bimbingan/{id}', [LogBimbinganController::class, 'update']);
+    Route::patch('/log-bimbingan/{id}', [LogBimbinganController::class, 'update']);
+    Route::delete('/log-bimbingan/{id}', [LogBimbinganController::class, 'destroy']);
 
     Route::get('log-bimbingan', [\App\Http\Controllers\Api\LogBimbinganController::class, 'index']);
     Route::post('log-bimbingan', [\App\Http\Controllers\Api\LogBimbinganController::class, 'store']);        //ini untuk daftar pembimbing ya (urutan), jangan dihapus
