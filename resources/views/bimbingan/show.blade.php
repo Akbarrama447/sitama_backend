@@ -2,7 +2,14 @@
 @extends('layouts.app')
 @section('content')
 <div class="container">
-    <a href="{{ route('bimbingan.index') }}" class="btn btn-sm btn-secondary mb-2">← Kembali</a>
+    {{-- Header & Tombol Kembali --}}
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <a href="{{ route('bimbingan.index') }}" class="btn btn-outline-secondary btn-sm px-3 rounded-pill back-btn">
+            <i class="fas fa-arrow-left me-1"></i> Kembali
+        </a>
+        <h4 class="mb-0 fw-bold text-dark">Detail Bimbingan</h4>
+    </div>
+
     <h4>Detail Bimbingan - {{ $ta->mahasiswa->nama ?? $ta->mhs_nama }} <small class="text-muted">({{ $peran ?? 'Peran: -' }})</small></h4>
 
     <table class="table table-striped">
@@ -20,15 +27,15 @@
                 <td>{{ $item->tanggal }}</td>
                 <td>{{ $item->catatan }}</td>
                 <td>
-                    @if($item->status == 2) <span class="badge bg-success">Sudah ACC</span>
+                    @if($item->status == 2) <span class="badge bg-success">Disetujui</span>
                     @elseif($item->status == 1) <span class="badge bg-danger">Ditolak</span>
                     @else <span class="badge bg-warning text-dark">Pending</span>
                     @endif
                 </td>
                 <td>
                     @if($isPembimbing)
-                        @if($item->status == 0) <!-- Pending status -->
-                            <!-- Single button with dropdown for pending status -->
+                        @if($item->status == 0)
+
                             <div class="btn-group">
                                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Aksi

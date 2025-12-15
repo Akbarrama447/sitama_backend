@@ -61,3 +61,17 @@ body {
 
 /* Small utility tweak */
 .text-muted { color: #64748b !important; }
+
+/* Back button styling */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+.back-btn:hover {
+  text-decoration: none;
+  transform: translateX(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}

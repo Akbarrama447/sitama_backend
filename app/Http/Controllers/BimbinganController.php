@@ -8,15 +8,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\BimbinganLog;
 use App\Models\TugasAkhir;
-use App\Models\Bimbingan; // Pastikan model Bimbingan ada
+use App\Models\Bimbingan;
 use App\Models\Dosen;
 
 class BimbinganController extends Controller
 {
     /**
-     * Menampilkan DAFTAR MAHASISWA (Style SITAMA).
+     * Menampilkan DAFTAR MAHASISWA (Style SITAMA) dengan FILTER.
      */
-    public function index()
+    public function index(Request $request)
     {
         // 1. Ambil Data Dosen Login
         $dosen = Dosen::where('user_id', auth()->id())->first();
@@ -24,52 +24,74 @@ class BimbinganController extends Controller
             return redirect()->back()->with('error', 'Data Dosen tidak ditemukan.');
         }
 
-        // 2. Gunakan method dari model Bimbingan untuk query data
-        $daftarMahasiswa = Bimbingan::getBimbinganForDosen($dosen->dosen_nip)->paginate(10);
+        // 2. QUERY DAFTAR MAHASISWA
+        $query = DB::table('bimbingan')
+            ->join('tugas_akhir', 'bimbingan.tugas_akhir_id', '=', 'tugas_akhir.id')
+            ->join('tugas_akhir_anggota', 'tugas_akhir.id', '=', 'tugas_akhir_anggota.tugas_akhir_id')
+            ->join('mahasiswa', 'tugas_akhir_anggota.mhs_nim', '=', 'mahasiswa.mhs_nim')
+            ->where('bimbingan.dosen_nip', $dosen->dosen_nip)
+            // Filter: Hanya tampilkan yang SUDAH ADA log bimbingannya
+            ->whereExists(function ($q) {
+                $q->select(DB::raw(1))
+                  ->from('bimbingan_log')
+                  ->whereColumn('bimbingan_log.bimbingan_id', 'bimbingan.id');
+            });
+
+        // --- LOGIKA FILTER TAHUN AKADEMIK ---
+        if ($request->filled('tahun_akademik')) {
+            $query->where('tugas_akhir.tahun_akademik', $request->tahun_akademik);
+        }
+        // ------------------------------------
+
+        // Select Data
+        $daftarMahasiswa = $query->select(
+                'tugas_akhir.id as ta_id',
+                'tugas_akhir.judul as judul_ta',
+                'tugas_akhir.tahun_akademik',
+                'mahasiswa.mhs_nama',
+                'mahasiswa.mhs_nim',
+                'bimbingan.id as bimbingan_id',
+                'bimbingan.urutan',
+                DB::raw('(SELECT id FROM bimbingan_log WHERE bimbingan_log.bimbingan_id = bimbingan.id ORDER BY tanggal DESC LIMIT 1) as id'),
+                DB::raw('(SELECT tanggal FROM bimbingan_log WHERE bimbingan_log.bimbingan_id = bimbingan.id ORDER BY tanggal DESC LIMIT 1) as tanggal'),
+                DB::raw('(SELECT catatan FROM bimbingan_log WHERE bimbingan_log.bimbingan_id = bimbingan.id ORDER BY tanggal DESC LIMIT 1) as catatan'),
+                DB::raw('(SELECT status FROM bimbingan_log WHERE bimbingan_log.bimbingan_id = bimbingan.id ORDER BY tanggal DESC LIMIT 1) as status'),
+                DB::raw('(SELECT COUNT(*) FROM bimbingan_log WHERE bimbingan_log.bimbingan_id = bimbingan.id AND bimbingan_log.status = 2) as jumlah_verified')
+            )
+            ->groupBy('tugas_akhir.id')
+            ->orderBy('mahasiswa.mhs_nama', 'asc')
+            ->paginate(10);
+
+        // Penting: Append query string agar filter tidak hilang saat pindah halaman
+        $daftarMahasiswa->appends($request->all());
 
         return view('bimbingan.index', ['bimbingan' => $daftarMahasiswa]);
     }
 
-    /**
-     * Menampilkan DETAIL HISTORY BIMBINGAN.
-     */
     public function show($ta_id)
     {
         $dosen = Dosen::where('user_id', auth()->id())->first();
         if (!$dosen) abort(403, 'Unauthorized');
 
-        $ta = TugasAkhir::with('mahasiswa')->findOrFail($ta_id);
+        $ta = TugasAkhir::query()->from('tugas_akhir')->with('mahasiswa')->findOrFail($ta_id);
+        
+        $peran = "Pembimbing"; 
+        $isPembimbing = true;  
 
-        // Determine role using the bimbingan table to check if this dosen is pembimbing
-        $bimbingan = DB::table('bimbingan')
-            ->where('tugas_akhir_id', $ta_id)
-            ->where('dosen_nip', $dosen->dosen_nip)
-            ->first();
-
-        if ($bimbingan) {
-            $peran = "Pembimbing " . $bimbingan->urutan;
-            $isPembimbing = true;
-        } else {
-            $peran = "Pembimbing";
-            $isPembimbing = false;
-        }
-
-        // Cek peran via sidang (jika ada) - untuk penguji
         $sidang = DB::table('sidang_tugas_akhir')->where('tugas_akhir_id', $ta_id)->first();
-        if ($sidang && !$isPembimbing) {
+        if ($sidang) {
             $peranData = DB::table('dosen_penguji')
-                ->where('sidang_id', $sidang->id)
+                ->where('sidang_id', $sidang->id) 
                 ->where('dosen_nip', $dosen->dosen_nip)
                 ->first();
-
             if ($peranData) {
                 $peran = $peranData->peran;
                 $isPembimbing = str_contains(strtolower($peran), 'pembimbing');
             }
         }
 
-        // Use the relationship to get bimbingan logs for this ta_id
-        $list = BimbinganLog::join('bimbingan', 'bimbingan_log.bimbingan_id', '=', 'bimbingan.id')
+        $list = BimbinganLog::query()
+            ->join('bimbingan', 'bimbingan_log.bimbingan_id', '=', 'bimbingan.id')
             ->where('bimbingan.tugas_akhir_id', $ta_id)
             ->select('bimbingan_log.*')
             ->orderBy('bimbingan_log.tanggal', 'desc')
@@ -86,7 +108,7 @@ class BimbinganController extends Controller
     public function verify(Request $request, $id)
     {
         $log = BimbinganLog::findOrFail($id);
-        $log->status = 2;
+        $log->status = 2; 
         $log->save();
         return redirect()->back()->with('success', 'Verified');
     }
@@ -94,7 +116,7 @@ class BimbinganController extends Controller
     public function reject(Request $request, $id)
     {
         $log = BimbinganLog::findOrFail($id);
-        $log->status = 1;
+        $log->status = 1; 
         $log->save();
         return redirect()->back()->with('success', 'Rejected');
     }

@@ -89,27 +89,17 @@
         </div>
 
         <aside class="main-sidebar main-sidebar-custom sidebar-dark-info elevation-4">
-            <a href="{{ url('') }}" class="brand-link">
-                <img src="{{ asset('') }}dist/img/logo-polines.png" alt="Logo Polines"
-                    class="brand-image elevation-3" style="opacity: .8">
-                <span
-                    class="brand-text font-weight-light "><strong>{{ env('APP_NAME', 'PBL IK-TI Polines') }}</strong></span>
+            <a href="{{ url('') }}" class="brand-link text-center p-3">
+                <img src="assets/images/SITAMA.png" alt="SITAMA"
+                    class="brand-image img-fluid"
+                    style="opacity: .8; float: none; max-height: 80px;">
             </a>
+
             <div class="sidebar">
                 <nav class="mt-2">
                     @include('layouts.sidebar')
                 </nav>
             </div>
-
-            {{-- <div class="sidebar-custom">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <a class="btn btn-info btn-block" href="{{ route('logout') }}"
-                        onclick="event.preventDefault();
-                this.closest('form').submit();"><i
-                            class="fas fa-sign-out-alt"></i> <span>Keluar</span></a>
-                </form>
-            </div> --}}
         </aside>
 
         <div class="content-wrapper">

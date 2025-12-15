@@ -4,30 +4,34 @@
 <div class="container-fluid px-4">
     <h1 class="mt-4">Data Mahasiswa Bimbingan Tugas Akhir</h1>
     
-    {{-- Filter Section (Visual Saja) --}}
+    {{-- Card Wrapper --}}
     <div class="card mb-4 mt-3 shadow-sm border-0">
+        
+        {{-- Filter Section --}}
         <div class="card-header bg-white py-3">
-            <div class="row g-2 align-items-center">
-                <div class="col-auto">
-                    <select class="form-select form-select-sm">
-                        <option>2024/2025</option>
-                        <option>2023/2024</option>
-                    </select>
+            <form action="{{ route('bimbingan.index') }}" method="GET">
+                <div class="row g-2 align-items-center">
+                    <div class="col-auto">
+                        <select name="tahun_akademik" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">Semua Tahun</option>
+                            <option value="2024/2025" {{ request('tahun_akademik') == '2024/2025' ? 'selected' : '' }}>2024/2025</option>
+                            <option value="2023/2024" {{ request('tahun_akademik') == '2023/2024' ? 'selected' : '' }}>2023/2024</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <select name="prodi" class="form-select form-select-sm" disabled title="Fitur belum tersedia">
+                            <option>All Program Studi</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                    </div>
                 </div>
-                <div class="col-auto">
-                    <select class="form-select form-select-sm">
-                        <option>All Program Studi</option>
-                        <option>Teknik Informatika</option>
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <button class="btn btn-primary btn-sm">Filter</button>
-                </div>
-            </div>
+            </form>
         </div>
 
         <div class="card-body">
-            {{-- Alert Messages --}}
+            {{-- Pesan Alert --}}
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     {{ session('success') }}
@@ -58,35 +62,20 @@
                     <tbody>
                         @forelse($bimbingan as $b)
                         <tr>
-                            {{-- 1. No --}}
                             <td class="text-center">{{ $loop->iteration + $bimbingan->firstItem() - 1 }}</td>
-                            
-                            {{-- 2. NIM --}}
                             <td>{{ $b->mhs_nim }}</td>
-                            
-                            {{-- 3. Mahasiswa --}}
-                            <td class="fw-bold">
-                                {{ $b->mhs_nama }}
-                            </td>
-                            
-                            {{-- 4. Judul TA --}}
+                            <td class="fw-bold">{{ $b->mhs_nama }}</td>
                             <td>
                                 <small class="text-muted d-block" style="line-height: 1.2;">
                                     {{ Str::limit($b->judul_ta, 100) }}
                                 </small>
                             </td>
-                            
-                            {{-- 5. Tahun Akademik --}}
                             <td class="text-center">{{ $b->tahun_akademik ?? '-' }}</td>
-                            
-                            {{-- 6. Sebagai --}}
                             <td class="text-center">
                                 <span class="badge bg-light text-dark border">
                                     Pembimbing {{ $b->urutan }}
                                 </span>
                             </td>
-
-                            {{-- 7. Persetujuan Sidang (Logic: Minimal 8 Verified) --}}
                             <td class="text-center">
                                 @if($b->jumlah_verified >= 8)
                                     <span class="badge bg-success rounded-pill px-3">
@@ -98,8 +87,6 @@
                                     </span>
                                 @endif
                             </td>
-
-                            {{-- 8. Aksi (Tombol Biru) --}}
                             <td class="text-center">
                                 <a href="{{ route('bimbingan.show', $b->ta_id) }}" class="btn btn-primary btn-sm" title="Lihat Detail">
                                     <i class="fas fa-list"></i>
@@ -117,7 +104,6 @@
                 </table>
             </div>
             
-            {{-- Pagination --}}
             <div class="mt-3 d-flex justify-content-end">
                 {{ $bimbingan->links() }}
             </div>

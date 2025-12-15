@@ -4,10 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Dosen;
 use App\Models\TugasAkhir;
-use App\Models\SidangTugasAkhir;
+use App\Models\SidangTugasAkhir; // Pastikan model ini sesuai dengan nama tabel (sidang_tugas_akhir)
 use App\Models\DosenPenguji;
-use App\Models\NilaiDosenPembimbing;
-use App\Models\NilaiDosenPenguji;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -24,8 +22,12 @@ class NilaiController extends Controller
             abort(403, 'Akses ditolak: Data dosen tidak ditemukan.');
         }
 
-        $ta = TugasAkhir::with(['mahasiswa', 'sidang'])->findOrFail($ta_id);
-        $sidang = $ta->sidang;
+        // Ambil TA dan Sidang
+        $ta = TugasAkhir::with(['mahasiswa'])->findOrFail($ta_id);
+        
+        // Ambil data sidang dari tabel yang benar 'sidang_tugas_akhir'
+        // Asumsi relasi di model TugasAkhir sudah benar atau kita ambil manual
+        $sidang = DB::table('sidang_tugas_akhir')->where('tugas_akhir_id', $ta_id)->first();
 
         if (!$sidang) {
             abort(404, 'Sidang belum dibuat untuk Tugas Akhir ini.');
@@ -42,7 +44,7 @@ class NilaiController extends Controller
             case 'sekretaris':
                 return $this->showSekretarisNilai($ta, $sidang);
             default:
-                abort(403, 'Anda tidak memiliki akses untuk memberikan nilai di Tugas Akhir ini.');
+                abort(403, 'Anda tidak memiliki akses untuk memberikan nilai di Tugas Akhir ini. Peran Anda tidak ditemukan.');
         }
     }
 
@@ -51,45 +53,34 @@ class NilaiController extends Controller
      */
     private function determineRole($nip, $ta, $sidang)
     {
-        // Check if dosen is pembimbing 1 or 2 (using old method as fallback)
-        if ($ta->pembimbing_1_nip === $nip || $ta->pembimbing_2_nip === $nip) {
-            return 'pembimbing';
-        }
-
-        // Check if dosen is pembimbing using bimbingan table (primary method now)
-        $bimbingan = DB::table('bimbingan')
+        // 1. Cek apakah Dosen Pembimbing (via tabel bimbingan)
+        $isPembimbing = DB::table('bimbingan')
             ->where('tugas_akhir_id', $ta->id)
             ->where('dosen_nip', $nip)
-            ->first();
+            ->exists();
 
-        if ($bimbingan) {
+        if ($isPembimbing) {
             return 'pembimbing';
         }
 
-        // Check if dosen is a penguji
+        // 2. Cek apakah Dosen Penguji (via tabel dosen_penguji)
         if ($sidang) {
-            // Check if the dosen_penguji table exists
-            if (Schema::hasTable('dosen_penguji')) {
-                $dosenPenguji = DosenPenguji::where('sidang_id', $sidang->id)
-                    ->where('dosen_nip', $nip)
-                    ->first();
-                if ($dosenPenguji) {
-                    return 'penguji';
-                }
-            } else {
-                // Fallback: check if dosen is penguji from sidang_tugas_akhir table
-                if ($sidang->penguji_1_nip === $nip || $sidang->penguji_2_nip === $nip || $sidang->penguji_3_nip === $nip) {
-                    return 'penguji';
-                }
+            $isPenguji = DB::table('dosen_penguji')
+                ->where('sidang_id', $sidang->id)
+                ->where('dosen_nip', $nip)
+                ->exists();
+
+            if ($isPenguji) {
+                return 'penguji';
             }
         }
 
-        // Check if dosen is sekretaris
-        if ($sidang && $sidang->sekretaris_nip === $nip) {
-            return 'sekretaris';
-        }
+        // 3. Cek Sekretaris (jika ada kolom sekretaris di tabel sidang)
+        // if ($sidang && isset($sidang->sekretaris_nip) && $sidang->sekretaris_nip === $nip) {
+        //     return 'sekretaris';
+        // }
 
-        return 'none'; // No role found
+        return 'none';
     }
 
     /**
@@ -97,21 +88,11 @@ class NilaiController extends Controller
      */
     private function showPembimbingNilai($ta, $sidang, $dosen)
     {
-        // Check both possible table names and use the one that exists
-        $tableExists = Schema::hasTable('unsur_nilai_pembimbing') || Schema::hasTable('unsur_nilai_dosen_pembimbing');
-
-        if ($tableExists) {
-            $table = Schema::hasTable('unsur_nilai_pembimbing') ? 'unsur_nilai_pembimbing' : 'unsur_nilai_dosen_pembimbing';
-
-            // Use DB query to check if nilai record exists for this dosen and sidang
-            $nilai = DB::table($table)
-                ->where('sidang_id', $sidang->id)
-                ->where('dosen_nip', $dosen->dosen_nip)
-                ->first();
-        } else {
-            // Create a dummy object if table doesn't exist
-            $nilai = null;
-        }
+        // Ambil nilai dari tabel 'unsur_nilai_pembimbing'
+        $nilai = DB::table('unsur_nilai_pembimbing')
+            ->where('sidang_id', $sidang->id)
+            ->where('dosen_nip', $dosen->dosen_nip)
+            ->first();
 
         return view('nilai.pembimbing', [
             'ta' => $ta,
@@ -126,32 +107,17 @@ class NilaiController extends Controller
      */
     private function showPengujiNilai($ta, $sidang, $dosen)
     {
-        // Logic for penguji nilai (soal TA)
-        $dosenPenguji = null;
-        if (Schema::hasTable('dosen_penguji')) {
-            $dosenPenguji = DosenPenguji::where('sidang_id', $sidang->id)
-                ->where('dosen_nip', $dosen->dosen_nip)
-                ->first();
-        }
+        // Ambil data peran penguji (Penguji 1, 2, atau 3)
+        $dosenPenguji = DB::table('dosen_penguji')
+            ->where('sidang_id', $sidang->id)
+            ->where('dosen_nip', $dosen->dosen_nip)
+            ->first();
 
-        // Check if nilai_penguji table exists (using the new table we created)
-        if (Schema::hasTable('unsur_nilai_penguji') || Schema::hasTable('unsur_nilai_dosen_penguji')) {
-            $table = Schema::hasTable('unsur_nilai_penguji') ? 'unsur_nilai_penguji' : 'unsur_nilai_dosen_penguji';
-            $nilai = DB::table($table)
-                ->where('sidang_id', $sidang->id)
-                ->where('dosen_nip', $dosen->dosen_nip)
-                ->first();
-        } else {
-            // Check if old nilai_dosen_penguji table exists (for backward compatibility)
-            if (Schema::hasTable('nilai_dosen_penguji')) {
-                $nilai = DB::table('nilai_dosen_penguji')
-                    ->where('sidang_id', $sidang->id)
-                    ->where('dosen_nip', $dosen->dosen_nip)
-                    ->first();
-            } else {
-                $nilai = null;
-            }
-        }
+        // Ambil nilai dari tabel 'unsur_nilai_penguji'
+        $nilai = DB::table('unsur_nilai_penguji')
+            ->where('sidang_id', $sidang->id)
+            ->where('dosen_nip', $dosen->dosen_nip)
+            ->first();
 
         return view('nilai.penguji', [
             'ta' => $ta,
@@ -167,31 +133,13 @@ class NilaiController extends Controller
      */
     private function showSekretarisNilai($ta, $sidang)
     {
-        // Check if tables exist before querying - support both table names for pembimbing
-        if (Schema::hasTable('unsur_nilai_pembimbing') || Schema::hasTable('unsur_nilai_dosen_pembimbing')) {
-            $table = Schema::hasTable('unsur_nilai_pembimbing') ? 'unsur_nilai_pembimbing' : 'unsur_nilai_dosen_pembimbing';
-            $nilaiPembimbing = DB::table($table)
-                ->where('sidang_id', $sidang->id)
-                ->get();
-        } else {
-            $nilaiPembimbing = collect(); // Empty collection
-        }
+        $nilaiPembimbing = DB::table('unsur_nilai_pembimbing')
+            ->where('sidang_id', $sidang->id)
+            ->get();
 
-        // Support both new and old table names for penguji
-        if (Schema::hasTable('unsur_nilai_penguji') || Schema::hasTable('unsur_nilai_dosen_penguji')) {
-            $table = Schema::hasTable('unsur_nilai_penguji') ? 'unsur_nilai_penguji' : 'unsur_nilai_dosen_penguji';
-            $nilaiPenguji = DB::table($table)
-                ->where('sidang_id', $sidang->id)
-                ->get();
-        } else {
-            if (Schema::hasTable('nilai_dosen_penguji')) {
-                $nilaiPenguji = DB::table('nilai_dosen_penguji')
-                    ->where('sidang_id', $sidang->id)
-                    ->get();
-            } else {
-                $nilaiPenguji = collect(); // Empty collection
-            }
-        }
+        $nilaiPenguji = DB::table('unsur_nilai_penguji')
+            ->where('sidang_id', $sidang->id)
+            ->get();
 
         return view('nilai.sekretaris', [
             'ta' => $ta,
@@ -203,6 +151,7 @@ class NilaiController extends Controller
 
     /**
      * Store pembimbing nilai
+     * Unsur: Kedisiplinan, Kreativitas, Penguasaan Materi, Kelengkapan
      */
     public function storePembimbing(Request $request, $ta_id, $sidang_id)
     {
@@ -211,32 +160,42 @@ class NilaiController extends Controller
             abort(403, 'Akses ditolak: Data dosen tidak ditemukan.');
         }
 
+        // Validasi input sesuai kolom tabel unsur_nilai_pembimbing
         $request->validate([
-            'nilai_kedisiplinan' => 'nullable|numeric|min:0|max:100',
-            'nilai_kreativitas' => 'nullable|numeric|min:0|max:100',
-            'nilai_penguasaan_materi' => 'nullable|numeric|min:0|max:100',
-            'nilai_kelengkapan' => 'nullable|numeric|min:0|max:100',
-            'catatan' => 'nullable|string'
+            'nilai_kedisiplinan'      => 'required|numeric|min:0|max:100',
+            'nilai_kreativitas'       => 'required|numeric|min:0|max:100',
+            'nilai_penguasaan_materi' => 'required|numeric|min:0|max:100',
+            'nilai_kelengkapan'       => 'required|numeric|min:0|max:100',
+            'catatan'                 => 'nullable|string'
         ]);
 
-        // Check if table exists before saving - support both table names
-        if (Schema::hasTable('unsur_nilai_pembimbing') || Schema::hasTable('unsur_nilai_dosen_pembimbing')) {
-            $table = Schema::hasTable('unsur_nilai_pembimbing') ? 'unsur_nilai_pembimbing' : 'unsur_nilai_dosen_pembimbing';
+        // Cek apakah sudah ada nilai sebelumnya
+        $existingRecord = DB::table('unsur_nilai_pembimbing')
+            ->where('sidang_id', $sidang_id)
+            ->where('dosen_nip', $dosen->dosen_nip)
+            ->first();
 
-            // Use DB query to update or create since we're dealing with potentially different table names
-            DB::table($table)->updateOrInsert(
-                [
-                    'sidang_id' => $sidang_id,
-                    'dosen_nip' => $dosen->dosen_nip,
-                ],
-                [
-                    'nilai_kedisiplinan' => $request->nilai_kedisiplinan,
-                    'nilai_kreativitas' => $request->nilai_kreativitas,
-                    'nilai_penguasaan_materi' => $request->nilai_penguasaan_materi,
-                    'nilai_kelengkapan' => $request->nilai_kelengkapan,
-                    'catatan' => $request->catatan,
-                ]
-            );
+        $data = [
+            'nilai_kedisiplinan'      => $request->nilai_kedisiplinan,
+            'nilai_kreativitas'       => $request->nilai_kreativitas,
+            'nilai_penguasaan_materi' => $request->nilai_penguasaan_materi,
+            'nilai_kelengkapan'       => $request->nilai_kelengkapan,
+            'catatan'                 => $request->catatan,
+            'updated_at'              => now(),
+        ];
+
+        if ($existingRecord) {
+            // Update
+            DB::table('unsur_nilai_pembimbing')
+                ->where('id', $existingRecord->id)
+                ->update($data);
+        } else {
+            // Insert
+            $data['sidang_id']  = $sidang_id;
+            $data['dosen_nip']  = $dosen->dosen_nip;
+            $data['created_at'] = now();
+            
+            DB::table('unsur_nilai_pembimbing')->insert($data);
         }
 
         return redirect()->back()->with('success', 'Nilai pembimbing berhasil disimpan.');
@@ -244,6 +203,7 @@ class NilaiController extends Controller
 
     /**
      * Store penguji nilai
+     * Unsur: Isi Naskah, Penguasaan Materi, Presentasi, Hasil Rancang Bangun
      */
     public function storePenguji(Request $request, $ta_id, $sidang_id)
     {
@@ -252,38 +212,42 @@ class NilaiController extends Controller
             abort(403, 'Akses ditolak: Data dosen tidak ditemukan.');
         }
 
+        // Validasi input sesuai kolom tabel unsur_nilai_penguji
         $request->validate([
-            'nilai_ta' => 'nullable|numeric|min:0|max:100',
-            'catatan' => 'nullable|string'
+            'nilai_isi_naskah'           => 'required|numeric|min:0|max:100',
+            'nilai_penguasaan_materi'    => 'required|numeric|min:0|max:100',
+            'nilai_presentasi'           => 'required|numeric|min:0|max:100',
+            'nilai_hasil_rancang_bangun' => 'required|numeric|min:0|max:100',
+            'catatan'                    => 'nullable|string'
         ]);
 
-        // Check if nilai_penguji table exists (using the new table we created)
-        if (Schema::hasTable('unsur_nilai_penguji') || Schema::hasTable('unsur_nilai_dosen_penguji')) {
-            $table = Schema::hasTable('unsur_nilai_penguji') ? 'unsur_nilai_penguji' : 'unsur_nilai_dosen_penguji';
-            DB::table($table)->updateOrInsert(
-                [
-                    'sidang_id' => $sidang_id,
-                    'dosen_nip' => $dosen->dosen_nip,
-                ],
-                [
-                    'nilai' => $request->nilai_ta,
-                    'catatan' => $request->catatan,
-                ]
-            );
+        // Cek apakah sudah ada nilai sebelumnya
+        $existingRecord = DB::table('unsur_nilai_penguji')
+            ->where('sidang_id', $sidang_id)
+            ->where('dosen_nip', $dosen->dosen_nip)
+            ->first();
+
+        $data = [
+            'nilai_isi_naskah'           => $request->nilai_isi_naskah,
+            'nilai_penguasaan_materi'    => $request->nilai_penguasaan_materi,
+            'nilai_presentasi'           => $request->nilai_presentasi,
+            'nilai_hasil_rancang_bangun' => $request->nilai_hasil_rancang_bangun,
+            'catatan'                    => $request->catatan,
+            'updated_at'                 => now(),
+        ];
+
+        if ($existingRecord) {
+            // Update
+            DB::table('unsur_nilai_penguji')
+                ->where('id', $existingRecord->id)
+                ->update($data);
         } else {
-            // Fallback to old table (for backward compatibility)
-            if (Schema::hasTable('nilai_dosen_penguji')) {
-                DB::table('nilai_dosen_penguji')->updateOrInsert(
-                    [
-                        'sidang_id' => $sidang_id,
-                        'dosen_nip' => $dosen->dosen_nip,
-                    ],
-                    [
-                        'nilai' => $request->nilai_ta,
-                        'catatan' => $request->catatan,
-                    ]
-                );
-            }
+            // Insert
+            $data['sidang_id']  = $sidang_id;
+            $data['dosen_nip']  = $dosen->dosen_nip;
+            $data['created_at'] = now();
+
+            DB::table('unsur_nilai_penguji')->insert($data);
         }
 
         return redirect()->back()->with('success', 'Nilai penguji berhasil disimpan.');

@@ -4,47 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Schema;
 
 class NilaiDosenPembimbing extends Model
 {
     use HasFactory;
+    protected $table = 'nilai_dosen_pembimbing';
+    protected $fillable = ['sidang_id', 'dosen_nip', 'unsur_id', 'nilai'];
 
-    // Dynamically set table name based on which table exists
-    protected $table;
-
-    // Dynamically set fillable based on available columns
-    public function __construct(array $attributes = [])
+    public function unsur()
     {
-        parent::__construct($attributes);
-
-        // Check which table exists and set the table name accordingly
-        if (Schema::hasTable('unsur_nilai_pembimbing')) {
-            $this->table = 'unsur_nilai_pembimbing';
-        } else {
-            $this->table = 'unsur_nilai_dosen_pembimbing';
-        }
-
-        if (Schema::hasTable($this->table)) {
-            $this->fillable = Schema::getColumnListing($this->table);
-        } else {
-            // Default fillable if table doesn't exist
-            $this->fillable = [
-                'sidang_id',
-                'dosen_nip',
-                'nilai',
-                'nilai_kedisiplinan',
-                'nilai_kreativitas',
-                'nilai_penguasaan_materi',
-                'nilai_kelengkapan',
-                'catatan'
-            ];
-        }
-    }
-
-    public function sidang()
-    {
-        return $this->belongsTo(SidangTugasAkhir::class, 'sidang_id');
+        return $this->belongsTo(UnsurPenilaianPembimbing::class, 'unsur_id');
     }
 
     public function dosen()

@@ -1,107 +1,131 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h3>Penilaian Sidang</h3>
+<div class="container-fluid px-4">
+    <h3 class="mt-4 mb-4">Data Ujian Sidang Tugas Akhir</h3>
 
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
+    @if(session('success')) <div class="alert alert-success">{{ session('success') }}</div> @endif
+    @if(session('error')) <div class="alert alert-danger">{{ session('error') }}</div> @endif
 
-    <table class="table table-bordered table-striped mt-3">
-        <thead class="table-dark">
-            <tr>
-                <th>Mahasiswa</th>
-                <th>Judul & Jadwal</th>
-                <th>Peran Saya</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($daftarSidang as $s)
-            <tr>
-                {{-- Nama --}}
-                <td>
-                    @php
-                        $mahasiswa_nama = 'N/A';
-                        $mahasiswa_nim = 'N/A';
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                    <thead class="bg-light text-center">
+                        <tr>
+                            <th width="3%">No</th>
+                            <th width="22%">Judul</th>
+                            <th width="20%">Mahasiswa & Jadwal</th>
+                            <th width="18%">Pembimbing</th>
+                            <th width="18%">Penguji</th>
+                            <th width="8%">Status</th>
+                            <th width="5%">Nilai</th>
+                            <th width="6%">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($sidangs as $s)
+                        <tr>
+                            <td class="text-center">{{ $loop->iteration + $sidangs->firstItem() - 1 }}</td>
 
-                        if (isset($s->tugasAkhir) && $s->tugasAkhir) {
-                            // Try to get mahasiswa data from the enhanced relationship
-                            if (isset($s->tugasAkhir->mahasiswa) && $s->tugasAkhir->mahasiswa) {
-                                $mahasiswa_nama = $s->tugasAkhir->mahasiswa->mhs_nama ?? 'N/A';
-                                $mahasiswa_nim = $s->tugasAkhir->mahasiswa->mhs_nim ?? 'N/A';
-                            } else {
-                                // If not available, try to get from the TA directly (in case there are other naming conventions)
-                                $mahasiswa_nama = $s->tugasAkhir->mhs_nama ?? 'N/A';
-                                $mahasiswa_nim = $s->tugasAkhir->mhs_nim ?? 'N/A';
-                            }
-                        }
-                    @endphp
-                    <strong>{{ $mahasiswa_nama }}</strong><br>
-                    <small>{{ $mahasiswa_nim }}</small>
-                </td>
+                            <td>
+                                <div class="fw-bold text-uppercase mb-2">
+                                    {{ $s->tugasAkhir->judul ?? '-' }}
+                                </div>
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-file-pdf me-1"></i> Naskah Laporan
+                                </span>
+                            </td>
 
-                {{-- Judul --}}
-                <td>
-                    {{ $s->tugasAkhir->judul ?? 'N/A' }} <br>
-                    <span class="badge bg-info">{{ $s->status ?? 'Belum Ada Jadwal' }}</span>
-                </td>
+                            <td>
+                                <div class="fw-bold text-uppercase">{{ $s->tugasAkhir->mahasiswa->mhs_nama ?? 'Nama Tidak Ada' }}</div>
+                                <div class="fw-bold mb-2">({{ $s->tugasAkhir->mahasiswa->mhs_nim ?? '-' }})</div>
+                                <div class="border-top my-2"></div>
+                                <div class="text-muted" style="font-size: 0.8rem;">
+                                    <strong>Hari/Tgl:</strong> {{ $s->info_jadwal['hari_tgl'] }} <br>
+                                    <strong>Ruangan:</strong> {{ $s->info_jadwal['ruangan'] }} <br>
+                                    <strong>Waktu:</strong> {{ $s->info_jadwal['waktu'] }} <br>
+                                    <strong>Sesi:</strong> {{ $s->info_jadwal['sesi'] }}
+                                </div>
+                            </td>
 
-                {{-- Peran Saya --}}
-                <td class="text-center">
-                    @php
-                        $ta = $s->tugasAkhir;
-                        $dosen = \App\Models\Dosen::where('user_id', auth()->id())->first();
-                        $role = 'Tidak Ada';
+                            <td>
+                                <ol class="ps-3 mb-3">
+                                    @forelse($s->tugasAkhir->bimbingan as $b)
+                                        <li class="mb-2">
+                                            <div class="fw-bold">{{ $b->dosen->dosen_nama ?? 'Nama Tidak Ditemukan' }}</div>
+                                            <small class="text-muted" style="font-size: 0.75rem;">NIP: {{ $b->dosen_nip }}</small>
+                                            <div class="mt-1"><span class="badge bg-light text-dark border">Pembimbing {{ $b->urutan }}</span></div>
+                                        </li>
+                                    @empty
+                                        <li class="text-muted">-</li>
+                                    @endforelse
+                                </ol>
 
-                        if ($ta && $dosen) {
-                            // Use schema info passed from controller
-                            if ($schemaInfo['hasPembimbingCols'] && ($ta->pembimbing_1_nip === $dosen->dosen_nip || $ta->pembimbing_2_nip === $dosen->dosen_nip)) {
-                                $role = 'Pembimbing';
-                            }
-                            // If pembimbing columns don't exist, check the bimbingan table
-                            elseif (!$schemaInfo['hasPembimbingCols']) {
-                                $bimbinganCount = DB::table('bimbingan')
-                                    ->where('tugas_akhir_id', $ta->id)
-                                    ->where('dosen_nip', $dosen->dosen_nip)
-                                    ->count();
-                                if ($bimbinganCount > 0) {
-                                    $role = 'Pembimbing';
-                                }
-                            }
-                            // Check if dosen_penguji table exists
-                            elseif ($schemaInfo['hasDosenPengujiTable'] && $s->dosenPenguji && $s->dosenPenguji->contains('dosen_nip', $dosen->dosen_nip)) {
-                                $role = 'Penguji';
-                            }
-                            // Fallback: check penguji columns in sidang table
-                            elseif (!$schemaInfo['hasDosenPengujiTable']) {
-                                if ($schemaInfo['hasPengujiCols'] && (
-                                    $s->penguji_1_nip === $dosen->dosen_nip ||
-                                    $s->penguji_2_nip === $dosen->dosen_nip ||
-                                    $s->penguji_3_nip === $dosen->dosen_nip
-                                )) {
-                                    $role = 'Penguji';
-                                }
-                            }
-                            // Check if sekretaris column exists
-                            elseif ($schemaInfo['hasSekretarisCol'] && $s->sekretaris_nip === $dosen->dosen_nip) {
-                                $role = 'Sekretaris';
-                            }
-                        }
-                    @endphp
-                    <span class="badge bg-primary">{{ $role }}</span>
-                </td>
+                                <div class="border-top pt-2 mt-2">
+                                    <small class="text-muted fw-bold d-block mb-1">Sekretaris:</small>
+                                    @if($s->sekretaris)
+                                        <div class="fw-bold">{{ $s->sekretaris->dosen_nama }}</div>
+                                        <small class="text-muted" style="font-size: 0.75rem;">NIP: {{ $s->sekretaris_nip }}</small>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </div>
+                            </td>
 
-                {{-- Tombol Input Nilai --}}
-                <td>
-                    <a href="{{ route('nilai.show', $s->tugasAkhir->id) }}" class="btn btn-primary btn-sm">
-                        <i class="bi bi-pencil"></i> Input Nilai
-                    </a>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+                            <td>
+                                <ol class="ps-3 mb-0">
+                                    @forelse($s->dosenPengujis as $p)
+                                        <li class="mb-2">
+                                            <div class="fw-bold">{{ $p->dosen_nama ?? 'Nama Tidak Ditemukan' }}</div>
+                                            <small class="text-muted d-block" style="font-size: 0.75rem;">NIP: {{ $p->dosen_nip }}</small>
+                                            @if($p->pivot->peran)
+                                                <span class="badge bg-light text-dark border mt-1">{{ $p->pivot->peran }}</span>
+                                            @endif
+                                        </li>
+                                    @empty
+                                        <li class="text-muted">-</li>
+                                    @endforelse
+                                </ol>
+                            </td>
+
+                            <td class="text-center">
+                                <span class="badge bg-{{ $s->badge_color }}">{{ $s->status }}</span>
+                            </td>
+
+                            <td class="text-center fw-bold fs-6">
+                                {{ $s->nilai_akhir ?? 0 }}
+                            </td>
+
+                            <td class="text-center">
+                                @if($s->peran_user !== 'Tidak Ada')
+                                    <a href="{{ route('nilai.show', $s->id) }}" class="btn btn-outline-primary btn-sm w-100 mb-1" title="Input Nilai">
+                                        <i class="fas fa-pencil-alt"></i> Nilai
+                                    </a>
+
+                                    @if($s->peran_user == 'Sekretaris')
+                                        <div class="badge bg-warning text-dark w-100">Sekretaris</div>
+                                    @else
+                                        <div class="small text-muted fw-bold">{{ $s->peran_user }}</div>
+                                    @endif
+                                @else
+                                    <button class="btn btn-light btn-sm w-100 text-muted" disabled><i class="fas fa-lock"></i></button>
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">Belum ada data sidang.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-end p-3">
+                {{ $sidangs->links() }}
+            </div>
+        </div>
+    </div>
 </div>
 @endsection

@@ -3,204 +3,276 @@
 namespace App\Http\Controllers;
 
 use App\Models\Dosen;
-use App\Models\NilaiDosenPembimbing;
-use App\Models\NilaiDosenPenguji;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use App\Http\Controllers\Controller;
 use App\Models\SidangTugasAkhir;
 use App\Models\TugasAkhir;
-use App\Models\DosenPenguji;
-use App\Models\Mahasiswa;
+use App\Models\NilaiDosenPembimbing;
+use App\Models\NilaiDosenPenguji;
+use App\Models\UnsurPenilaianPembimbing;
+use App\Models\UnsurPenilaianPenguji;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SidangController extends Controller
 {
     public function index()
     {
-        $dosen = Dosen::where('user_id', auth()->id())->first();
-        if (!$dosen) abort(404);
+        $user = auth()->user();
+        $dosen = Dosen::where('user_id', $user->id)->first();
+        
+        // Jika bukan dosen (misal admin murni), tampilkan semua atau kosongkan (tergantung kebijakan)
+        // Di sini diasumsikan kalau admin mau liat semua, tapi kalau dosen hanya yg terkait
+        if (!$dosen) {
+             if($user->role == 'admin') {
+                 // Admin lihat semua
+                 $sidangs = SidangTugasAkhir::with([
+                    'tugasAkhir.mahasiswa',
+                    'tugasAkhir.bimbingan.dosen',
+                    'dosenPengujis',
+                    'jadwal.sesi',
+                    'sekretaris'
+                ])->orderBy('created_at', 'desc')->paginate(10);
+             } else {
+                 return redirect()->back()->with('error', 'Data Dosen tidak ditemukan.');
+             }
+        } else {
+            // FILTER KHUSUS DOSEN
+            $myNip = $dosen->dosen_nip;
 
-        // Get all sidang related to this dosen in various roles (pembimbing, penguji, sekretaris)
-        // Using the scope to find all sidang related to this dosen
-        $query = SidangTugasAkhir::with(['tugasAkhir']);
-
-        // Conditionally load dosenPenguji relation only if table exists
-        if (Schema::hasTable('dosen_penguji')) {
-            $query->with(['dosenPenguji']);
-        }
-
-        $daftarSidang = $query->terkaitDosen($dosen->dosen_nip)
+            $sidangs = SidangTugasAkhir::with([
+                'tugasAkhir.mahasiswa',
+                'tugasAkhir.bimbingan.dosen',
+                'dosenPengujis',
+                'jadwal.sesi',
+                'sekretaris'
+            ])
+            ->where(function($query) use ($myNip) {
+                // 1. Cek apakah saya Pembimbing (Relasi via Tugas Akhir -> Bimbingan)
+                $query->whereHas('tugasAkhir.bimbingan', function($q) use ($myNip) {
+                    $q->where('dosen_nip', $myNip);
+                })
+                // 2. ATAU apakah saya Penguji (Relasi via Sidang -> DosenPenguji)
+                ->orWhereHas('dosenPengujis', function($q) use ($myNip) {
+                    $q->where('dosen_penguji.dosen_nip', $myNip); // Spesifik tabel pivot
+                })
+                // 3. ATAU apakah saya Sekretaris (Kolom sekretaris_nip di tabel sidang)
+                ->orWhere('sekretaris_nip', $myNip);
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+        }
 
-        // Enhance the data with mahasiswa information through alternative methods if needed
-        foreach ($daftarSidang as $sidang) {
-            if ($sidang->tugasAkhir) {
-                // Check if mahasiswa relationship is already loaded and valid
-                if (!$sidang->tugasAkhir->relationLoaded('mahasiswa') || !$sidang->tugasAkhir->mahasiswa) {
-                    // Try alternative method - look up through tugas_akhir_anggota
-                    $taAnggota = DB::table('tugas_akhir_anggota')
-                        ->where('tugas_akhir_id', $sidang->tugasAkhir->id)
-                        ->first();
+        // Transform data untuk badge status & peran (Logic tampilan tetap sama)
+        $sidangs->getCollection()->transform(function ($sidang) use ($dosen) {
+            // Kalau admin login tanpa data dosen, peran_user null/admin
+            $nipCheck = $dosen ? $dosen->dosen_nip : null;
+            
+            $sidang->peran_user = $nipCheck ? $sidang->getPeranDosen($nipCheck) : 'Admin';
+            
+            $status = strtolower($sidang->status);
+            $sidang->badge_status = match($status) {
+                'lulus' => 'success',
+                'tidak lulus', 'tidak_lulus' => 'danger',
+                'revisi', 'lulus dengan revisi' => 'warning',
+                'dijadwalkan' => 'info',
+                default => 'primary'
+            };
+            return $sidang;
+        });
 
-                    if ($taAnggota) {
-                        $mahasiswa = Mahasiswa::where('mhs_nim', $taAnggota->mhs_nim)->first();
-                        if ($mahasiswa) {
-                            // Assign the mahasiswa data directly to the relation
-                            $sidang->tugasAkhir->setRelation('mahasiswa', $mahasiswa);
-                        }
-                    }
+        return view('sidang.index', compact('sidangs'));
+    }
+
+    public function show($id)
+    {
+        $user = Auth::user();
+        
+        // 1. AMBIL DATA SIDANG
+        $sidang = SidangTugasAkhir::with('tugasAkhir.mahasiswa')->findOrFail($id);
+
+        // 2. AMBIL NIP USER YANG LOGIN
+        $dosen = Dosen::where('user_id', $user->id)->first();
+        $myNip = $dosen ? $dosen->dosen_nip : null;
+
+        // -------------------------------------------------------------
+        // LOGIKA PENENTUAN HAK AKSES SEKRETARIS
+        // -------------------------------------------------------------
+        $isAdminOrStaff = ($user->role == 'sekretaris' || $user->role == 'admin');
+        $isSekretarisSidang = ($myNip && trim($myNip) == trim($sidang->sekretaris_nip));
+
+        if ($isAdminOrStaff || $isSekretarisSidang) {
+            // PERBAIKAN: Tambahkan 'dosen' di dalam array with()
+            $nilaiPembimbing = NilaiDosenPembimbing::with(['unsur', 'dosen'])->where('sidang_id', $id)->get();
+            $nilaiPenguji = NilaiDosenPenguji::with(['unsur', 'dosen'])->where('sidang_id', $id)->get();
+            
+            return view('sidang.show_sekretaris', compact('sidang', 'nilaiPembimbing', 'nilaiPenguji'));
+        }
+
+        // -------------------------------------------------------------
+        // CEK PENGUJI / PEMBIMBING
+        // -------------------------------------------------------------
+        if (!$myNip) {
+            return abort(403, "Akses ditolak. Akun Anda tidak terhubung dengan Data Dosen.");
+        }
+        
+        // Cek Penguji (Prioritas 1)
+        $isPenguji = DB::table('dosen_penguji')
+                     ->where('sidang_id', $id)
+                     ->where('dosen_nip', $myNip)
+                     ->exists();
+
+        $ta_id = optional($sidang->tugasAkhir)->id; 
+        
+        // Cek Pembimbing (Prioritas 2)
+        $isPembimbing = DB::table('bimbingan')
+                        ->where('tugas_akhir_id', $ta_id)
+                        ->where('dosen_nip', $myNip)
+                        ->exists();
+
+        $contextRole = null;
+
+        if ($isPenguji) {
+            $contextRole = 'dosen_penguji';
+            $unsurList = UnsurPenilaianPenguji::all();
+            $existingNilai = NilaiDosenPenguji::where('sidang_id', $id)
+                            ->where('dosen_nip', $myNip) 
+                            ->pluck('nilai', 'unsur_id')
+                            ->toArray();
+
+        } elseif ($isPembimbing) {
+            $contextRole = 'dosen_pembimbing';
+            $unsurList = UnsurPenilaianPembimbing::all();
+            $existingNilai = NilaiDosenPembimbing::where('sidang_id', $id)
+                            ->where('dosen_nip', $myNip)
+                            ->pluck('nilai', 'unsur_id')
+                            ->toArray();
+        } else {
+            abort(403, 'Akses Ditolak. Anda bukan Sekretaris, Penguji, ataupun Pembimbing di sidang ini.');
+        }
+
+        return view('sidang.show_dosen', compact('sidang', 'unsurList', 'existingNilai', 'contextRole'));
+    }
+
+    // =========================================================================
+    // FITUR: FUNGSI HITUNG OTOMATIS (PRIVATE)
+    // =========================================================================
+    private function updateNilaiAkhirSidang($sidang_id)
+    {
+        // 1. Hitung Rata-rata Pembimbing
+        $nilaiPembimbing = NilaiDosenPembimbing::with('unsur')->where('sidang_id', $sidang_id)->get();
+        $groupedPembimbing = $nilaiPembimbing->groupBy('dosen_nip');
+        
+        $totalRataPembimbing = 0;
+        $countPembimbing = $groupedPembimbing->count();
+
+        if ($countPembimbing > 0) {
+            $grandTotal = 0;
+            foreach ($groupedPembimbing as $scores) {
+                foreach ($scores as $item) {
+                    $grandTotal += ($item->nilai * ($item->unsur->bobot / 100));
                 }
             }
+            $totalRataPembimbing = $grandTotal / $countPembimbing;
         }
 
-        // Pass schema information to the view
-        $schemaInfo = [
-            'hasPembimbingCols' => Schema::hasColumn('tugas_akhir', 'pembimbing_1_nip') &&
-                                  Schema::hasColumn('tugas_akhir', 'pembimbing_2_nip'),
-            'hasPengujiCols' => Schema::hasColumn('sidang_tugas_akhir', 'penguji_1_nip') &&
-                               Schema::hasColumn('sidang_tugas_akhir', 'penguji_2_nip') &&
-                               Schema::hasColumn('sidang_tugas_akhir', 'penguji_3_nip'),
-            'hasSekretarisCol' => Schema::hasColumn('sidang_tugas_akhir', 'sekretaris_nip'),
-            'hasDosenPengujiTable' => Schema::hasTable('dosen_penguji'),
-        ];
+        // 2. Hitung Rata-rata Penguji
+        $nilaiPenguji = NilaiDosenPenguji::with('unsur')->where('sidang_id', $sidang_id)->get();
+        $groupedPenguji = $nilaiPenguji->groupBy('dosen_nip');
 
-        return view('sidang.index', compact('daftarSidang', 'schemaInfo'));
-    }
+        $totalRataPenguji = 0;
+        $countPenguji = $groupedPenguji->count();
 
-    public function store(Request $request)
-    {
-        $dosen = Dosen::where('user_id', auth()->id())->first();
-
-        if (!$dosen) {
-            return abort(404, 'Data Dosen tidak ditemukan');
-        }
-
-        // Determine if the logged-in dosen is pembimbing or penguji for this sidang
-        $sidang = SidangTugasAkhir::find($request->sidang_id);
-        if (!$sidang) {
-            return abort(404, 'Sidang tidak ditemukan');
-        }
-
-        // Check if the dosen is pembimbing using the bimbingan table
-        $isPembimbing = DB::table('bimbingan')
-            ->where('tugas_akhir_id', $sidang->tugasAkhir->id)
-            ->where('dosen_nip', $dosen->dosen_nip)
-            ->exists();
-
-        if ($isPembimbing) {
-            // Save nilai for pembimbing
-            // Only save if the table exists
-            if (Schema::hasTable('unsur_nilai_pembimbing') || Schema::hasTable('unsur_nilai_dosen_pembimbing')) {
-                NilaiDosenPembimbing::updateOrCreate(
-                    [
-                        'sidang_id' => $request->sidang_id,
-                        'dosen_nip' => $dosen->dosen_nip,
-                        'unsur_id'  => $request->unsur_id ?? 1
-                    ],
-                    [
-                        // Kolom database 'nilai' diisi dari input 'nilai_angka'
-                        'nilai' => $request->nilai_angka
-                    ]
-                );
+        if ($countPenguji > 0) {
+            $grandTotal = 0;
+            foreach ($groupedPenguji as $scores) {
+                foreach ($scores as $item) {
+                    $grandTotal += ($item->nilai * ($item->unsur->bobot / 100));
+                }
             }
+            $totalRataPenguji = $grandTotal / $countPenguji;
+        }
+
+        // 3. Hitung Nilai Akhir Gabungan
+        if ($countPembimbing > 0 && $countPenguji > 0) {
+            $nilaiAkhir = ($totalRataPembimbing + $totalRataPenguji) / 2;
+        } elseif ($countPembimbing > 0) {
+            $nilaiAkhir = $totalRataPembimbing;
+        } elseif ($countPenguji > 0) {
+            $nilaiAkhir = $totalRataPenguji;
         } else {
-            // Save nilai for penguji
-            // Only save if the table exists
-            if (Schema::hasTable('unsur_nilai_penguji') || Schema::hasTable('unsur_nilai_dosen_penguji')) {
-                NilaiDosenPenguji::updateOrCreate(
-                    [
-                        'sidang_id' => $request->sidang_id,
-                        'dosen_nip' => $dosen->dosen_nip,
-                        'unsur_id'  => $request->unsur_id ?? 1
-                    ],
-                    [
-                        // Kolom database 'nilai' diisi dari input 'nilai_angka'
-                        'nilai' => $request->nilai_angka
-                    ]
-                );
-            }
+            $nilaiAkhir = 0;
         }
 
-        return back()->with('success', 'Nilai berhasil disimpan!');
+        // 4. Update ke Tabel Utama (sidang_tugas_akhir)
+        $sidang = SidangTugasAkhir::find($sidang_id);
+        if ($sidang) {
+            // PERBAIKAN: Kembali ke 'nilai_akhir'
+            $sidang->nilai_akhir = round($nilaiAkhir, 2); 
+            $sidang->save();
+        }
     }
 
-    /**
-     * Determine the role of a dosen in a specific TA
-     */
-    public function determineRole($ta_id)
-    {
-        $dosen = Dosen::where('user_id', auth()->id())->first();
-        if (!$dosen) {
-            return response()->json(['error' => 'Dosen not found'], 404);
+    // =========================================================================
+    // UPDATE STORE DOSEN (Panggil fungsi hitung di sini)
+    // =========================================================================
+
+    public function storePembimbing(Request $request, $sidang_id) {
+        $dosen = Dosen::where('user_id', auth()->id())->firstOrFail();
+        $request->validate([
+            'skor' => 'required|array',
+            'skor.*' => 'required|integer|min:0|max:100']);
+
+        foreach ($request->skor as $unsur_id => $nilai) {
+            NilaiDosenPembimbing::updateOrCreate(
+                ['sidang_id' => $sidang_id, 'dosen_nip' => $dosen->dosen_nip, 'unsur_id' => $unsur_id],
+                ['nilai' => $nilai]
+            );
         }
 
-        $ta = TugasAkhir::with('sidang')->findOrFail($ta_id);
-        $sidang = $ta->sidang;
+        // Trigger Hitung Otomatis
+        $this->updateNilaiAkhirSidang($sidang_id);
 
-        if (!$sidang) {
-            return response()->json(['error' => 'Sidang not found'], 404);
-        }
-
-        $role = $this->checkUserRole($dosen->dosen_nip, $ta, $sidang);
-
-        return response()->json(['role' => $role]);
+        return redirect()->back()->with('success', 'Nilai tersimpan & dikalkulasi ulang.');
     }
 
-    /**
-     * Check the role of a dosen in a TA
-     */
-    private function checkUserRole($nip, $ta, $sidang)
+    public function storePenguji(Request $request, $sidang_id) {
+        $dosen = Dosen::where('user_id', auth()->id())->firstOrFail();
+        $request->validate([
+            'skor' => 'required|array',
+            'skor.*' => 'required|integer|min:0|max:100'
+        ]);
+
+        foreach ($request->skor as $unsur_id => $nilai) {
+            NilaiDosenPenguji::updateOrCreate(
+                ['sidang_id' => $sidang_id, 'dosen_nip' => $dosen->dosen_nip, 'unsur_id' => $unsur_id],
+                ['nilai' => $nilai]
+            );
+        }
+
+        // Trigger Hitung Otomatis
+        $this->updateNilaiAkhirSidang($sidang_id);
+
+        return redirect()->back()->with('success', 'Nilai tersimpan & dikalkulasi ulang.');
+    }
+
+    // =========================================================================
+    // STORE SEKRETARIS (Status Only)
+    // =========================================================================
+    public function storeSekretaris(Request $request, $sidang_id)
     {
-        // Check if pembimbing columns exist in the tugas_akhir table
-        $pembimbingColsExist = Schema::hasColumn('tugas_akhir', 'pembimbing_1_nip') &&
-                               Schema::hasColumn('tugas_akhir', 'pembimbing_2_nip');
+        $dosen = Dosen::where('user_id', auth()->id())->firstOrFail();
+        $sidang = SidangTugasAkhir::findOrFail($sidang_id);
 
-        // Check if dosen is pembimbing 1 or 2
-        if ($pembimbingColsExist && ($ta->pembimbing_1_nip === $nip || $ta->pembimbing_2_nip === $nip)) {
-            return 'pembimbing';
-        }
+        // Validasi HANYA status kelulusan
+        $request->validate([
+            'status_kelulusan' => 'required|string',
+        ]);
 
-        // Check the bimbingan table for association (this is the primary approach now)
-        $bimbingan = DB::table('bimbingan')
-            ->where('tugas_akhir_id', $ta->id)
-            ->where('dosen_nip', $nip)
-            ->first();
+        // Update Status saja, Nilai tidak disentuh
+        $sidang->update([
+            'status' => $request->status_kelulusan
+        ]);
 
-        if ($bimbingan) {
-            return 'pembimbing';
-        }
-
-        // Check if dosen_penguji table exists (this is the primary approach for examiners)
-        if (Schema::hasTable('dosen_penguji')) {
-            $dosenPenguji = DosenPenguji::where('sidang_id', $sidang->id)
-                ->where('dosen_nip', $nip)
-                ->first();
-            if ($dosenPenguji) {
-                return 'penguji';
-            }
-        } else {
-            // Fallback: check penguji columns in sidang_tugas_akhir table
-            $pengujiColsExist = Schema::hasColumn('sidang_tugas_akhir', 'penguji_1_nip') &&
-                                Schema::hasColumn('sidang_tugas_akhir', 'penguji_2_nip') &&
-                                Schema::hasColumn('sidang_tugas_akhir', 'penguji_3_nip');
-
-            if ($pengujiColsExist && (
-                $sidang->penguji_1_nip === $nip ||
-                $sidang->penguji_2_nip === $nip ||
-                $sidang->penguji_3_nip === $nip
-            )) {
-                return 'penguji';
-            }
-        }
-
-        // Check if sekretaris column exists and if dosen is sekretaris
-        $sekretarisColExists = Schema::hasColumn('sidang_tugas_akhir', 'sekretaris_nip');
-        if ($sekretarisColExists && $sidang->sekretaris_nip === $nip) {
-            return 'sekretaris';
-        }
-
-        return 'none';
+        return redirect()->back()->with('success', 'Keputusan sidang berhasil disimpan!');
     }
 }
