@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use App\Models\ModelApi\Mahasiswa;
 use App\Models\ModelApi\TugasAkhir;
 use App\Models\ModelApi\Bimbingan;
@@ -12,140 +13,238 @@ use App\Models\ModelApi\LogBimbingan;
 
 class LogBimbinganController extends Controller
 {
-    // GET: Ambil daftar pembimbing untuk mahasiswa yang login
-    public function getAdvisors(Request $request)
-    {
-        $user = Auth::user();
-        // 1. Cari Mahasiswa dari User ID
-        $mahasiswa = Mahasiswa::where('user_id', $user->id)->first();
-        if (!$mahasiswa) return response()->json(['message' => 'Data mahasiswa tidak ditemukan'], 404);
-
-        // 2. Cari TA Mahasiswa (ambil yang terbaru/aktif)
-        $ta = TugasAkhir::whereHas('anggota', function ($q) use ($mahasiswa) {
-            $q->where('mhs_nim', $mahasiswa->mhs_nim);
-        })->latest()->first();
-
-        if (!$ta) return response()->json(['message' => 'Belum ada Tugas Akhir'], 404);
-
-        // 3. Ambil semua bimbingan terkait TA ini
-        $bimbingans = Bimbingan::where('tugas_akhir_id', $ta->id)
-            ->with('dosen')
-            ->orderBy('urutan')
-            ->get();
-
-        // 4. Format data biar enak dibaca frontend
-        $formattedAdvisors = $bimbingans->map(function ($bimbingan) {
-            return [
-                'bimbingan_id' => $bimbingan->id,
-                'dosen_nip' => $bimbingan->dosen_nip,
-                'dosen_nama' => $bimbingan->dosen->dosen_nama ?? 'N/A',
-                'urutan' => $bimbingan->urutan,
-                'label' => 'Pembimbing ' . $bimbingan->urutan . ' - ' . ($bimbingan->dosen->dosen_nama ?? 'N/A'),
-            ];
-        });
-
-        return response()->json($formattedAdvisors);
-    }
-
-    // GET: Ambil semua histori log mahasiswa yang login
+    // GET /api/log-bimbingan
     public function index(Request $request)
     {
         $user = Auth::user();
-        // 1. Cari Mahasiswa dari User ID
+
         $mahasiswa = Mahasiswa::where('user_id', $user->id)->first();
         if (!$mahasiswa) return response()->json(['message' => 'Data mahasiswa tidak ditemukan'], 404);
 
-        // 2. Cari TA Mahasiswa (ambil yang terbaru/aktif)
-        // Asumsi: Mahasiswa cuma punya 1 TA yang aktif
         $ta = TugasAkhir::whereHas('anggota', function ($q) use ($mahasiswa) {
             $q->where('mhs_nim', $mahasiswa->mhs_nim);
         })->latest()->first();
 
         if (!$ta) return response()->json(['message' => 'Belum ada Tugas Akhir'], 404);
 
-        // 3. Ambil semua ID bimbingan terkait TA ini
-        $bimbinganIds = Bimbingan::where('tugas_akhir_id', $ta->id)->pluck('id');
+        $urutan = $request->query('urutan');
+        $bimbinganQuery = Bimbingan::where('tugas_akhir_id', $ta->id);
+        if ($urutan) $bimbinganQuery->where('urutan', intval($urutan));
 
-        // 4. Ambil log berdasarkan bimbingan_id tadi dan mhs_nim mahasiswa ini
+        $bimbinganIds = $bimbinganQuery->orderBy('urutan', 'asc')->pluck('id');
+        if ($bimbinganIds->isEmpty()) return response()->json([]);
+
         $logs = LogBimbingan::whereIn('bimbingan_id', $bimbinganIds)
-            ->where('mhs_nim', $mahasiswa->mhs_nim)
-            ->with(['bimbingan.dosen']) // Load data dosen biar tahu log ini sama siapa
+            ->with(['bimbingan.dosen'])
             ->orderBy('tanggal', 'desc')
             ->get();
 
-        // 5. Format data biar enak dibaca frontend
         $formattedLogs = $logs->map(function ($log) {
             return [
-                'id' => $log->id,
-                'tanggal' => $log->tanggal,
-                'catatan' => $log->catatan,
-                'judul' => $log->judul,
-                'deskripsi' => $log->deskripsi,
-                'status'  => $log->status, // 0: Pending, 1: Disetujui
-                'dosen'   => $log->bimbingan->dosen->dosen_nama ?? 'N/A',
-                'pembimbing_ke' => $log->bimbingan->urutan, // Pembimbing 1 atau 2
-                'file_path' => $log->file_path ? asset('storage/' . $log->file_path) : null,
+                'id'         => $log->id,
+                'judul'      => $log->judul,
+                'deskripsi'  => $log->deskripsi,
+                'catatan'    => $log->catatan,
+                'tanggal'    => $log->tanggal,
+                'status'     => $log->status,
+                'mhs_nim'    => $log->mhs_nim,
+                'pembimbing' => $log->bimbingan->dosen->dosen_nama ?? 'Tidak diketahui',
+                'dosen_nip'  => $log->bimbingan->dosen_nip ?? null,
+                'urutan'     => $log->bimbingan->urutan ?? null,
+                'file_url'   => $log->file_path ? asset('storage/' . $log->file_path) : null,
             ];
         });
 
         return response()->json($formattedLogs);
     }
 
-    // POST: Tambah log baru
+    // GET /api/pembimbing
+    public function pembimbing(Request $request)
+    {
+        $user = Auth::user();
+
+        $mahasiswa = Mahasiswa::where('user_id', $user->id)->first();
+        if (!$mahasiswa) return response()->json(['message' => 'Data mahasiswa tidak ditemukan'], 404);
+
+        $ta = TugasAkhir::whereHas('anggota', function ($q) use ($mahasiswa) {
+            $q->where('mhs_nim', $mahasiswa->mhs_nim);
+        })->latest()->first();
+
+        if (!$ta) return response()->json([]);
+
+        $bimbingans = Bimbingan::where('tugas_akhir_id', $ta->id)
+            ->with('dosen')
+            ->orderBy('urutan', 'asc')
+            ->get();
+
+        $result = $bimbingans->map(function ($b) {
+            return [
+                'urutan'       => $b->urutan,
+                'dosen_nip'    => $b->dosen_nip,
+                'dosen_nama'   => $b->dosen->dosen_nama ?? null,
+                'bimbingan_id' => $b->id,
+                'label'        => 'Pembimbing ' . $b->urutan . ' - ' . ($b->dosen->dosen_nama ?? 'N/A'),
+            ];
+        });
+
+        return response()->json($result);
+    }
+
+    // GET /api/log-bimbingan/{dosen_nip}
+    public function logsByDosen(Request $request, $dosenNip)
+    {
+        $user = Auth::user();
+
+        $mahasiswa = Mahasiswa::where('user_id', $user->id)->first();
+        if (!$mahasiswa) return response()->json(['message' => 'Data mahasiswa tidak ditemukan'], 404);
+
+        $ta = TugasAkhir::whereHas('anggota', function ($q) use ($mahasiswa) {
+            $q->where('mhs_nim', $mahasiswa->mhs_nim);
+        })->latest()->first();
+
+        if (!$ta) return response()->json([], 404);
+
+        $bimbinganIds = Bimbingan::where('tugas_akhir_id', $ta->id)
+            ->where('dosen_nip', $dosenNip)
+            ->pluck('id');
+
+        if ($bimbinganIds->isEmpty()) return response()->json([]);
+
+        $logs = LogBimbingan::whereIn('bimbingan_id', $bimbinganIds)
+            ->with(['bimbingan.dosen'])
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        $formattedLogs = $logs->map(function ($log) {
+            return [
+                'id'         => $log->id,
+                'judul'      => $log->judul,
+                'deskripsi'  => $log->deskripsi,
+                'catatan'    => $log->catatan,
+                'tanggal'    => $log->tanggal,
+                'status'     => $log->status,
+                'mhs_nim'    => $log->mhs_nim,
+                'pembimbing' => $log->bimbingan->dosen->dosen_nama ?? 'Tidak diketahui',
+                'dosen_nip'  => $log->bimbingan->dosen_nip ?? null,
+                'urutan'     => $log->bimbingan->urutan ?? null,
+                'file_url'   => $log->file_path ? asset('storage/' . $log->file_path) : null,
+            ];
+        });
+
+        return response()->json($formattedLogs);
+    }
+
+    // POST /api/log-bimbingan
     public function store(Request $request)
     {
         $request->validate([
-            'tanggal' => 'required|date',
-            'catatan' => 'string',
             'judul' => 'required|string',
             'deskripsi' => 'required|string',
-            'dosen_nip' => 'required|string', // Frontend harus kirim NIP dosen yang dibimbing
-            'file' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // File BAB, max 10MB
+            'catatan' => 'nullable|string',
+            'tanggal' => 'required|date',
+            'file_path' => 'nullable|file|mimes:pdf,doc,docx,png,jpg,jpeg',
+            'pembimbing_urutan' => 'nullable|integer|min:1',
+            'pembimbing' => 'nullable|string',
         ]);
 
         $user = Auth::user();
         $mahasiswa = Mahasiswa::where('user_id', $user->id)->first();
         if (!$mahasiswa) return response()->json(['message' => 'Mahasiswa tidak valid'], 403);
 
-        // 1. Cari TA-nya dulu
         $ta = TugasAkhir::whereHas('anggota', function ($q) use ($mahasiswa) {
             $q->where('mhs_nim', $mahasiswa->mhs_nim);
         })->latest()->first();
 
         if (!$ta) return response()->json(['message' => 'Anda belum memiliki Tugas Akhir'], 403);
 
-        // 2. Cari 'bimbingan_id' yang pas (TA ini + Dosen yang dipilih)
-        $bimbingan = Bimbingan::where('tugas_akhir_id', $ta->id)
-            ->where('dosen_nip', $request->dosen_nip)
-            ->first();
-
-        if (!$bimbingan) {
-            return response()->json(['message' => 'Dosen ini bukan pembimbing Anda'], 403);
+        $bimbingan = null;
+        if ($request->filled('pembimbing_urutan')) {
+            $bimbingan = Bimbingan::where('tugas_akhir_id', $ta->id)
+                ->where('urutan', $request->pembimbing_urutan)
+                ->first();
         }
 
-        // 3. Handle file upload jika ada
+        if (!$bimbingan && $request->filled('pembimbing')) {
+            $bimbingan = Bimbingan::where('tugas_akhir_id', $ta->id)
+                ->whereHas('dosen', function ($q) use ($request) {
+                    $q->where('dosen_nama', $request->pembimbing);
+                })
+                ->first();
+        }
+
+        if (!$bimbingan) return response()->json(['message' => 'Dosen ini bukan pembimbing Anda atau urutan tidak valid'], 403);
+
         $filePath = null;
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
+        if ($request->hasFile('file_path')) {
+            $file = $request->file('file_path');
             $fileName = time() . '_' . $mahasiswa->mhs_nim . '_' . $file->getClientOriginalName();
             $filePath = $file->storeAs('bimbingan_logs', $fileName, 'public');
         }
 
-        // 4. Simpan Log
         $log = LogBimbingan::create([
             'bimbingan_id' => $bimbingan->id,
-            'mhs_nim' => $mahasiswa->mhs_nim,
-            'tanggal' => $request->tanggal,
-            'catatan' => $request->catatan,
-            'judul' => $request->judul,
-            'deskripsi' => $request->deskripsi,
-            'status' => 0, // Default: Belum diverifikasi dosen
-            'file_path' => $filePath,
+            'mhs_nim'     => $mahasiswa->mhs_nim,
+            'judul'       => $request->judul,
+            'deskripsi'   => $request->deskripsi,
+            'catatan'     => $request->catatan,
+            'tanggal'     => $request->tanggal,
+            'file_path'   => $filePath,
+            'status'      => 0,
         ]);
 
         return response()->json([
-            'message' => 'Log bimbingan berhasil disimpan',
-            'data' => $log
+            'message' => 'Log bimbingan berhasil ditambahkan',
+            'data'    => $log
         ], 201);
+    }
+
+    // PUT /api/log-bimbingan/{id}
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'judul' => 'required|string',
+            'deskripsi' => 'required|string',
+            'catatan' => 'nullable|string',
+            'tanggal' => 'required|date',
+            'file_path' => 'nullable|file|mimes:pdf,doc,docx,png,jpg,jpeg',
+        ]);
+
+        $user = Auth::user();
+        $mahasiswa = Mahasiswa::where('user_id', $user->id)->first();
+        if (!$mahasiswa) return response()->json(['message' => 'Mahasiswa tidak valid'], 403);
+
+        $log = LogBimbingan::find($id);
+        if (!$log) return response()->json(['message' => 'Log tidak ditemukan'], 404);
+
+        if ($request->hasFile('file_path')) {
+            if ($log->file_path && Storage::disk('public')->exists($log->file_path)) {
+                Storage::disk('public')->delete($log->file_path);
+            }
+            $file = $request->file('file_path');
+            $fileName = time() . '_' . $mahasiswa->mhs_nim . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('bimbingan_logs', $fileName, 'public');
+            $log->file_path = $filePath;
+        }
+
+        $log->judul     = $request->judul;
+        $log->deskripsi = $request->deskripsi;
+        $log->catatan   = $request->catatan;
+        $log->tanggal   = $request->tanggal;
+        $log->save();
+
+        return response()->json([
+            'message' => 'Log berhasil diperbarui',
+            'data'    => $log
+        ]);
+    }
+
+    // DELETE /api/log-bimbingan/{id}
+    public function destroy($id)
+    {
+        $log = LogBimbingan::find($id);
+        if (!$log) return response()->json(['message' => 'Log bimbingan tidak ditemukan'], 404);
+
+        $log->delete();
+        return response()->json(['message' => 'Log bimbingan berhasil dihapus'], 200);
     }
 }

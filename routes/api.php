@@ -10,12 +10,14 @@ use App\Http\Controllers\Api\LogBimbinganController;
 use App\Http\Controllers\Api\DaftarSidangController;
 use App\Http\Controllers\Api\DokumenSidangController;
 use App\Http\Controllers\Api\FileDokumenSidangController;
+use App\Http\Controllers\Api\SyaratSidangController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 */
+
 // Rute publik
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -29,40 +31,42 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profil', [ProfilController::class, 'show']);
     Route::post('/ganti-password', [ProfilController::class, 'gantiPassword']);
 
-        // Endpoint untuk MEMBUAT (mengajukan) TA baru
-    Route::post('/tugas-akhir', [TugasAkhirController::class, 'store']);
     // Tugas Akhir
+    Route::post('/tugas-akhir', [TugasAkhirController::class, 'store']);
     Route::get('/tugas-akhir', [TugasAkhirController::class, 'show']);
-    // (Pake POST + _method:PUT buat ngetes form-data)
-
     Route::put('/tugas-akhir', [TugasAkhirController::class, 'update']);
 
-    // Jadwal Sidang (untuk Tab Home)
+    // Jadwal Sidang
     Route::get('/jadwal-sidang', [JadwalSidangController::class, 'index']);
+    Route::get('/jadwal-sidang/tersedia', [DaftarSidangController::class, 'jadwalTersedia']);
 
-    // Dokumen Sidang (dokumen te/api/dokumen-syaratrpisah untuk syarat sidang)
-    Route::apiResource('/dokumen-sidang', \App\Http\Controllers\Api\DokumenSidangController::class);
+    // Dokumen Sidang
+    Route::apiResource('/dokumen-sidang', DokumenSidangController::class);
     Route::post('/dokumen-sidang/upload-otomatis', [DokumenSidangController::class, 'storeOtomatis']);
-    // File Dokumen Sidang (file tambahan untuk syarat sidang)
-    Route::apiResource('/file-dokumen-sidang', \App\Http\Controllers\Api\FileDokumenSidangController::class);
+    Route::apiResource('/file-dokumen-sidang', FileDokumenSidangController::class);
 
-    // Dokumen Syarat Sidang (spesifik untuk syarat sidang sesuai struktur PM)
-        
-    Route::get('/status-upload/{tugasAkhirId}', [\App\Http\Controllers\Api\SyaratSidangController::class, 'getStatusUpload']);
-    Route::post('/upload-dokumen', [\App\Http\Controllers\Api\SyaratSidangController::class, 'uploadDokumen']);
-    Route::get('/my-uploaded-documents', [\App\Http\Controllers\Api\SyaratSidangController::class, 'getMyUploadedDocuments']);
-    Route::get('/uploaded-documents/{tugasAkhirId}', [\App\Http\Controllers\Api\SyaratSidangController::class, 'getUploadedDocuments']);
-    Route::delete('/hapus-dokumen/{id}', [\App\Http\Controllers\Api\SyaratSidangController::class, 'deleteDokumen']);
+    // Dokumen Syarat Sidang
+    Route::get('/status-upload/{tugasAkhirId}', [SyaratSidangController::class, 'getStatusUpload']);
+    Route::post('/upload-dokumen', [SyaratSidangController::class, 'uploadDokumen']);
+    Route::get('/my-uploaded-documents', [SyaratSidangController::class, 'getMyUploadedDocuments']);
+    Route::get('/uploaded-documents/{tugasAkhirId}', [SyaratSidangController::class, 'getUploadedDocuments']);
+    Route::delete('/hapus-dokumen/{id}', [SyaratSidangController::class, 'deleteDokumen']);
 
-    Route::get('/log-bimbingan/advisors', [LogBimbinganController::class, 'getAdvisors']); // Ambil daftar pembimbing
+    //bimbingan
     Route::get('/log-bimbingan', [LogBimbinganController::class, 'index']); // Lihat histori
     Route::post('/log-bimbingan', [LogBimbinganController::class, 'store']); // Tambah log baru
+    //ini untuk daftar pembimbing ya (urutan), jangan dihapus
+    Route::get('log-bimbingan', [\App\Http\Controllers\Api\LogBimbinganController::class, 'index']);
+    Route::post('log-bimbingan', [\App\Http\Controllers\Api\LogBimbinganController::class, 'store']);       
+    Route::get('pembimbing', [\App\Http\Controllers\Api\LogBimbinganController::class, 'pembimbing']);
+    Route::get('/pembimbing', [LogBimbinganController::class, 'pembimbing']);
+    Route::get('/log-bimbingan/{dosen_nip}', [LogBimbinganController::class, 'logsByDosen']);
+    //biar bisa edit log bimbingan
+    Route::put('/log-bimbingan/{id}', [LogBimbinganController::class, 'update']);
+    Route::patch('/log-bimbingan/{id}', [LogBimbinganController::class, 'update']);
+    Route::delete('/log-bimbingan/{id}', [LogBimbinganController::class, 'destroy']);
 
     // Daftar Sidang
-    Route::get('/jadwal-sidang/tersedia', [DaftarSidangController::class, 'jadwalTersedia']);
     Route::post('/daftar-sidang', [DaftarSidangController::class, 'daftarSidang']);
     Route::get('/pendaftaran-sidang', [DaftarSidangController::class, 'cekStatusPendaftaran']);
-
 });
-
-

@@ -1,23 +1,22 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Factories\ModelApi;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\ModelApi\Prodi;
 use App\Models\ModelApi\User;
 
-class MahasiswaFactory extends Factory
+class DosenFactory extends Factory
 {
     public function definition(): array
     {
-        $user = User::factory()->create(['role' => 'mahasiswa']);
+        $user = User::factory()->create(['role' => 'dosen']);
 
         return [
             'user_id' => $user->id,
-            'mhs_nama' => $user->name,
+            'dosen_nama' => $user->name,
             'prodi_id' => Prodi::inRandomOrder()->first()->id,
-            'mhs_nim' => fake()->unique()->numerify('11012####'),
-            'tahun_masuk' => fake()->year(),
+            'dosen_nip' => fake()->unique()->numerify('198#########'), // Sesuai kesepakatan kita
         ];
     }
 }
