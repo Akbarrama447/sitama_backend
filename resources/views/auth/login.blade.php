@@ -13,10 +13,10 @@
     <link href="{{ asset('assets/css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/css/icons.css') }}" rel="stylesheet">
     <title>{{ env('APP_NAME', 'SITAMA - Login') }}</title>
-    
+
     <style>
         body {
-            background-color: #f0f2f5; /* Warna background soft modern */
+            background: linear-gradient(180deg, #ffffffff, #ffffffff, #c3ddffff); /* Gradient biru modern */
             height: 100vh;
             display: flex;
             align-items: center;
@@ -27,6 +27,8 @@
             width: 100%;
             border: none;
             border-radius: 1rem; /* Sudut lebih membulat */
+            background-color: rgba(255, 255, 255, 0.95); /* Lebih transparan untuk efek glass */
+            backdrop-filter: blur(10px); /* Efek glass */
         }
         .form-control {
             padding: 0.6rem 1rem; /* Input lebih tinggi/modern */
@@ -34,6 +36,22 @@
         .btn-primary {
             padding: 0.6rem 1rem;
             font-weight: 500;
+            background: #3a7bd5;
+            border: none;
+            color: #ffffffff;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(58, 123, 213, 0.3);
+        }
+        .btn-primary:hover {
+            background: #f0f0f0 ;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(58, 123, 213, 0.4);
+            color: #1e3c72;
+        }
+        .card-body {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 1rem;
         }
     </style>
 </head>
@@ -44,7 +62,7 @@
             <div class="container-fluid">
                 <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3">
                     <div class="col mx-auto">
-                        
+
                         <div class="card login-card shadow-lg">
                             <div class="card-body p-4 p-md-5">
                                 <div class="text-center mb-4">
@@ -53,11 +71,11 @@
                                     <h4 class="font-weight-bold">Selamat Datang</h4>
                                     <p class="text-muted">Silakan masuk ke akun SITAMA Anda</p>
                                 </div>
-                                
+
                                 <div class="form-body">
                                     <form class="row g-3" action="{{ route('login') }}" method="POST">
                                         @csrf
-                                        
+
                                         {{-- Email Input --}}
                                         <div class="col-12">
                                             <label for="inputEmailAddress" class="form-label text-secondary small text-uppercase fw-bold">Email</label>
@@ -78,7 +96,7 @@
                                                 <input type="password" name="password"
                                                     class="form-control border-end-0 @error('password') is-invalid @enderror"
                                                     id="inputChoosePassword" value=""
-                                                    placeholder="Masukkan Password"> 
+                                                    placeholder="Masukkan Password">
                                                 <a href="javascript:;" class="input-group-text bg-transparent"><i class="bx bx-hide"></i></a>
                                                 @error('password')
                                                     <span class="invalid-feedback" role="alert">
@@ -107,7 +125,7 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        
+
                                     </form>
                                 </div>
                             </div>
@@ -128,7 +146,7 @@
     <script src="{{ asset('assets/plugins/simplebar/js/simplebar.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/metismenu/js/metisMenu.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
-    
+
     <script>
         $(document).ready(function() {
             $("#show_hide_password a").on('click', function(event) {
