@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\ModelApi;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany; // Import untuk relasi
+use App\Models\ModelApi\Prodi;
 
 class Jurusan extends Model
 {
@@ -24,7 +25,7 @@ class Jurusan extends Model
         'nama_jurusan',
     ];
 
-    
+
     // --- 2. RELASI ELOQUENT ---
 
     /**

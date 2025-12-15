@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\ModelApi;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\ModelApi\DokumenSidang;
 
 class SyaratSidang extends Model
 {

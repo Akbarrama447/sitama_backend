@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\ModelApi;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\ModelApi\User;
+use App\Models\ModelApi\Prodi;
 
 class Dosen extends Model
 {

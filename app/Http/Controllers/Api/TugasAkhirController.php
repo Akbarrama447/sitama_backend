@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
-use App\Models\TugasAkhir; // <-- Import Model TA
-use App\Models\Mahasiswa; // <-- Import Model Mahasiswa
+use App\Models\ModelApi\TugasAkhir; // <-- Import Model TA
+use App\Models\ModelApi\Mahasiswa; // <-- Import Model Mahasiswa
 use Illuminate\Support\Facades\DB; // <-- TAMBAHAN IMPORT UNTUK TRANSAKSI
 
 class TugasAkhirController extends Controller
@@ -111,18 +111,18 @@ class TugasAkhirController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Data tidak valid', 
+                'message' => 'Data tidak valid',
                 'errors' => $validator->errors()
             ], 422);
         }
-        
+
         $dataTA = null;
 
         try {
             // 3. Gunakan Transaction (Biar aman)
             // Kita harus insert ke 2 tabel: 'tugas_akhir' dan 'tugas_akhir_anggota'
             DB::transaction(function () use ($request, $mahasiswa, &$dataTA) {
-                
+
                 // 4. Buat data TA baru
                 $tugasAkhir = TugasAkhir::create([
                     'judul' => $request->input('judul'),
@@ -177,7 +177,7 @@ class TugasAkhirController extends Controller
         if (!$tugasAkhir) {
             return response()->json(['message' => 'Tugas Akhir aktif tidak ditemukan.'], 404);
         }
-        
+
         // 2. Validasi input
         $validator = Validator::make($request->all(), [
             'judul' => 'sometimes|required|string|max:500',
@@ -187,7 +187,7 @@ class TugasAkhirController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Data tidak valid', 
+                'message' => 'Data tidak valid',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -196,11 +196,11 @@ class TugasAkhirController extends Controller
         $tugasAkhir->update($request->only(['judul', 'deskripsi']));
 
         // 4. PERBAIKAN BUG: Ambil data baru dari database
-        $tugasAkhir->refresh(); 
+        $tugasAkhir->refresh();
 
         // 5. Load ulang relasi untuk data yang baru (penting)
         $tugasAkhir->load('bimbingan.dosen', 'mahasiswa', 'sidangTugasAkhir.penguji.dosen');
-        
+
         // 6. Format data balikan menggunakan helper (BIAR KONSISTEN)
         $dataTA = $this->formatTugasAkhirResponse($tugasAkhir);
 
@@ -275,4 +275,3 @@ class TugasAkhirController extends Controller
         ];
     }
 }
-

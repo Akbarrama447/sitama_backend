@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\DokumenSidang;
-use App\Models\SyaratSidang;
-use App\Models\TugasAkhir;
+use App\Models\ModelApi\DokumenSidang;
+use App\Models\ModelApi\SyaratSidang;
+use App\Models\ModelApi\TugasAkhir;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;

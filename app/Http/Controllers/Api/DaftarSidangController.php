@@ -6,10 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Mahasiswa;
-use App\Models\TugasAkhir;
-use App\Models\JadwalSidang;
-use App\Models\SidangTugasAkhir;
+use App\Models\ModelApi\Mahasiswa;
+use App\Models\ModelApi\TugasAkhir;
+use App\Models\ModelApi\JadwalSidang;
+use App\Models\ModelApi\SidangTugasAkhir;
 
 class DaftarSidangController extends Controller
 {
@@ -175,7 +175,7 @@ class DaftarSidangController extends Controller
         } catch (\Exception $e) {
             // Rollback transaksi jika ada error
             \DB::rollBack();
-            
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Terjadi kesalahan saat mendaftar sidang',

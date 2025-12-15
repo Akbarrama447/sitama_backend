@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Mahasiswa;
-use App\Models\TugasAkhir;
-use App\Models\Bimbingan;
-use App\Models\LogBimbingan;
+use App\Models\ModelApi\Mahasiswa;
+use App\Models\ModelApi\TugasAkhir;
+use App\Models\ModelApi\Bimbingan;
+use App\Models\ModelApi\LogBimbingan;
 
 class LogBimbinganController extends Controller
 {
@@ -64,7 +64,6 @@ class LogBimbinganController extends Controller
         if (!$ta) return response()->json(['message' => 'Belum ada Tugas Akhir'], 404);
 
         // 3. Ambil semua ID bimbingan terkait TA ini
-        // (Bisa jadi dia punya Pembimbing 1 dan Pembimbing 2)
         $bimbinganIds = Bimbingan::where('tugas_akhir_id', $ta->id)->pluck('id');
 
         // 4. Ambil log berdasarkan bimbingan_id tadi dan mhs_nim mahasiswa ini
@@ -92,7 +91,7 @@ class LogBimbinganController extends Controller
         return response()->json($formattedLogs);
     }
 
-    // POST: Tambah log ba  ru
+    // POST: Tambah log baru
     public function store(Request $request)
     {
         $request->validate([

@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\ModelApi;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\ModelApi\Sesi;
+use App\Models\ModelApi\Ruangan;
+use App\Models\ModelApi\SidangTugasAkhir;
 
 class JadwalSidang extends Model
 {

@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use App\Models\JadwalSidang; // <-- Model utama kita
-use App\Models\SidangTugasAkhir; // Kita juga perlu ini
+use App\Models\ModelApi\JadwalSidang; // <-- Model utama kita
+use App\Models\ModelApi\SidangTugasAkhir; // Kita juga perlu ini
 use Carbon\Carbon; // Untuk format jam
 
 class JadwalSidangController extends Controller
@@ -34,7 +34,7 @@ class JadwalSidangController extends Controller
                 // Load relasi-relasi yang kita butuhin
                 'ruangan', // Dapat tempat
                 'sesi',    // Dapat jam
-                
+
                 // Ini relasi bersarang (nested)
                 'sidangTugasAkhir.tugasAkhir.anggota.mahasiswa.prodi',
                 'sidangTugasAkhir.tugasAkhir.bimbingan.dosen',
@@ -44,23 +44,23 @@ class JadwalSidangController extends Controller
 
         // 3. Transformasi Data
         // Hasil query-nya kompleks, kita "ratakan" jadi JSON simpel
-        
+
         $data = [];
-        
+
         // Looping tiap jadwal (misal: Sesi 1 di Ruang A)
         foreach ($jadwals as $jadwal) {
-            
+
             // Looping tiap sidang di dalam jadwal itu
             foreach ($jadwal->sidangTugasAkhir as $sidang) {
-                
+
                 // Ambil data-data yang kita butuhin
                 $ta = $sidang->tugasAkhir;
-                
+
                 // Asumsi 1 TA 1 Anggota, atau kita ambil yg pertama
-                $anggota = $ta->anggota->first(); 
-                
+                $anggota = $ta->anggota->first();
+
                 if (!$anggota) continue; // Skip jika TA tidak punya anggota
-                
+
                 $mahasiswa = $anggota->mahasiswa;
 
                 // Format data sesuai rancangan
@@ -71,16 +71,16 @@ class JadwalSidangController extends Controller
                     'jurusan'     => $mahasiswa->prodi->nama_prodi,
                     'judul'       => $ta->judul,
                     'deskripsi'   => $ta->deskripsi ?? '-',
-                    
+
                     'tanggal'     => $jadwal->tanggal, // Tipe Date
                     'jam'         => Carbon::parse($jadwal->sesi->waktu_mulai)->format('H:i') . ' WIB',
                     'tempat'      => $jadwal->ruangan->nama_ruangan,
-                    
+
                     // Ambil 'dosen_nama' dari tiap relasi bimbingan
                     'pembimbing'  => $ta->bimbingan->map(function ($b) {
                         return $b->dosen->dosen_nama;
                     }),
-                    
+
                     // Ambil 'dosen_nama' dari tiap relasi penguji
                     'penguji'     => $sidang->penguji->map(function ($p) {
                         return $p->dosen->dosen_nama;
@@ -88,7 +88,7 @@ class JadwalSidangController extends Controller
                 ];
             }
         }
-        
+
         // Urutkan hasil akhir berdasarkan jam
         usort($data, function($a, $b) {
             return strtotime($a['jam']) - strtotime($b['jam']);

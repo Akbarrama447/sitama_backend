@@ -1,13 +1,17 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\ModelApi;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use App\Models\DokumenSidang; // Tambahkan import ini untuk method syaratSidangLengkap
-use App\Models\SyaratSidang; // Tambahkan import ini untuk relasi syaratSidang
+use App\Models\ModelApi\DokumenSidang; // Tambahkan import ini untuk method syaratSidangLengkap
+use App\Models\ModelApi\SyaratSidang; // Tambahkan import ini untuk relasi syaratSidang
+use App\Models\ModelApi\Bimbingan;
+use App\Models\ModelApi\TugasAkhirAnggota;
+use App\Models\ModelApi\Mahasiswa;
+use App\Models\ModelApi\SidangTugasAkhir;
 
 class TugasAkhir extends Model
 {

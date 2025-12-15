@@ -1,11 +1,14 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\ModelApi;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo; // Import untuk relasi
 use Illuminate\Database\Eloquent\Relations\HasMany;   // Import untuk relasi
+use App\Models\ModelApi\Jurusan;
+use App\Models\ModelApi\Mahasiswa;
+use App\Models\ModelApi\Dosen;
 
 class Prodi extends Model
 {
@@ -57,4 +60,3 @@ class Prodi extends Model
         return $this->hasMany(Dosen::class, 'prodi_id');
     }
 }
-

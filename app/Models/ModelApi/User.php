@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\ModelApi;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens; // <-- 1. TAMBAHKAN INI
+use App\Models\ModelApi\Mahasiswa;
+use App\Models\ModelApi\Dosen;
 
 class User extends Authenticatable
 {
@@ -68,4 +70,3 @@ class User extends Authenticatable
         return $this->hasOne(Dosen::class, 'user_id');
     }
 }
-

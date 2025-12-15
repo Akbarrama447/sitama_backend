@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\ModelApi;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\ModelApi\Mahasiswa;
 
 class TugasAkhirAnggota extends Model
 {

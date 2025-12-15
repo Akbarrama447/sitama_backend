@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\ModelApi;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany; // <-- 1. PASTIKAN INI ADA
-use App\Models\User;
-use App\Models\Prodi;
-use App\Models\TugasAkhir; // <-- 2. TAMBAHKAN INI JUGA
+use App\Models\ModelApi\User;
+use App\Models\ModelApi\Prodi;
+use App\Models\ModelApi\TugasAkhir; // <-- 2. TAMBAHKAN INI JUGA
 
 class Mahasiswa extends Model
 {
@@ -49,4 +49,3 @@ class Mahasiswa extends Model
         return $this->belongsToMany(TugasAkhir::class, 'tugas_akhir_anggota', 'mhs_nim', 'tugas_akhir_id');
     }
 }
-

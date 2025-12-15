@@ -6,14 +6,14 @@ $app = require_once __DIR__.'/bootstrap/app.php';
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 $kernel->bootstrap();
 
-use App\Models\TugasAkhir;
+use App\Models\ModelApi\TugasAkhir;
 
 // Ambil salah satu TA buat test method syaratSidangLengkap
 $tugasAkhir = TugasAkhir::first();
 
 if ($tugasAkhir) {
     echo "Testing method syaratSidangLengkap() pada TugasAkhir ID: {$tugasAkhir->id}\n";
-    
+
     try {
         $hasil = $tugasAkhir->syaratSidangLengkap();
         echo "Hasil: " . ($hasil ? 'true' : 'false') . "\n";

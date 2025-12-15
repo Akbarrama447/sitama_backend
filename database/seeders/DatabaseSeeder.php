@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 // TAMBAHKAN DUA BARIS INI
-use App\Models\Mahasiswa;
-use App\Models\Dosen;
+use App\Models\ModelApi\Mahasiswa;
+use App\Models\ModelApi\Dosen;
 
 class DatabaseSeeder extends Seeder
 {
