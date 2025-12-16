@@ -2,18 +2,78 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ProfilController;
+use App\Http\Controllers\Api\TugasAkhirController;
+use App\Http\Controllers\Api\JadwalSidangController;
+use App\Http\Controllers\Api\LogBimbinganController;
+use App\Http\Controllers\Api\DaftarSidangController;
+use App\Http\Controllers\Api\DokumenSidangController;
+use App\Http\Controllers\Api\FileDokumenSidangController;
+use App\Http\Controllers\Api\SyaratSidangController;
+use App\Http\Controllers\Api\RevisiTugasAkhirController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Rute publik
+Route::post('/login', [AuthController::class, 'login']);
+
+// Rute yang dilindungi
+Route::middleware('auth:sanctum')->group(function () {
+
+    // Auth
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Profil
+    Route::get('/profil', [ProfilController::class, 'show']);
+    Route::post('/ganti-password', [ProfilController::class, 'gantiPassword']);
+
+    // Tugas Akhir
+    Route::post('/tugas-akhir', [TugasAkhirController::class, 'store']);
+    Route::get('/tugas-akhir', [TugasAkhirController::class, 'show']);
+    Route::put('/tugas-akhir', [TugasAkhirController::class, 'update']);
+
+    // Jadwal Sidang
+    Route::get('/jadwal-sidang', [JadwalSidangController::class, 'index']);
+    Route::get('/jadwal-sidang/tersedia', [DaftarSidangController::class, 'jadwalTersedia']);
+
+    // Dokumen Sidang
+    Route::apiResource('/dokumen-sidang', DokumenSidangController::class);
+    Route::post('/dokumen-sidang/upload-otomatis', [DokumenSidangController::class, 'storeOtomatis']);
+    Route::apiResource('/file-dokumen-sidang', FileDokumenSidangController::class);
+
+    // Dokumen Syarat Sidang
+    Route::get('/status-upload/{tugasAkhirId}', [SyaratSidangController::class, 'getStatusUpload']);
+    Route::post('/upload-dokumen', [SyaratSidangController::class, 'uploadDokumen']);
+    Route::get('/my-uploaded-documents', [SyaratSidangController::class, 'getMyUploadedDocuments']);
+    Route::get('/uploaded-documents/{tugasAkhirId}', [SyaratSidangController::class, 'getUploadedDocuments']);
+    Route::delete('/hapus-dokumen/{id}', [SyaratSidangController::class, 'deleteDokumen']);
+
+    //bimbingan
+    Route::get('/log-bimbingan', [LogBimbinganController::class, 'index']); // Lihat histori
+    Route::post('/log-bimbingan', [LogBimbinganController::class, 'store']); // Tambah log baru
+    //ini untuk daftar pembimbing ya (urutan), jangan dihapus
+    Route::get('log-bimbingan', [\App\Http\Controllers\Api\LogBimbinganController::class, 'index']);
+    Route::post('log-bimbingan', [\App\Http\Controllers\Api\LogBimbinganController::class, 'store']);       
+    Route::get('pembimbing', [\App\Http\Controllers\Api\LogBimbinganController::class, 'pembimbing']);
+    Route::get('/pembimbing', [LogBimbinganController::class, 'pembimbing']);
+    Route::get('/log-bimbingan/{dosen_nip}', [LogBimbinganController::class, 'logsByDosen']);
+    //biar bisa edit log bimbingan
+    Route::put('/log-bimbingan/{id}', [LogBimbinganController::class, 'update']);
+    Route::patch('/log-bimbingan/{id}', [LogBimbinganController::class, 'update']);
+    Route::delete('/log-bimbingan/{id}', [LogBimbinganController::class, 'destroy']);
+
+    // Daftar Sidang
+    Route::post('/daftar-sidang', [DaftarSidangController::class, 'daftarSidang']);
+    Route::get('/pendaftaran-sidang', [DaftarSidangController::class, 'cekStatusPendaftaran']);
+
+    // Revisi Tugas Akhir
+    Route::apiResource('/revisi-tugas-akhir', RevisiTugasAkhirController::class);
+    Route::get('/revisi-tugas-akhir-by-ta/{tugas_akhir_id}', [RevisiTugasAkhirController::class, 'getByTugasAkhir']);
+    Route::post('/revisi-tugas-akhir-untuk-saya', [RevisiTugasAkhirController::class, 'storeForCurrentUser']);
+    Route::get('/revisi-tugas-akhir-saya', [RevisiTugasAkhirController::class, 'getForCurrentUser']);
 });
