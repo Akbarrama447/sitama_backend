@@ -13,6 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
+        if (!Schema::hasTable('failed_jobs')) {
         // Create nilai_dosen_penguji table to store examiner grading data
         Schema::create('nilai_dosen_penguji', function (Blueprint $table) {
             $table->id();
@@ -26,7 +27,8 @@ return new class extends Migration
             $table->unique(['sidang_id', 'dosen_nip']);
         });
     }
-
+    }
+    
     /**
      * Reverse the migrations.
      *

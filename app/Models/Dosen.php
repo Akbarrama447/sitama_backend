@@ -23,4 +23,8 @@ class Dosen extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function prodi()
+{
+    return $this->belongsTo(Prodi::class, 'prodi_id');
+}
 }

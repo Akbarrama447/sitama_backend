@@ -13,9 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
+        if (!Schema::hasTable('permissions')) {
         Schema::table('permissions', function ($table) {
             $table->unsignedBigInteger('menu_id')->nullable();
         });
+    }
     }
 
     /**

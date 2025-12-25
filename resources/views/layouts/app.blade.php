@@ -12,9 +12,13 @@
     @stack('css')
     <link rel="stylesheet" href="{{ asset('') }}dist/css/adminlte.min.css">
     <!-- bootstrap already included -->
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <!-- custom overrides -->
+    /<link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+    <style>
+        h3 {
+            margin-top: 0 !important; /* Pakai !important biar maksa ngalahin style bawaan */
+        }
+    </style>    
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -23,6 +27,7 @@
         <img class="animation__shake" src="{{ asset('') }}dist/img/logo-polines.png" alt="Polines Logo"
             height="80" width="80">
     </div> --}}
+    
     <div class="wrapper">
         <nav class="main-header navbar navbar-expand navbar-white navbar-light">
             <ul class="navbar-nav">

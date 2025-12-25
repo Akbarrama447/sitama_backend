@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Role extends Model
 {
     use HasFactory;
+    
+    public function menus()
+{
+    // Ini memberitahu Laravel: "Role ini punya banyak Menu lewat tabel role_has_menus"
+    return $this->belongsToMany(Menu::class, 'role_has_menus', 'role_id', 'menu_id');
+}
 }

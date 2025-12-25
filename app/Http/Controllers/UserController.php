@@ -17,143 +17,119 @@ class UserController extends Controller
         $this->middleware('permission:update_user')->only('edit', 'update');
         $this->middleware('permission:delete_user')->only('destroy');
     }
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
         $users = User::all();
         return view('users.index', compact('users'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         $roles = Role::all();
         return view('users.create', compact('roles'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
-            'email' => 'required|string|email:rfc|unique:users',
+            'email' => 'required|string|email:rfc|unique:user',
             'role' => 'nullable',
             'verified' => 'nullable|string',
+            'password' => 'required|min:6', // Password wajib saat create
         ]);
 
         if ($validator->fails()) {
-            toastr()->error('Perngguna gagal ditambah </br> Periksa kembali data anda');
+            toastr()->error('Pengguna gagal ditambah </br> Periksa kembali data anda');
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         };
+
         try {
-            $data = User::create(
-                [
-                    'name' => $request->name,
-                    'email' => $request->email,
-                    'password' => Hash::make($request->password),
-                    'email_verified_at' => !blank($request->verified) ? now() : null
-                ]
-            );
-            $data->assignRole(!blank($request->role) ? $request->role : array());
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+            
+            // Assign Role (Ambil ID atau Array kosong)
+            $roleIds = $request->role ?? [];
+
+            $roles = Role::whereIn('id', $roleIds)->get();
+
+            $user->syncRoles($roles);
+
             toastr()->success('Pengguna baru berhasil disimpan');
             return redirect()->route('manage-user.index');
         } catch (\Throwable $th) {
-            toastr()->warning('Terdapat masalah diserver');
+            toastr()->warning('Server Error: ' . $th->getMessage());
             return redirect()->route('manage-user.index');
         }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
         $roles = Role::all();
-        $user = User::findorfail($id);
+        $user = User::findOrFail($id); // Pakai findOrFail standar
         return view('users.edit', compact('user', 'roles'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
-            'email' => 'required|string|email:rfc',
+            'email' => 'required|string|email:rfc|unique:user,email,'.$id, 
             'role' => 'nullable',
-            'verified' => 'nullable|string',
+            'verified' => 'nullable', 
+            'password' => 'nullable|min:6', 
         ]);
 
         if ($validator->fails()) {
-            toastr()->error('Perngguna gagal ditambah </br> Periksa kembali data anda');
+            toastr()->error('Pengguna gagal diperbarui </br> Periksa kembali data anda');
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         };
 
         try {
-            $user = User::findorfail($id);
+            $user = User::findOrFail($id);
 
+            // 1. Siapkan data tanpa password dulu
             $update_data = [
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'email_verified_at' => !blank($request->verified) ? now() : null
             ];
-            if(empty($request->password)){
-                unset($update_data['password']);
+
+            // 2. Cek apakah user input password baru?
+            // PERBAIKAN: Hanya masukkan password ke array jika user mengisinya
+            if ($request->filled('password')) {
+                $update_data['password'] = Hash::make($request->password);
             }
+
+            // 3. Eksekusi Update
             $user->update($update_data);
 
-            $user->syncRoles(!blank($request->role) ? $request->role : array());
+            // 4. Sync Roles
+            $roleIds = $request->role ?? []; 
+            
+            // Cari Object Role berdasarkan ID tersebut
+            $roles = Role::whereIn('id', $roleIds)->get();
+            
+            // Masukkan Object Role (bukan ID) ke Spatie
+            $user->syncRoles($roles);
+            
             toastr()->success('Pengguna berhasil diperbarui');
             return redirect()->route('manage-user.index');
+        
         } catch (\Throwable $th) {
-            toastr()->warning('Terdapat masalah diserver');
+            // Tampilkan pesan error asli biar ketahuan salahnya dimana
+            toastr()->warning('Server Error: ' . $th->getMessage());
             return redirect()->route('manage-user.index');
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         //

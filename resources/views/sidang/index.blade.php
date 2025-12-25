@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4">
-    <h3 class="mt-4 mb-4">Data Ujian Sidang Tugas Akhir</h3>
+<div class="container-fluid pt-4">
+    <h3 class="mt-1 mb-2">Data Ujian Sidang Tugas Akhir</h3>
 
     @if(session('success')) <div class="alert alert-success">{{ session('success') }}</div> @endif
     @if(session('error')) <div class="alert alert-danger">{{ session('error') }}</div> @endif
@@ -80,7 +80,7 @@
                                             <div class="fw-bold">{{ $p->dosen_nama ?? 'Nama Tidak Ditemukan' }}</div>
                                             <small class="text-muted d-block" style="font-size: 0.75rem;">NIP: {{ $p->dosen_nip }}</small>
                                             @if($p->pivot->peran)
-                                                <span class="badge bg-light text-dark border mt-1">{{ $p->pivot->peran }}</span>
+                                                <span class="badge bg-light text-dark border mt-1">Penguji {{ $p->pivot->peran }}</span>
                                             @endif
                                         </li>
                                     @empty
@@ -90,7 +90,16 @@
                             </td>
 
                             <td class="text-center">
-                                <span class="badge bg-{{ $s->badge_color }}">{{ $s->status }}</span>
+                                <span class="badge bg-{{ $s->badge_color }}">{{ match($s->status) {
+                                    '0' => 'Terjadwal',
+                                    '1' => 'Lulus',
+                                    '2' => 'Lulus dengan Revisi',
+                                    '3' => 'Revisi',
+                                    '4' => 'Tidak Lulus',
+                                    default => $s->status
+                                }
+                                }}
+                            </span>
                             </td>
 
                             <td class="text-center fw-bold fs-6">

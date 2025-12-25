@@ -13,7 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        // Create dosen_penguji table to store the relationship between sidang and examiners
+        
+        if (!Schema::hasTable('dosen_penguji')) {
         Schema::create('dosen_penguji', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sidang_id')->constrained('sidang_tugas_akhir', 'id')->onDelete('cascade');
@@ -25,7 +26,7 @@ return new class extends Migration
             $table->unique(['sidang_id', 'dosen_nip']);
         });
     }
-
+    }
     /**
      * Reverse the migrations.
      *

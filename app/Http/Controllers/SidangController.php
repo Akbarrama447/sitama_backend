@@ -193,15 +193,15 @@ class SidangController extends Controller
         }
 
         // 3. Hitung Nilai Akhir Gabungan
-        if ($countPembimbing > 0 && $countPenguji > 0) {
+        // if ($countPembimbing > 0 && $countPenguji > 0) {
             $nilaiAkhir = ($totalRataPembimbing + $totalRataPenguji) / 2;
-        } elseif ($countPembimbing > 0) {
-            $nilaiAkhir = $totalRataPembimbing;
-        } elseif ($countPenguji > 0) {
-            $nilaiAkhir = $totalRataPenguji;
-        } else {
-            $nilaiAkhir = 0;
-        }
+        // } elseif ($countPembimbing > 0) {
+        //     $nilaiAkhir = $totalRataPembimbing;
+        // } elseif ($countPenguji > 0) {
+        //     $nilaiAkhir = $totalRataPenguji;
+        // } else {
+        //     $nilaiAkhir = 0;
+        // }
 
         // 4. Update ke Tabel Utama (sidang_tugas_akhir)
         $sidang = SidangTugasAkhir::find($sidang_id);
@@ -265,7 +265,7 @@ class SidangController extends Controller
 
         // Validasi HANYA status kelulusan
         $request->validate([
-            'status_kelulusan' => 'required|string',
+            'status_kelulusan' => 'required|int',
         ]);
 
         // Update Status saja, Nilai tidak disentuh

@@ -35,6 +35,10 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::resource('profil', ProfilController::class)->except('destroy');
 
+Route::group(['middleware' => ['role:admin']], function () {
+    Route::get('/configs', [ConfigController::class, 'index']);
+});
+
 Route::resource('manage-user', UserController::class);
 Route::resource('manage-role', RoleController::class);
 Route::resource('manage-menu', MenuController::class);

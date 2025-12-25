@@ -11,6 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+
+        if (!Schema::hasTable('bimbingan')) {
         Schema::table('bimbingan', function (Blueprint $table) {
             // Add necessary columns to bimbingan table
             $table->foreignId('tugas_akhir_id')->nullable()->constrained('tugas_akhir', 'id')->onDelete('cascade');
@@ -24,7 +26,7 @@ return new class extends Migration
             $table->unique(['tugas_akhir_id', 'dosen_nip'], 'unique_bimbingan_dosen');
         });
     }
-
+    }
     /**
      * Reverse the migrations.
      */

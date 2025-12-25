@@ -1,14 +1,19 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 pb-5">
+<div class="container-fluid pt-1 pb-5">
     {{-- Header & Tombol Kembali --}}
-    <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div class="container-fluid justify-content-between align-items-center mb-4 mt-3">
         <a href="{{ route('sidang.index') }}" class="btn btn-outline-secondary btn-sm px-3 rounded-pill back-btn">
             <i class="fas fa-arrow-left me-1"></i> Kembali
         </a>
-        <h4 class="mb-0 fw-bold text-dark">Rekapitulasi Nilai Sidang</h4>
+
+        <div class="container-fluid justify-content-between align-items-center mb-4 mt-3">
+        <h4 class="mb-1 fw-bold text-dark">Rekapitulasi Nilai Sidang</h4>
+</div>
     </div>
+
+    <div class="container-fluid justify-content-between align-items-center mb-4 mt-3">
 
     {{-- Info Mahasiswa --}}
     <div class="card border-0 shadow-sm mb-4" style="border-left: 5px solid #0d6efd;">
@@ -80,7 +85,7 @@
                                                 </td>
                                             @endif
 
-                                            <td class="py-2 text-secondary">{{ $item->unsur->kriteria }}</td>
+                                            <td class="py-2 text-secondary">{{ $item->unsur->nama_unsur }}</td>
                                             <td class="text-center fw-bold text-dark">{{ $item->nilai }}</td>
                                             <td class="text-center text-muted small">{{ $item->unsur->bobot }}%</td>
                                             <td class="text-end pe-4 text-secondary">{{ number_format($scoreHitung, 2) }}</td>
@@ -162,7 +167,7 @@
                                                 </td>
                                             @endif
 
-                                            <td class="py-2 text-secondary">{{ $item->unsur->kriteria }}</td>
+                                            <td class="py-2 text-secondary">{{ $item->unsur->nama_unsur }}</td>
                                             <td class="text-center fw-bold text-dark">{{ $item->nilai }}</td>
                                             <td class="text-center text-muted small">{{ $item->unsur->bobot }}%</td>
                                             <td class="text-end pe-4 text-secondary">{{ number_format($scoreHitung, 2) }}</td>
@@ -224,10 +229,10 @@
                             <span class="input-group-text bg-white"><i class="fas fa-certificate text-warning"></i></span>
                             <select name="status_kelulusan" class="form-select fs-5" required>
                                 <option value="" disabled selected>-- Pilih Keputusan --</option>
-                                <option value="Lulus" {{ $sidang->status == 'Lulus' ? 'selected' : '' }}>Lulus</option>
-                                <option value="Lulus dengan Revisi" {{ $sidang->status == 'Lulus dengan Revisi' ? 'selected' : '' }}>Lulus dengan Revisi</option>
-                                <option value="Revisi" {{ $sidang->status == 'Revisi' ? 'selected' : '' }}>Revisi / Mengulang</option>
-                                <option value="Tidak Lulus" {{ $sidang->status == 'Tidak Lulus' ? 'selected' : '' }}>Tidak Lulus</option>
+                                <option value="1" {{ $sidang->status == '1' ? 'selected' : '' }}>Lulus</option>
+                                <option value="2" {{ $sidang->status == '2' ? 'selected' : '' }}>Lulus dengan Revisi</option>
+                                <option value="3" {{ $sidang->status == '3' ? 'selected' : '' }}>Revisi / Mengulang</option>
+                                <option value="4" {{ $sidang->status == '4' ? 'selected' : '' }}>Tidak Lulus</option>
                             </select>
                         </div>
                     </div>

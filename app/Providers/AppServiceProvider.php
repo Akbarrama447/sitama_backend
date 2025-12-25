@@ -5,9 +5,11 @@ namespace App\Providers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Gate;
 
 use Exception;
 use PDOException;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,9 +30,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // Handle offline database
-
-        //Use bootstrap 4 for pagination css
-        Paginator::useBootstrapFour();
+        // Bypass semua pengecekan permission untuk Super Admin
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('Super Admin') ? true : null;
+        });
     }
+
 }

@@ -59,28 +59,23 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Role Pengguna</label>
-                                    {{-- {{ $role_user }} --}}
-                                    @if (count($user->roles->pluck('name')->toarray()) > 0)
-                                        @foreach ($roles as $item)
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" name="role[]" class="custom-control-input"
-                                                    id="{{ $item->name . $item->id }}" value="{{ strtolower($item->name) }}"
-                                                    @checked(in_array($item->name, $user->roles->pluck('name')->toarray()))>
-                                                <label class="custom-control-label"
-                                                    for="{{ $item->name . $item->id }}">{{ strtoupper($item->name) }}</label>
-                                            </div>
-                                        @endforeach
-                                    @else
-                                        @foreach ($roles as $item)
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" name="role[]" class="custom-control-input"
-                                                    id="{{ $item->name . $item->id }}"
-                                                    value="{{ strtolower($item->name) }}">
-                                                <label class="custom-control-label"
-                                                    for="{{ $item->name . $item->id }}">{{ strtoupper($item->name) }}</label>
-                                            </div>
-                                        @endforeach
-                                    @endif
+                                    {{-- Loop Role --}}
+                                    @foreach ($roles as $item)
+                                        <div class="custom-control custom-checkbox">
+                                            {{-- PERBAIKAN 1: value pakai ID (lebih aman daripada nama) --}}
+                                            <input type="checkbox" 
+                                                name="role[]" 
+                                                class="custom-control-input"
+                                                id="role_{{ $item->id }}" 
+                                                value="{{ $item->id }}"
+                                                @if($user->roles->contains($item->id)) checked @endif>
+                                            
+                                            {{-- PERBAIKAN 2: ID label disesuaikan biar gak error spasi --}}
+                                            <label class="custom-control-label" for="role_{{ $item->id }}">
+                                                {{ strtoupper($item->name) }}
+                                            </label>
+                                        </div>
+                                    @endforeach
                                 </div>
                                 <div class="form-group">
                                     <label>Verified</label>

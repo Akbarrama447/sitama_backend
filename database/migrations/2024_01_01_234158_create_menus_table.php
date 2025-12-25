@@ -13,6 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
+        if (!Schema::hasTable('menus')) {
         Schema::create('menus', function (Blueprint $table) {
             $table->id();
             $table->string('nama_menu');
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->string('tipe_menu',['be','fe'])->default('be')->change();
 
         });
+    }
     }
 
     /**

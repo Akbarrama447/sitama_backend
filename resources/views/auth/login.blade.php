@@ -68,7 +68,6 @@
                                 <div class="text-center mb-4">
                                     {{-- Logo SITAMA --}}
                                     <img src="{{ asset('assets/images/SITAMA.png') }}" width="150" alt="Logo SITAMA" class="mb-3">
-                                    <h4 class="font-weight-bold">Selamat Datang</h4>
                                     <p class="text-muted">Silakan masuk ke akun SITAMA Anda</p>
                                 </div>
 

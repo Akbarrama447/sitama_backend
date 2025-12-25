@@ -10,6 +10,7 @@ use App\Models\BimbinganLog;
 use App\Models\TugasAkhir;
 use App\Models\Bimbingan;
 use App\Models\Dosen;
+use App\Models\Prodi;
 
 class BimbinganController extends Controller
 {
@@ -18,11 +19,12 @@ class BimbinganController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Ambil Data Dosen Login
+        
         $dosen = Dosen::where('user_id', auth()->id())->first();
         if (!$dosen) {
             return redirect()->back()->with('error', 'Data Dosen tidak ditemukan.');
         }
+
 
         // 2. QUERY DAFTAR MAHASISWA
         $query = DB::table('bimbingan')
@@ -31,17 +33,38 @@ class BimbinganController extends Controller
             ->join('mahasiswa', 'tugas_akhir_anggota.mhs_nim', '=', 'mahasiswa.mhs_nim')
             ->where('bimbingan.dosen_nip', $dosen->dosen_nip)
             // Filter: Hanya tampilkan yang SUDAH ADA log bimbingannya
-            ->whereExists(function ($q) {
+            ->whereExists(function ($q) {   
                 $q->select(DB::raw(1))
                   ->from('bimbingan_log')
                   ->whereColumn('bimbingan_log.bimbingan_id', 'bimbingan.id');
             });
 
-        // --- LOGIKA FILTER TAHUN AKADEMIK ---
+        $user = Auth::user();
+            $tahunAkademik = [];
+        $currentYear = date('Y');
+        for ($i = 0; $i < 4; $i++) { // 4 tahun ke belakang
+            $start = $currentYear - $i;
+            $tahunAkademik[] = $start . '/' . ($start + 1);
+        }
         if ($request->filled('tahun_akademik')) {
             $query->where('tugas_akhir.tahun_akademik', $request->tahun_akademik);
         }
         // ------------------------------------
+
+        if ($user->hasRole('admin')) { 
+        // Admin bisa lihat SEMUA prodi dari semua jurusan
+        $prodis = Prodi::all(); 
+        } else {
+        // Asumsi: User connect ke Dosen, Dosen punya kolom 'prodi_id'
+        // Ambil data prodi tempat dosen bernaung
+        $dosenProdi = $user->dosen->prodi; 
+        
+        // Ambil ID Jurusannya (Misal: 1 untuk Elektro)
+        $idJurusan = $dosenProdi->jurusan_id; 
+
+        // Ambil semua prodi yang punya jurusan_id SAMA (Elektro family)
+        $prodis = Prodi::where('jurusan_id', $idJurusan)->get();
+        }
 
         // Select Data
         $daftarMahasiswa = $query->select(
@@ -56,7 +79,7 @@ class BimbinganController extends Controller
                 DB::raw('(SELECT tanggal FROM bimbingan_log WHERE bimbingan_log.bimbingan_id = bimbingan.id ORDER BY tanggal DESC LIMIT 1) as tanggal'),
                 DB::raw('(SELECT catatan FROM bimbingan_log WHERE bimbingan_log.bimbingan_id = bimbingan.id ORDER BY tanggal DESC LIMIT 1) as catatan'),
                 DB::raw('(SELECT status FROM bimbingan_log WHERE bimbingan_log.bimbingan_id = bimbingan.id ORDER BY tanggal DESC LIMIT 1) as status'),
-                DB::raw('(SELECT COUNT(*) FROM bimbingan_log WHERE bimbingan_log.bimbingan_id = bimbingan.id AND bimbingan_log.status = 2) as jumlah_verified')
+                DB::raw('(SELECT COUNT(*) FROM bimbingan_log WHERE bimbingan_log.bimbingan_id = bimbingan.id AND bimbingan_log.status = 1) as jumlahApproved')
             )
             ->groupBy('tugas_akhir.id')
             ->orderBy('mahasiswa.mhs_nama', 'asc')
@@ -65,7 +88,11 @@ class BimbinganController extends Controller
         // Penting: Append query string agar filter tidak hilang saat pindah halaman
         $daftarMahasiswa->appends($request->all());
 
-        return view('bimbingan.index', ['bimbingan' => $daftarMahasiswa]);
+
+        return view('bimbingan.index', [
+            'bimbingan' => $daftarMahasiswa
+            ,'prodis'    => $prodis]);
+            
     }
 
     public function show($ta_id)
@@ -75,8 +102,18 @@ class BimbinganController extends Controller
 
         $ta = TugasAkhir::query()->from('tugas_akhir')->with('mahasiswa')->findOrFail($ta_id);
         
-        $peran = "Pembimbing"; 
-        $isPembimbing = true;  
+        $bimbingan = Bimbingan::where('tugas_akhir_id', $ta_id)
+                                ->where('dosen_nip', $dosen->dosen_nip)
+                                ->first();
+
+        $peran = "Pembimbing " . $bimbingan->urutan; 
+        $isPembimbing = true;
+
+        $list = BimbinganLog::join('bimbingan', 'bimbingan_log.bimbingan_id', '=', 'bimbingan.id')
+        ->where('bimbingan.tugas_akhir_id', $ta_id)
+        ->select('bimbingan_log.*')
+        ->orderBy('bimbingan_log.tanggal', 'asc') // Urutkan dari yang terlama ke terbaru sesuai gambar
+        ->get();
 
         $sidang = DB::table('sidang_tugas_akhir')->where('tugas_akhir_id', $ta_id)->first();
         if ($sidang) {
@@ -90,25 +127,35 @@ class BimbinganController extends Controller
             }
         }
 
+        $minBimbingan = \App\Models\Config::getValue('min_bimbingan', 8);
+
+        $jumlahApproved = $list->where('status', 1)->count();
+
+
         $list = BimbinganLog::query()
             ->join('bimbingan', 'bimbingan_log.bimbingan_id', '=', 'bimbingan.id')
             ->where('bimbingan.tugas_akhir_id', $ta_id)
             ->select('bimbingan_log.*')
             ->orderBy('bimbingan_log.tanggal', 'desc')
             ->get();
-
+        
+        
         return view('bimbingan.show', [
-            'ta'   => $ta,
-            'list' => $list,
-            'peran' => $peran,
-            'isPembimbing' => $isPembimbing
+        'ta'             => $ta,
+        'list'           => $list,
+        'peran'          => $peran,
+        'isPembimbing'   => $isPembimbing,
+        'dosen'          => $dosen,
+        'minBimbingan'   => $minBimbingan,
+        'jumlahApproved' => $jumlahApproved,
+        'bimbingan'      => $bimbingan
         ]);
     }
 
     public function verify(Request $request, $id)
     {
         $log = BimbinganLog::findOrFail($id);
-        $log->status = 2; 
+        $log->status = 1; 
         $log->save();
         return redirect()->back()->with('success', 'Verified');
     }
@@ -116,7 +163,7 @@ class BimbinganController extends Controller
     public function reject(Request $request, $id)
     {
         $log = BimbinganLog::findOrFail($id);
-        $log->status = 1; 
+        $log->status = 2; 
         $log->save();
         return redirect()->back()->with('success', 'Rejected');
     }

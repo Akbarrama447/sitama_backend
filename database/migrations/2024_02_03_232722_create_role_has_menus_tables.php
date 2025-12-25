@@ -13,6 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
+        if (!Schema::hasTable('role_has_menus')) {
         Schema::create('role_has_menus', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('menu_id');
@@ -22,6 +23,7 @@ return new class extends Migration
                 ->on('menus')
                 ->onDelete('cascade');
         });
+    }
     }
 
     /**

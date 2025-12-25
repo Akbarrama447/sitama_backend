@@ -20,7 +20,8 @@ class Menu extends Model
     }
     public function permissions()
     {
-        return $this->hasMany(Permission::class, 'menu_id', 'id');
+
+        return $this->hasMany(Permission::class, 'menu_id');
     }
     public function parent()
     {

@@ -1,8 +1,8 @@
 @extends('layouts.app') 
 
 @section('content')
-<div class="container-fluid px-4">
-    <h1 class="mt-4">Data Mahasiswa Bimbingan Tugas Akhir</h1>
+<div class="container-fluid pt-2">
+    <h3 class="mt-4">Data Mahasiswa Bimbingan Tugas Akhir</h3   >
     
     {{-- Card Wrapper --}}
     <div class="card mb-4 mt-3 shadow-sm border-0">
@@ -19,9 +19,15 @@
                         </select>
                     </div>
                     <div class="col-auto">
-                        <select name="prodi" class="form-select form-select-sm" disabled title="Fitur belum tersedia">
-                            <option>All Program Studi</option>
-                        </select>
+                        <select name="prodi_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Semua Program Studi</option>
+                        
+                        @foreach($prodis as $p)
+                            <option value="{{ $p->id }}" {{ request('prodi_id') == $p->id ? 'selected' : '' }}>
+                                {{ $p->nama_prodi }}
+                            </option>
+                        @endforeach
+                    </select>
                     </div>
                     <div class="col-auto">
                         <button type="submit" class="btn btn-primary btn-sm">Filter</button>
@@ -77,13 +83,13 @@
                                 </span>
                             </td>
                             <td class="text-center">
-                                @if($b->jumlah_verified >= 8)
+                                @if($b->jumlahApproved >= 8)
                                     <span class="badge bg-success rounded-pill px-3">
-                                        <i class="fas fa-check-circle me-1"></i> Syarat Terpenuhi ({{ $b->jumlah_verified }})
+                                        <i class="fas fa-check-circle me-1"></i> Syarat Terpenuhi ({{ $b->jumlahApproved }})
                                     </span>
                                 @else
                                     <span class="badge bg-secondary rounded-pill px-3">
-                                        Belum Cukup ({{ $b->jumlah_verified }}/8)
+                                        Belum Cukup ({{ $b->jumlahApproved }}/8)
                                     </span>
                                 @endif
                             </td>

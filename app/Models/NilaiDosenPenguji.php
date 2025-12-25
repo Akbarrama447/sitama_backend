@@ -20,5 +20,5 @@ class NilaiDosenPenguji extends Model
     public function dosen()
     {
         return $this->belongsTo(Dosen::class, 'dosen_nip', 'dosen_nip');
-    }
+    }   
 }

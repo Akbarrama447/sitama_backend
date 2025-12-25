@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="container pt-1 pb-5">
     {{-- Tombol Kembali --}}
     <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
         <a href="{{ route('sidang.index') }}" class="btn btn-outline-secondary btn-sm px-3 rounded-pill back-btn">
@@ -67,7 +67,7 @@
                         @foreach($unsurList as $index => $unsur)
                         <div class="form-group mb-4">
                             <label for="skor_{{ $unsur->id }}" class="form-label fw-bold">
-                                {{ $index + 1 }}. {{ $unsur->kriteria }}
+                                {{ $index + 1 }}. {{ $unsur->nama_unsur }}
                                 <span class="badge bg-light text-dark border ms-2">Bobot: {{ $unsur->bobot }}%</span>
                             </label>
 
@@ -90,7 +90,7 @@
                             <span class="input-group-text">%</span>
                         </div>
                             <small class="text-muted">
-                                Berikan penilaian objektif untuk poin {{ strtolower($unsur->kriteria) }}.
+                                Berikan penilaian objektif untuk poin {{ strtolower($unsur->nama_unsur) }}.
                             </small>
                         </div>
                         @endforeach
@@ -120,7 +120,7 @@
                             {{-- List Panduan Dinamis sesuai Unsur --}}
                             @foreach($unsurList as $unsur)
                             <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                <span>{{ $unsur->kriteria }}</span>
+                                <span>{{ $unsur->nama_unsur }}</span>
                                 <span class="badge bg-secondary rounded-pill">{{ $unsur->bobot }}%</span>
                             </li>
                             @endforeach

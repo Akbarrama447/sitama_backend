@@ -43,84 +43,58 @@
                                 <div class="form-group">
                                     <label>Roles Menu Permission</label>
                                     <ul class="checktree">
-                                        @foreach ($menus as $menu)
-                                            @if (count($menu->submenus) == '0')
-                                                <li><input type="checkbox" name="menu_id[]" value="{{ $menu->id }}"> <b>
-                                                        {{ $menu->nama_menu }}</b>
-                                                    @if (count($menu->permissions) > 0)
-                                                        <ul>
-                                                            @foreach ($menu->permissions as $permission)
-                                                                <li>
-                                                                    <input type="checkbox" name="permission_id[]"
-                                                                        value="{{ $permission->name }}">
-                                                                    {!! $permission->detail . '<i>( ' . $permission->name . ' )</i>' !!}
-                                                                </li>
-                                                            @endforeach
-                                                        </ul>
-                                                    @endif
-                                                </li>
-                                            @else
-                                                <li>
-                                                    <input type="checkbox" name="menu_id[]" value="{{ $menu->id }}"> <b>
-                                                        {{ $menu->nama_menu }}</b>
-                                                    <ul>
-                                                        @foreach ($menu->submenus as $submenu)
-                                                            @if (count($submenu->submenus) == 0)
-                                                                <li>
-                                                                    <input type="checkbox" name="menu_id[]"
-                                                                        value="{{ $submenu->id }}">
-                                                                    <b>
-                                                                        {{ ucwords($submenu->nama_menu) }}</b>
-                                                                    @if (count($submenu->permissions) > 0)
-                                                                        <ul>
-                                                                            @foreach ($submenu->permissions as $permission)
-                                                                                <li>
-                                                                                    <input type="checkbox"
-                                                                                        name="permission_id[]"
-                                                                                        value="{{ $permission->name }}">
-                                                                                    {!! $permission->detail . '<i>( ' . $permission->name . ')</i>' !!}
-                                                                                </li>
-                                                                            @endforeach
-                                                                        </ul>
-                                                                    @endif
-                                                                </li>
-                                                            @else
-                                                                <li>
-                                                                    <input type="checkbox" name="menu_id[]"
-                                                                        value="{{ $submenu->id }}">
-                                                                    <b>
-                                                                        {{ $submenu->nama_menu }}</b>
-                                                                    <ul>
-                                                                        @foreach ($submenu->submenus as $submenu2)
-                                                                            @if (count($submenu2->submenus) == 0)
-                                                                                <li>
-                                                                                    <input type="checkbox" name="menu_id[]"
-                                                                                        value="{{ $submenu2->id }}"> <b>
-                                                                                        {{ $submenu2->nama_menu }}</b>
-                                                                                    @if (count($submenu2->permissions) > 0)
-                                                                                        <ul>
-                                                                                            @foreach ($submenu2->permissions as $permission)
-                                                                                                <li>
-                                                                                                    <input type="checkbox"
-                                                                                                        name="permission_id[]"
-                                                                                                        value="{{ $permission->name }}">
-                                                                                                    {!! $permission->detail . '<i>(' . $permission->name . ' )</i>' !!}
-                                                                                                </li>
-                                                                                            @endforeach
-                                                                                        </ul>
-                                                                                    @endif
-                                                                                </li>
-                                                                            @endif
-                                                                        @endforeach
-                                                                    </ul>
-                                                                </li>
-                                                            @endif
-                                                        @endforeach
-                                                    </ul>
-                                                </li>
-                                            @endif
+    @foreach ($menus as $menu)
+        @if (count($menu->submenus) == 0)
+            <li>
+                <input type="checkbox" name="menu_id[]" value="{{ $menu->id }}">
+                <b>{{ $menu->name ?? $menu->nama_menu }}</b> 
+
+                @if (count($menu->permissions) > 0)
+                    <ul>
+                        @foreach ($menu->permissions as $permission)
+                            <li>
+                                <input type="checkbox" name="permission_id[]" value="{{ $permission->name }}">
+                                {{ $permission->detail ?? $permission->name }}
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </li>
+        @else
+            <li>
+                <input type="checkbox" name="menu_id[]" value="{{ $menu->id }}">
+                <b>{{ $menu->name ?? $menu->nama_menu }}</b>
+
+                <ul>
+                    @foreach ($menu->submenus as $submenu)
+                        @if (count($submenu->submenus) == 0)
+                            <li>
+                                <input type="checkbox" name="menu_id[]" value="{{ $submenu->id }}">
+                                <b>{{ ucwords($submenu->name ?? $submenu->nama_menu) }}</b>
+
+                                @if (count($submenu->permissions) > 0)
+                                    <ul>
+                                        @foreach ($submenu->permissions as $permission)
+                                            <li>
+                                                <input type="checkbox" name="permission_id[]" value="{{ $permission->name }}">
+                                                {{ $permission->detail ?? $permission->name }}
+                                            </li>
                                         @endforeach
                                     </ul>
+                                @endif
+                            </li>
+                        @else
+                            <li>
+                                <input type="checkbox" name="menu_id[]" value="{{ $submenu->id }}">
+                                <b>{{ $submenu->name ?? $submenu->nama_menu }}</b>
+                                </li>
+                        @endif
+                    @endforeach
+                </ul>
+            </li>
+        @endif
+    @endforeach
+</ul>
                                 </div>
                             </div>
                             <div class="card-footer">
