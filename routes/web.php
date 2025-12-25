@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\DBBackupController;
 use App\Models\User;
 use App\Http\Controllers\MenuController;
@@ -36,7 +37,7 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Route::resource('profil', ProfilController::class)->except('destroy');
 
 Route::group(['middleware' => ['role:admin']], function () {
-    Route::get('/configs', [ConfigController::class, 'index']);
+    Route::get('/configs', [\App\Http\Controllers\ConfigController::class, 'index']);
 });
 
 Route::resource('manage-user', UserController::class);
