@@ -12,7 +12,6 @@ class Mahasiswa extends Model
 
     public function tugasAkhir()
     {
-        // hasOne artinya "Mahasiswa ini PUNYA SATU Tugas Akhir"
-        return $this->hasOne(TugasAkhir::class, 'mahasiswa_nim', 'nim');
+        return $this->hasOne(TugasAkhir::class, 'mhs_nim', 'nim');
     }
 }

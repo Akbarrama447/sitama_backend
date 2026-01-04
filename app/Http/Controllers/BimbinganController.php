@@ -11,6 +11,7 @@ use App\Models\TugasAkhir;
 use App\Models\Bimbingan;
 use App\Models\Dosen;
 use App\Models\Prodi;
+use App\Models\Config;
 
 class BimbinganController extends Controller
 {
@@ -151,6 +152,40 @@ class BimbinganController extends Controller
         'bimbingan'      => $bimbingan
         ]);
     }
+
+    public function checkSidangEligibility(Request $request) {
+    $user = Auth::user();
+    $mahasiswa = DB::table('mahasiswa')->where('user_id', $user->id)->first();
+    if (!$mahasiswa) return response()->json(['can_register' => false, 'message' => 'Mahasiswa tidak ditemukan']);
+
+    $ta = DB::table('tugas_akhir_anggota')->where('mhs_nim', $mahasiswa->mhs_nim)->first();
+    if (!$ta) return response()->json(['can_register' => false, 'message' => 'Belum terdaftar TA']);
+
+    // Ambil batas 8 dari configs
+    $minBimbingan = \App\Models\Config::where('setting_key', 'min_bimbingan')->value('setting_value') ?? 8;
+
+    // Cek masing-masing pembimbing (biasanya ada 2)
+    $pembimbing = DB::table('bimbingan')->where('tugas_akhir_id', $ta->tugas_akhir_id)->get();
+    
+    $canRegister = true;
+    $countStatus = "";
+
+    foreach ($pembimbing as $p) {
+        $approved = DB::table('bimbingan_log')
+            ->where('bimbingan_id', $p->id)
+            ->where('status', 1)->count();
+        
+        if ($approved < $minBimbingan) {
+            $canRegister = false;
+            $countStatus .= "Pembimbing $p->urutan baru $approved/$minBimbingan. ";
+        }
+    }
+
+    return response()->json([
+        'can_register' => $canRegister,
+        'message' => $canRegister ? 'Syarat terpenuhi' : $countStatus
+    ]);
+    }   
 
     public function verify(Request $request, $id)
     {
