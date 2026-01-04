@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\DBBackupController;
 use App\Models\User;
 use App\Http\Controllers\MenuController;
@@ -35,10 +36,16 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::resource('profil', ProfilController::class)->except('destroy');
 
+<<<<<<< HEAD
 // Route for config management - to be implemented later
 // Route::group(['middleware' => ['role:admin']], function () {
 //     Route::get('/configs', [ConfigController::class, 'index']);
 // });
+=======
+Route::group(['middleware' => ['role:admin']], function () {
+    Route::get('/configs', [\App\Http\Controllers\ConfigController::class, 'index']);
+});
+>>>>>>> 603c094c23a34b5a7f84dcfd14cdf2d885d6fe2c
 
 Route::resource('manage-user', UserController::class);
 Route::resource('manage-role', RoleController::class);

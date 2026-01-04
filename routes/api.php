@@ -12,7 +12,10 @@ use App\Http\Controllers\Api\DokumenSidangController;
 use App\Http\Controllers\Api\FileDokumenSidangController;
 use App\Http\Controllers\Api\SyaratSidangController;
 use App\Http\Controllers\Api\RevisiTugasAkhirController;
+<<<<<<< HEAD
 use App\Http\Controllers\TestApiController;
+=======
+>>>>>>> 603c094c23a34b5a7f84dcfd14cdf2d885d6fe2c
 
 /*
 |--------------------------------------------------------------------------
@@ -73,5 +76,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/revisi-tugas-akhir-by-ta/{tugas_akhir_id}', [RevisiTugasAkhirController::class, 'getByTugasAkhir']);
     Route::post('/revisi-tugas-akhir-untuk-saya', [RevisiTugasAkhirController::class, 'storeForCurrentUser']);
     Route::get('/revisi-tugas-akhir-saya', [RevisiTugasAkhirController::class, 'getForCurrentUser']);
+<<<<<<< HEAD
 
+=======
+>>>>>>> 603c094c23a34b5a7f84dcfd14cdf2d885d6fe2c
 });
