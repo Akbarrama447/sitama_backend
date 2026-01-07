@@ -94,7 +94,7 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                <a href="{{ route('bimbingan.show', $b->ta_id) }}" class="btn btn-primary btn-sm" title="Lihat Detail">
+                                <a href="{{ route('bimbingan.show', ['ta' => $b->ta_id, 'mhs' => $b->mhs_nim]) }}" class="btn btn-primary btn-sm" title="Lihat Detail">
                                     <i class="fas fa-list"></i>
                                 </a>
                             </td>

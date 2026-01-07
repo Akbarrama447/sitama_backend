@@ -80,9 +80,9 @@ class BimbinganController extends Controller
                 DB::raw('(SELECT tanggal FROM bimbingan_log WHERE bimbingan_log.bimbingan_id = bimbingan.id ORDER BY tanggal DESC LIMIT 1) as tanggal'),
                 DB::raw('(SELECT catatan FROM bimbingan_log WHERE bimbingan_log.bimbingan_id = bimbingan.id ORDER BY tanggal DESC LIMIT 1) as catatan'),
                 DB::raw('(SELECT status FROM bimbingan_log WHERE bimbingan_log.bimbingan_id = bimbingan.id ORDER BY tanggal DESC LIMIT 1) as status'),
-                DB::raw('(SELECT COUNT(*) FROM bimbingan_log WHERE bimbingan_log.bimbingan_id = bimbingan.id AND bimbingan_log.status = 1) as jumlahApproved')
+                DB::raw('(SELECT COUNT(*) FROM bimbingan_log WHERE bimbingan_log.bimbingan_id = bimbingan.id AND bimbingan_log.mhs_nim = mahasiswa.mhs_nim AND bimbingan_log.status = 1) as jumlahApproved')
             )
-            ->groupBy('tugas_akhir.id')
+            ->groupBy('mahasiswa.mhs_nim')  // Diganti dari 'tugas_akhir.id'
             ->orderBy('mahasiswa.mhs_nama', 'asc')
             ->paginate(10);
 
@@ -96,22 +96,26 @@ class BimbinganController extends Controller
             
     }
 
-    public function show($ta_id)
+    public function show($ta_id, $mhs_nim)
     {
         $dosen = Dosen::where('user_id', auth()->id())->first();
         if (!$dosen) abort(403, 'Unauthorized');
 
         $ta = TugasAkhir::query()->from('tugas_akhir')->with('mahasiswa')->findOrFail($ta_id);
-        
+
+        $mahasiswa = \App\Models\Mahasiswa::where('mhs_nim', $mhs_nim)->first(); // Ambil data mahasiswa spesifik
+
         $bimbingan = Bimbingan::where('tugas_akhir_id', $ta_id)
                                 ->where('dosen_nip', $dosen->dosen_nip)
                                 ->first();
 
-        $peran = "Pembimbing " . $bimbingan->urutan; 
+        $peran = "Pembimbing " . $bimbingan->urutan;
         $isPembimbing = true;
 
         $list = BimbinganLog::join('bimbingan', 'bimbingan_log.bimbingan_id', '=', 'bimbingan.id')
         ->where('bimbingan.tugas_akhir_id', $ta_id)
+        ->where('bimbingan.dosen_nip', $dosen->dosen_nip)  // Ditambahin
+        ->where('bimbingan_log.mhs_nim', $mhs_nim)  // Diganti
         ->select('bimbingan_log.*')
         ->orderBy('bimbingan_log.tanggal', 'asc') // Urutkan dari yang terlama ke terbaru sesuai gambar
         ->get();
@@ -119,7 +123,7 @@ class BimbinganController extends Controller
         $sidang = DB::table('sidang_tugas_akhir')->where('tugas_akhir_id', $ta_id)->first();
         if ($sidang) {
             $peranData = DB::table('dosen_penguji')
-                ->where('sidang_id', $sidang->id) 
+                ->where('sidang_id', $sidang->id)
                 ->where('dosen_nip', $dosen->dosen_nip)
                 ->first();
             if ($peranData) {
@@ -136,13 +140,16 @@ class BimbinganController extends Controller
         $list = BimbinganLog::query()
             ->join('bimbingan', 'bimbingan_log.bimbingan_id', '=', 'bimbingan.id')
             ->where('bimbingan.tugas_akhir_id', $ta_id)
+            ->where('bimbingan.dosen_nip', $dosen->dosen_nip)  // Ditambahin
+            ->where('bimbingan_log.mhs_nim', $mhs_nim)  // Diganti
             ->select('bimbingan_log.*')
             ->orderBy('bimbingan_log.tanggal', 'desc')
             ->get();
-        
-        
+
+
         return view('bimbingan.show', [
         'ta'             => $ta,
+        'mahasiswa'      => $mahasiswa, // Tambahin variabel mahasiswa
         'list'           => $list,
         'peran'          => $peran,
         'isPembimbing'   => $isPembimbing,
