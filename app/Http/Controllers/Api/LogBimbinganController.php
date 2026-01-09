@@ -35,6 +35,7 @@ class LogBimbinganController extends Controller
         if ($bimbinganIds->isEmpty()) return response()->json([]);
 
         $logs = LogBimbingan::whereIn('bimbingan_id', $bimbinganIds)
+            ->where('mhs_nim', $mahasiswa->mhs_nim)  // Ditambahin
             ->with(['bimbingan.dosen'])
             ->orderBy('tanggal', 'desc')
             ->get();
@@ -111,6 +112,7 @@ class LogBimbinganController extends Controller
         if ($bimbinganIds->isEmpty()) return response()->json([]);
 
         $logs = LogBimbingan::whereIn('bimbingan_id', $bimbinganIds)
+            ->where('mhs_nim', $mahasiswa->mhs_nim)  // Ditambahin
             ->with(['bimbingan.dosen'])
             ->orderBy('tanggal', 'desc')
             ->get();
@@ -179,6 +181,21 @@ class LogBimbinganController extends Controller
             $file = $request->file('file_path');
             $fileName = time() . '_' . $mahasiswa->mhs_nim . '_' . $file->getClientOriginalName();
             $filePath = $file->storeAs('bimbingan_logs', $fileName, 'public');
+
+            // Copy file ke public/storage juga untuk kompatibilitas Windows
+            if ($filePath) {
+                $sourcePath = storage_path('app/public/' . $filePath);
+                $destPath = public_path('storage/' . $filePath);
+
+                // Buat direktori jika belum ada
+                $destDir = dirname($destPath);
+                if (!file_exists($destDir)) {
+                    mkdir($destDir, 0755, true);
+                }
+
+                // Copy file
+                copy($sourcePath, $destPath);
+            }
         }
 
         $log = LogBimbingan::create([
@@ -219,11 +236,32 @@ class LogBimbinganController extends Controller
         if ($request->hasFile('file_path')) {
             if ($log->file_path && Storage::disk('public')->exists($log->file_path)) {
                 Storage::disk('public')->delete($log->file_path);
+
+                // Hapus juga dari public/storage
+                $publicFilePath = public_path('storage/' . $log->file_path);
+                if (file_exists($publicFilePath)) {
+                    unlink($publicFilePath);
+                }
             }
             $file = $request->file('file_path');
             $fileName = time() . '_' . $mahasiswa->mhs_nim . '_' . $file->getClientOriginalName();
             $filePath = $file->storeAs('bimbingan_logs', $fileName, 'public');
             $log->file_path = $filePath;
+
+            // Copy file ke public/storage juga untuk kompatibilitas Windows
+            if ($filePath) {
+                $sourcePath = storage_path('app/public/' . $filePath);
+                $destPath = public_path('storage/' . $filePath);
+
+                // Buat direktori jika belum ada
+                $destDir = dirname($destPath);
+                if (!file_exists($destDir)) {
+                    mkdir($destDir, 0755, true);
+                }
+
+                // Copy file
+                copy($sourcePath, $destPath);
+            }
         }
 
         $log->judul     = $request->judul;
@@ -243,6 +281,20 @@ class LogBimbinganController extends Controller
     {
         $log = LogBimbingan::find($id);
         if (!$log) return response()->json(['message' => 'Log bimbingan tidak ditemukan'], 404);
+
+        // Hapus file dari storage jika ada
+        if ($log->file_path) {
+            // Hapus dari storage/app/public
+            if (Storage::disk('public')->exists($log->file_path)) {
+                Storage::disk('public')->delete($log->file_path);
+            }
+
+            // Hapus juga dari public/storage
+            $publicFilePath = public_path('storage/' . $log->file_path);
+            if (file_exists($publicFilePath)) {
+                unlink($publicFilePath);
+            }
+        }
 
         $log->delete();
         return response()->json(['message' => 'Log bimbingan berhasil dihapus'], 200);

@@ -109,12 +109,15 @@ class DaftarSidangController extends Controller
                 $tugasAkhir->update(['judul' => $request->judul]);
             }
 
-            // Cek apakah mahasiswa udah daftar sidang sebelumnya
-            $cekDaftarSebelumnya = SidangTugasAkhir::where('tugas_akhir_id', $tugasAkhir->id)->first();
+            // Cek apakah mahasiswa ini udah daftar sidang sebelumnya
+            $cekDaftarSebelumnya = SidangTugasAkhir::where('tugas_akhir_id', $tugasAkhir->id)
+                ->where('mhs_nim', $mahasiswa->mhs_nim) // Tambahkan kondisi ini
+                ->first();
+
             if ($cekDaftarSebelumnya) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Mahasiswa sudah terdaftar dalam sidang sebelumnya'
+                    'message' => 'Anda sudah terdaftar dalam sidang sebelumnya'
                 ], 400);
             }
 
@@ -154,6 +157,7 @@ class DaftarSidangController extends Controller
             // Buat record di tabel sidang_tugas_akhir
             $sidang = SidangTugasAkhir::create([
                 'tugas_akhir_id' => $tugasAkhir->id,
+                'mhs_nim' => $mahasiswa->mhs_nim, // Tambahkan ini
                 'jadwal_sidang_id' => $request->jadwal_sidang_id,
                 'status' => 'Aktif'
             ]);
@@ -214,8 +218,9 @@ class DaftarSidangController extends Controller
                 ], 200);
             }
 
-            // Cari pendaftaran sidang terkait TA ini
+            // Cari pendaftaran sidang terkait TA ini DAN milik mahasiswa ini
             $pendaftaranSidang = SidangTugasAkhir::where('tugas_akhir_id', $tugasAkhir->id)
+                ->where('mhs_nim', $mahasiswa->mhs_nim) // Tambahkan kondisi ini
                 ->with(['jadwalSidang.sesi', 'jadwalSidang.ruangan', 'tugasAkhir'])
                 ->first();
 

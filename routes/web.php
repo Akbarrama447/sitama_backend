@@ -59,7 +59,7 @@ Route::get('sidang-ta', [SidangController::class, 'index'])->name('sidang.index'
 
 // --- BIMBINGAN ROUTES ---
 Route::get('bimbingan', [BimbinganController::class, 'index'])->name('bimbingan.index');
-Route::get('bimbingan/{ta}', [BimbinganController::class, 'show'])->name('bimbingan.show');
+Route::get('bimbingan/{ta}/mahasiswa/{mhs}', [BimbinganController::class, 'show'])->name('bimbingan.show');
 Route::post('bimbingan/{id}/verify', [BimbinganController::class, 'verify'])->name('bimbingan.verify');
 Route::post('bimbingan/{id}/reject', [BimbinganController::class, 'reject'])->name('bimbingan.reject');
 

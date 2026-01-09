@@ -73,5 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/revisi-tugas-akhir-by-ta/{tugas_akhir_id}', [RevisiTugasAkhirController::class, 'getByTugasAkhir']);
     Route::post('/revisi-tugas-akhir-untuk-saya', [RevisiTugasAkhirController::class, 'storeForCurrentUser']);
     Route::get('/revisi-tugas-akhir-saya', [RevisiTugasAkhirController::class, 'getForCurrentUser']);
+    Route::post('/upload-revisi-file', [RevisiTugasAkhirController::class, 'uploadFileRevisi']);
+    Route::post('/upload-revisi-file/{revisi_id}', [RevisiTugasAkhirController::class, 'uploadFileRevisiById']);
 
 });

@@ -11,7 +11,7 @@
     <div class="card mb-3 border-0 shadow-sm border-top border-primary border-4">
         <div class="card-body d-flex justify-content-between align-items-center py-2">
             <h6 class="mb-0 fw-bold text-dark">
-                {{ $ta->mahasiswa->mhs_nim ?? '-' }} - {{ strtoupper($ta->mahasiswa->mhs_nama ?? $ta->mhs_nama) }}
+                {{ $mahasiswa->mhs_nim ?? '-' }} - {{ strtoupper($mahasiswa->mhs_nama ?? '') }}
             </h6>
 
         </div>
@@ -51,11 +51,17 @@
                         @forelse($list as $index => $item)
                         <tr>
                             <td class="text-center text-muted">{{ $index + 1 }}</td>
-                            <td class="fw-bold">Bimbingan Bab {{ $index + 1 }}</td>
+                            <td class="fw-bold">{{ $item->judul ?? 'Bimbingan Bab ' . ($index + 1) }}</td>
                             <td>{{ $item->deskripsi }}</td>
                             <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('l, d F Y') }}</td>
                             <td class="text-center">
-                                <span class="badge bg-primary rounded-1 py-1 px-2 fw-normal" style="font-size: 10px;">Tidak ada lampiran</span>
+                                @if($item->file_path)
+                                    <a href="{{ asset('storage/' . $item->file_path) }}" target="_blank" class="badge bg-primary rounded-1 py-1 px-2 fw-normal" style="font-size: 10px; text-decoration: none;">
+                                        Lihat File
+                                    </a>
+                                @else
+                                    <span class="badge bg-secondary rounded-1 py-1 px-2 fw-normal" style="font-size: 10px;">Tidak ada lampiran</span>
+                                @endif
                             </td>
                             <td class="text-center">
                                 @if($item->status == 1)

@@ -12,6 +12,7 @@ class RevisiTugasAkhir extends Model
     protected $table = 'revisi_tugas_akhir';
 
     protected $fillable = [
+        'mhs_nim',
         'tugas_akhir_id',
         'dosen_nip',
         'catatan_revisi',
@@ -31,5 +32,10 @@ class RevisiTugasAkhir extends Model
     public function dosen()
     {
         return $this->belongsTo(Dosen::class, 'dosen_nip', 'dosen_nip');
+    }
+
+    public function mahasiswa()
+    {
+        return $this->belongsTo(Mahasiswa::class, 'mhs_nim', 'mhs_nim');
     }
 }
