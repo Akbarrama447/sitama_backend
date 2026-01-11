@@ -98,7 +98,7 @@ class DaftarSidangController extends Controller
                 $tugasAkhir = TugasAkhir::create([
                     'judul' => $request->judul,
                     'deskripsi' => '', // Bisa ditambahin nanti
-                    'status' => 'Aktif',
+                    'status' => '0', // Status default saat pertama kali buat (diajukan)
                     'tahun_akademik' => date('Y') . '/' . (date('Y') + 1) // Format tahun ajaran
                 ]);
 
@@ -161,6 +161,9 @@ class DaftarSidangController extends Controller
                 'jadwal_sidang_id' => $request->jadwal_sidang_id,
                 'status' => 'Aktif'
             ]);
+
+            // Perbarui status tugas akhir ke 'Sidang' (2) saat mendaftar sidang
+            $tugasAkhir->update(['status' => '2']); // Ubah ke status 'Sidang'
 
             // Commit transaksi
             \DB::commit();

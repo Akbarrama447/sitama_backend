@@ -209,6 +209,12 @@ class LogBimbinganController extends Controller
             'status'      => 0,
         ]);
 
+        // Perbarui status tugas akhir ke 'Bimbingan' (1) jika sebelumnya 'Diajukan' (0)
+        $tugasAkhir = $log->bimbingan->tugasAkhir;
+        if ($tugasAkhir->status === 'Diajukan' || $tugasAkhir->status === '0') {
+            $tugasAkhir->update(['status' => '1']); // Ubah ke status 'Bimbingan'
+        }
+
         return response()->json([
             'message' => 'Log bimbingan berhasil ditambahkan',
             'data'    => $log

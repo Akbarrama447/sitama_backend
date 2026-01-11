@@ -127,7 +127,7 @@ class TugasAkhirController extends Controller
                 $tugasAkhir = TugasAkhir::create([
                     'judul' => $request->input('judul'),
                     'deskripsi' => $request->input('deskripsi'),
-                    'status' => 'Diajukan', // Status default saat pertama kali buat
+                    'status' => '0', // Status default saat pertama kali buat (diajukan)
                     'tahun_akademik' => '2024/2025' // TODO: Harusnya dinamis
                 ]);
 
@@ -263,11 +263,21 @@ class TugasAkhirController extends Controller
             }
         }
 
-        // 4. Format data balikan
+        // 4. Konversi status ke format yang diinginkan
+        $statusValue = $tugasAkhir->status;
+        $statusText = match($statusValue) {
+            '0', 'Diajukan' => 'diajukan',
+            '1', 'Bimbingan' => 'bimbingan',
+            '2', 'Sidang' => 'sidang',
+            'Selesai' => 'selesai',
+            default => $statusValue // Jika tidak cocok dengan aturan, kembalikan nilai aslinya
+        };
+
+        // 5. Format data balikan
         return [
             'judul' => $tugasAkhir->judul,
             'deskripsi' => $tugasAkhir->deskripsi,
-            'status' => $tugasAkhir->status,
+            'status' => $statusText,
             'pembimbing_1' => $pembimbing1,
             'pembimbing_2' => $pembimbing2,
             'penguji' => $penguji,
