@@ -33,6 +33,36 @@ Route::permanentRedirect('/', '/login');
 
 Auth::routes();
 
+// Route untuk halaman download aplikasi Flutter (publik)
+Route::get('/download', [\App\Http\Controllers\DownloadController::class, 'index'])->name('download.index');
+Route::get('/download/flutter-app', [\App\Http\Controllers\DownloadController::class, 'downloadApp'])->name('download.app');
+
+// Route debugging untuk cek file
+Route::get('/debug/check-file', function() {
+    use Illuminate\Support\Facades\Storage;
+
+    $filePath = 'public/flutter_apps/flutter_app.apk';
+    $fileExists = Storage::exists($filePath);
+
+    echo "File Path: " . $filePath . "<br>";
+    echo "File Exists: " . ($fileExists ? 'YES' : 'NO') . "<br>";
+
+    if ($fileExists) {
+        $fileSize = Storage::size($filePath);
+        $lastModified = Storage::lastModified($filePath);
+
+        echo "File Size: " . $fileSize . " bytes<br>";
+        echo "Last Modified: " . date('d M Y H:i:s', $lastModified) . "<br>";
+    } else {
+        echo "File tidak ditemukan oleh Storage facade<br>";
+        echo "Mencoba mencari file secara langsung...<br>";
+
+        $fullPath = storage_path('app/' . $filePath);
+        echo "Full Path: " . $fullPath . "<br>";
+        echo "File exists (direct): " . (file_exists($fullPath) ? 'YES' : 'NO') . "<br>";
+    }
+});
+
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::resource('profil', ProfilController::class)->except('destroy');
 
