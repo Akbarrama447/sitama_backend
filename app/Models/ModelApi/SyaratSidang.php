@@ -19,6 +19,7 @@ class SyaratSidang extends Model
     protected $fillable = [
         'tugas_akhir_id',
         'dokumen_id',
+        'mhs_nim',
         'dokumen_file_original',
         'dokumen_file',
         'verified',

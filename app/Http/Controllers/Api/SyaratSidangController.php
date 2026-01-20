@@ -32,14 +32,26 @@ class SyaratSidangController extends Controller
     /**
      * Get upload status for a specific tugas akhir
      */
-    public function getStatusUpload($tugasAkhirId)
+    public function getStatusUpload($tugasAkhirId, Request $request)
     {
+        $user = $request->user(); // Ambil user yang sedang login
+
+        // Ambil data mahasiswa terkait user
+        $mahasiswa = DB::table('mahasiswa')->where('user_id', $user->id)->first();
+        if (!$mahasiswa) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data mahasiswa tidak ditemukan'
+            ], 404);
+        }
+
         // Dapatkan semua jenis dokumen syarat
         $dokumenSyarat = DokumenSidang::select('dokumen_id', 'dokumen_syarat', 'keterangan', 'tipe_dokumen')
             ->get();
 
-        // Dapatkan dokumen yang sudah diupload untuk tugas akhir ini
+        // Dapatkan dokumen yang sudah diupload untuk tugas akhir ini OLEH USER YANG SEDANG LOGIN
         $uploadedDokumen = SyaratSidang::where('tugas_akhir_id', $tugasAkhirId)
+            ->where('mhs_nim', $mahasiswa->mhs_nim) // Filter hanya dokumen yang diupload oleh user ini
             ->join('dokumen_sidang', 'syarat_sidang.dokumen_id', '=', 'dokumen_sidang.dokumen_id')
             ->select(
                 'syarat_sidang.id',
@@ -81,6 +93,15 @@ class SyaratSidangController extends Controller
     public function uploadDokumen(Request $request)
     {
         $user = $request->user(); // Ambil user yang sedang login
+
+        // Ambil data mahasiswa terkait user
+        $mahasiswa = DB::table('mahasiswa')->where('user_id', $user->id)->first();
+        if (!$mahasiswa) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data mahasiswa tidak ditemukan'
+            ], 404);
+        }
 
         // Validasi input
         $rules = [
@@ -151,9 +172,10 @@ class SyaratSidangController extends Controller
         $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
         $filePath = $file->storeAs('dokumen_sidang', $fileName, 'public');
 
-        // Cek apakah file sudah pernah diupload untuk dokumen_id dan tugas_akhir_id yang sama
+        // Cek apakah file sudah pernah diupload untuk dokumen_id, tugas_akhir_id dan mhs_nim yang sama
         $existingUpload = SyaratSidang::where('tugas_akhir_id', $tugasAkhirId)
             ->where('dokumen_id', $request->dokumen_id)
+            ->where('mhs_nim', $mahasiswa->mhs_nim) // Tambahkan filter berdasarkan mahasiswa yang upload
             ->first();
 
         if ($existingUpload) {
@@ -177,6 +199,7 @@ class SyaratSidangController extends Controller
             $syaratSidang = SyaratSidang::create([
                 'tugas_akhir_id' => $tugasAkhirId,
                 'dokumen_id' => $request->dokumen_id,
+                'mhs_nim' => $mahasiswa->mhs_nim, // Simpan informasi siapa yang upload
                 'dokumen_file_original' => $originalName,
                 'dokumen_file' => $filePath,
                 'verified' => 0, // belum diverifikasi
@@ -198,6 +221,15 @@ class SyaratSidangController extends Controller
     {
         $user = $request->user(); // Mendapatkan user yang sedang login
 
+        // Ambil data mahasiswa terkait user
+        $mahasiswa = DB::table('mahasiswa')->where('user_id', $user->id)->first();
+        if (!$mahasiswa) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data mahasiswa tidak ditemukan'
+            ], 404);
+        }
+
         // Ambil tugas akhir aktif milik user
         // Asumsi: relasi dari user -> mahasiswa -> tugas akhir anggota -> tugas akhir
         $tugasAkhirId = DB::table('mahasiswa')
@@ -215,8 +247,9 @@ class SyaratSidangController extends Controller
             ], 404);
         }
 
-        // Ambil semua dokumen yang sudah diupload untuk tugas akhir ini
+        // Ambil semua dokumen yang sudah diupload untuk tugas akhir ini OLEH USER INI
         $uploadedDokumen = SyaratSidang::where('tugas_akhir_id', $tugasAkhirId->id)
+            ->where('mhs_nim', $mahasiswa->mhs_nim) // Filter hanya dokumen yang diupload oleh user ini
             ->join('dokumen_sidang', 'syarat_sidang.dokumen_id', '=', 'dokumen_sidang.dokumen_id')
             ->select(
                 'syarat_sidang.id',
@@ -246,6 +279,15 @@ class SyaratSidangController extends Controller
     {
         $user = $request->user();
 
+        // Ambil data mahasiswa terkait user
+        $mahasiswa = DB::table('mahasiswa')->where('user_id', $user->id)->first();
+        if (!$mahasiswa) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data mahasiswa tidak ditemukan'
+            ], 404);
+        }
+
         // Cek apakah user punya akses ke tugas akhir ini
         // Asumsi: gunakan relasi dari user -> mahasiswa -> tugas akhir anggota -> tugas akhir
         $cekAkses = DB::table('mahasiswa')
@@ -261,8 +303,9 @@ class SyaratSidangController extends Controller
             ], 403);
         }
 
-        // Ambil semua dokumen yang sudah diupload untuk tugas akhir ini
+        // Ambil semua dokumen yang sudah diupload untuk tugas akhir ini OLEH USER INI
         $uploadedDokumen = SyaratSidang::where('tugas_akhir_id', $tugasAkhirId)
+            ->where('mhs_nim', $mahasiswa->mhs_nim) // Filter hanya dokumen yang diupload oleh user ini
             ->join('dokumen_sidang', 'syarat_sidang.dokumen_id', '=', 'dokumen_sidang.dokumen_id')
             ->select(
                 'syarat_sidang.id',
@@ -287,14 +330,27 @@ class SyaratSidangController extends Controller
     /**
      * Delete uploaded dokumen
      */
-    public function deleteDokumen($id)
+    public function deleteDokumen($id, Request $request)
     {
-        $syaratSidang = SyaratSidang::find($id);
+        $user = $request->user();
+
+        // Ambil data mahasiswa terkait user
+        $mahasiswa = DB::table('mahasiswa')->where('user_id', $user->id)->first();
+        if (!$mahasiswa) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data mahasiswa tidak ditemukan'
+            ], 404);
+        }
+
+        $syaratSidang = SyaratSidang::where('id', $id)
+            ->where('mhs_nim', $mahasiswa->mhs_nim) // Pastikan hanya user yang bersangkutan yang bisa hapus
+            ->first();
 
         if (!$syaratSidang) {
             return response()->json([
                 'success' => false,
-                'message' => 'Dokumen tidak ditemukan'
+                'message' => 'Dokumen tidak ditemukan atau Anda tidak memiliki izin untuk menghapus dokumen ini'
             ], 404);
         }
 

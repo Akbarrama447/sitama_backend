@@ -33,10 +33,12 @@ class HomeController extends Controller
 
         if ($nip) {
             // A. Mahasiswa Aktif (Jumlah mahasiswa yang dibimbing)
+            // Kita perlu menghitung jumlah mahasiswa yang terlibat dalam tugas akhir yang dibimbing oleh dosen
             $stats['mahasiswa_aktif'] = DB::table('bimbingan')
-                ->where('dosen_nip', $nip)
-                ->distinct('tugas_akhir_id')
-                ->count('tugas_akhir_id');
+                ->join('tugas_akhir_anggota', 'bimbingan.tugas_akhir_id', '=', 'tugas_akhir_anggota.tugas_akhir_id')
+                ->where('bimbingan.dosen_nip', $nip)
+                ->distinct('tugas_akhir_anggota.mhs_nim') // Hitung berdasarkan NIM mahasiswa
+                ->count('tugas_akhir_anggota.mhs_nim');
 
             // B. Log Bimbingan Baru (Log pending yang ditujukan kepada NIP ini)
             // Asumsi relasi bimbingan sudah terdefinisi di BimbinganLog
@@ -55,7 +57,7 @@ class HomeController extends Controller
             })
             ->orWhere('sekretaris_nip', $nip)
             ->count();
-            
+
             // D. Tugas Penilaian Pending
             $stats['tugas_penilaian_pending'] = $this->countPendingNilai($nip);
         }

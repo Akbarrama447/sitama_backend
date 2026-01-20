@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Dec 20, 2025 at 10:55 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: localhost:3306
+-- Generation Time: Jan 19, 2026 at 03:06 PM
+-- Server version: 8.4.3
+-- PHP Version: 8.3.26
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `sitamafinal`
+-- Database: `latestsitama`
 --
 
 -- --------------------------------------------------------
@@ -27,11 +27,10 @@ SET time_zone = "+00:00";
 -- Table structure for table `admin_prodi`
 --
 
-DROP TABLE IF EXISTS `admin_prodi`;
 CREATE TABLE `admin_prodi` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `prodi_id` bigint(20) UNSIGNED NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `prodi_id` bigint UNSIGNED NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -42,12 +41,11 @@ CREATE TABLE `admin_prodi` (
 -- Table structure for table `bimbingan`
 --
 
-DROP TABLE IF EXISTS `bimbingan`;
 CREATE TABLE `bimbingan` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `tugas_akhir_id` bigint(20) UNSIGNED NOT NULL,
-  `dosen_nip` varchar(20) NOT NULL,
-  `urutan` tinyint(4) NOT NULL COMMENT 'urutan pembimbing',
+  `id` bigint UNSIGNED NOT NULL,
+  `tugas_akhir_id` bigint UNSIGNED NOT NULL,
+  `dosen_nip` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `urutan` tinyint NOT NULL COMMENT 'urutan pembimbing',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -60,7 +58,11 @@ INSERT INTO `bimbingan` (`id`, `tugas_akhir_id`, `dosen_nip`, `urutan`, `created
 (1, 1, '198119046338', 1, '2025-10-26 15:34:05', '2025-10-26 15:34:05'),
 (2, 1, '198946122444', 2, '2025-10-26 15:34:05', '2025-10-26 15:34:05'),
 (3, 2, '198617040828', 1, '2025-11-09 05:02:11', NULL),
-(4, 2, '198936489906', 2, '2025-11-09 05:02:11', NULL);
+(4, 2, '198936489906', 2, '2025-11-09 05:02:11', NULL),
+(8, 5, '198311338302', 1, '2026-01-07 15:23:49', '2026-01-07 15:23:49'),
+(9, 5, '198617040828', 2, '2026-01-07 15:24:42', '2026-01-07 15:24:42'),
+(10, 31, '198617040828', 1, '2026-01-11 18:05:16', '2026-01-11 18:05:16'),
+(11, 31, '198936489906', 2, '2026-01-11 18:05:16', '2026-01-11 18:05:16');
 
 -- --------------------------------------------------------
 
@@ -68,19 +70,18 @@ INSERT INTO `bimbingan` (`id`, `tugas_akhir_id`, `dosen_nip`, `urutan`, `created
 -- Table structure for table `bimbingan_log`
 --
 
-DROP TABLE IF EXISTS `bimbingan_log`;
 CREATE TABLE `bimbingan_log` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `bimbingan_id` bigint(20) UNSIGNED NOT NULL,
-  `judul` varchar(255) DEFAULT NULL,
-  `deskripsi` text DEFAULT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `bimbingan_id` bigint UNSIGNED NOT NULL,
+  `judul` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `deskripsi` text COLLATE utf8mb4_unicode_ci,
   `tanggal` date NOT NULL,
-  `catatan` text DEFAULT NULL,
-  `status` tinyint(1) NOT NULL DEFAULT 0,
-  `file_path` varchar(255) DEFAULT NULL,
+  `catatan` text COLLATE utf8mb4_unicode_ci,
+  `status` tinyint(1) NOT NULL DEFAULT '0',
+  `file_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `mhs_nim` int(11) DEFAULT NULL
+  `mhs_nim` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -88,14 +89,51 @@ CREATE TABLE `bimbingan_log` (
 --
 
 INSERT INTO `bimbingan_log` (`id`, `bimbingan_id`, `judul`, `deskripsi`, `tanggal`, `catatan`, `status`, `file_path`, `created_at`, `updated_at`, `mhs_nim`) VALUES
-(14, 1, 'knjkjngdfhg', 'knkjnvkjfngkj', '2025-11-28', NULL, 1, NULL, '2025-11-28 02:08:58', '2025-12-18 17:40:32', 110127515),
+(14, 1, 'knjkjngdfhg', 'knkjnvkjfngkj', '2025-11-28', NULL, 1, NULL, '2025-11-28 02:08:58', '2025-12-25 04:32:57', 110127515),
 (15, 1, 'ngkdnfgndfk', 'dkngkjdngkldfngkfd', '2025-11-28', NULL, 1, NULL, '2025-11-28 02:09:20', '2025-12-18 18:15:18', 110127515),
 (16, 1, 'fghfghfgjmbnm', '[rlyhopfjhoifojfgophjdp', '2025-11-28', NULL, 1, NULL, '2025-11-28 02:09:38', '2025-12-18 18:24:26', 110127515),
 (20, 1, 'dnksdjnfkd', 'bkabsdkabsdkasd', '2025-12-02', NULL, 1, NULL, '2025-12-01 23:42:22', '2025-12-18 17:12:55', 110127515),
 (21, 1, 'ksfksdfk', 'knvn vmc', '2025-12-02', NULL, 1, NULL, '2025-12-02 02:20:32', '2025-12-18 17:13:04', 110127515),
 (22, 1, 'svsdf', 'sdfd', '2025-12-14', NULL, 1, NULL, '2025-12-14 01:42:52', '2025-12-18 16:57:52', 110127515),
-(24, 1, 'Bimbingan final? or not', 'aduhai capek', '0000-00-00', NULL, 1, NULL, NULL, NULL, NULL),
-(25, 1, 'Aduhai', 'tomyam', '0000-00-00', NULL, 1, NULL, NULL, NULL, NULL);
+(26, 3, 'sdf', 'sdf', '2025-12-25', 'sdccbn', 0, 'rrrr', '2025-12-25 04:34:00', '2025-12-25 04:34:00', 110127233),
+(29, 2, 'hghfjgjhg', 'hiuhhu', '2026-01-07', NULL, 1, 'bimbingan_logs/1767721585_110127515_fe.png', '2026-01-06 17:46:25', '2026-01-12 06:14:08', 110127515),
+(30, 2, 'asdsd', 'fdfdf', '2026-01-23', NULL, 2, 'bimbingan_logs/1767722648_110127515_firewall.png', '2026-01-06 18:04:08', '2026-01-06 18:04:08', 110127515),
+(31, 2, 'asdasd', 'test', '2026-01-08', NULL, 1, 'bimbingan_logs/1767722692_110127515_eresource1.png', '2026-01-06 18:04:52', '2026-01-06 18:04:52', 110127515),
+(32, 8, '1', 'test', '2026-01-07', NULL, 1, 'bimbingan_logs/1767799702_110122154_eresource1.png', '2026-01-07 15:28:23', '2026-01-07 16:44:50', 110122154),
+(33, 9, '1', 'asdsd', '2026-01-07', NULL, 0, 'bimbingan_logs/1767799735_110122154_fe.png', '2026-01-07 15:28:55', '2026-01-07 15:28:55', 110122154),
+(35, 2, 'test 1 pembimbing 1', 'test', '2026-01-23', NULL, 0, 'bimbingan_logs/1767801530_110122601_lisensi.png', '2026-01-07 15:58:50', '2026-01-07 15:58:50', 110122601),
+(39, 1, 'sdfsdf', 'sdfsdf', '2026-01-08', NULL, 0, 'bimbingan_logs/1767808687_110122601_Gemini_Generated_Image_ng3i97ng3i97ng3i (1).png', '2026-01-07 17:58:07', '2026-01-07 17:58:07', 110122601),
+(40, 2, 'asdasd', 'asdasd', '2026-01-08', NULL, 0, 'bimbingan_logs/1767808749_110122601_Gemini_Generated_Image_ys5fviys5fviys5f.png', '2026-01-07 17:59:09', '2026-01-07 17:59:09', 110122601),
+(41, 1, 'sdasd', 'asdasd', '2026-01-08', NULL, 0, 'bimbingan_logs/1767808917_110122601_roni.png', '2026-01-07 18:01:57', '2026-01-07 18:01:57', 110122601),
+(42, 1, 'Progress Report Minggu Ini', 'Melanjutkan implementasi fitur login', '2026-01-08', 'Perlu revisi UI', 0, 'bimbingan_logs/1767809457_110122601_3.34.24.2.02_Akbar Ramadhan_Regression.pdf', '2026-01-07 18:10:57', '2026-01-07 18:10:57', 110122601),
+(45, 1, 'Progress Report Minggu Ini 2', 'Melanjutkan implementasi fitur login 2', '2026-01-08', 'Perlu revisi UI', 0, 'bimbingan_logs/1767810553_110122601_Akbar Ramadhan_02_jobsheet9.pdf', '2026-01-07 18:29:13', '2026-01-07 18:29:13', 110122601),
+(46, 1, 'asdasd', 'asdasd', '2026-01-16', NULL, 0, 'bimbingan_logs/1767810611_110122601_AKBAR_XIII SIJA 2_LAPORAN PKL.pdf', '2026-01-07 18:30:11', '2026-01-07 18:30:11', 110122601),
+(47, 1, 'zzzz', 'zzzz', '2026-01-30', NULL, 0, 'bimbingan_logs/1767810714_110122601_3.34.24.2.02_Akbar Ramadhan_IK 2C - Copy.docx', '2026-01-07 18:31:54', '2026-01-07 18:32:16', 110122601),
+(48, 10, 'fsdfsdf', 'dfdfg', '2026-01-12', NULL, 0, 'bimbingan_logs/1768154844_110128963_WIN_20251128_08_49_54_Pro.jpg', '2026-01-11 18:07:25', '2026-01-11 18:07:25', 110128963),
+(49, 1, 'asdsddf', 'dgsdfasd', '2026-01-07', NULL, 1, 'bimbingan_logs/1768198064_110127515_SS Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.png', '2026-01-12 06:07:46', '2026-01-12 06:12:33', 110127515),
+(50, 1, 'ssdfsdf', 'xvcvcvs', '2026-01-13', NULL, 1, 'bimbingan_logs/1768198086_110127515_Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.docx', '2026-01-12 06:08:06', '2026-01-12 06:12:18', 110127515),
+(51, 2, 'fsdfsdffdcvbghdgh', 'kiugioupgukghjkhj', '2026-01-13', NULL, 1, 'bimbingan_logs/1768198121_110127515_Gemini_Generated_Image_ys5fviys5fviys5f.png', '2026-01-12 06:08:41', '2026-01-12 06:14:05', 110127515),
+(52, 2, 'gdfgdfgdfg', 'sdfsdfsdf', '2026-01-12', NULL, 1, 'bimbingan_logs/1768198142_110127515_Gemini_Generated_Image_ys5fviys5fviys5f.png', '2026-01-12 06:09:03', '2026-01-12 06:13:54', 110127515),
+(53, 2, 'bcvbvbcvb', 'gdfgdfgdfg', '2026-01-15', NULL, 1, 'bimbingan_logs/1768198162_110127515_lke.png', '2026-01-12 06:09:22', '2026-01-12 06:13:51', 110127515),
+(54, 2, 'owehf;ohfo;hf', 'ow8yfw89sfhoishfisf', '2026-01-12', NULL, 1, 'bimbingan_logs/1768198242_110127515_lak.png', '2026-01-12 06:10:42', '2026-01-12 06:13:56', 110127515),
+(55, 2, 'svsvvxvcb', 'srtytrhfgh', '2026-01-15', NULL, 1, 'bimbingan_logs/1768198269_110127515_3.34.24.2.01_3.34.24.2.02_Lawan_Tirani_Akbar_Ramadhan.pdf', '2026-01-12 06:11:09', '2026-01-12 06:13:53', 110127515),
+(56, 2, 'dfsdfsdf', 'bdfvdfgdfg', '2026-01-12', NULL, 1, 'bimbingan_logs/1768198506_110127515_Gemini_Generated_Image_ng3i97ng3i97ng3i (1).png', '2026-01-12 06:15:06', '2026-01-12 06:15:27', 110127515),
+(57, 8, 'dfd', 'sdf', '2026-01-18', NULL, 1, 'bimbingan_logs/1768705482_110129690_SS Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.png', '2026-01-18 03:04:43', '2026-01-18 03:05:59', 110129690),
+(58, 8, 'ssdf', 'asdasd', '2026-01-18', NULL, 1, 'bimbingan_logs/1768705495_110129690_SS Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.png', '2026-01-18 03:04:55', '2026-01-18 03:06:04', 110129690),
+(59, 9, 'sdf', 'sdf', '2026-01-18', NULL, 1, 'bimbingan_logs/1768705631_110129690_SS Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.png', '2026-01-18 03:07:11', '2026-01-18 03:07:59', 110129690),
+(60, 9, 'asdas', 'asdas', '2026-01-31', NULL, 1, 'bimbingan_logs/1768705641_110129690_SS Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.png', '2026-01-18 03:07:21', '2026-01-18 03:07:55', 110129690),
+(61, 8, 's', 's', '2026-01-18', NULL, 1, 'bimbingan_logs/1768706036_110129690_SS Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.png', '2026-01-18 03:13:56', '2026-01-18 03:17:15', 110129690),
+(62, 8, 's', 's', '2026-01-18', NULL, 1, 'bimbingan_logs/1768706045_110129690_SS Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.png', '2026-01-18 03:14:05', '2026-01-18 03:17:21', 110129690),
+(63, 8, 's', 's', '2026-01-18', NULL, 1, 'bimbingan_logs/1768706057_110129690_Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.docx', '2026-01-18 03:14:17', '2026-01-18 03:17:23', 110129690),
+(64, 8, 'd', 'd', '2026-01-18', NULL, 1, 'bimbingan_logs/1768706072_110129690_SS Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.png', '2026-01-18 03:14:33', '2026-01-18 03:17:26', 110129690),
+(65, 8, 'f', 'f', '2026-01-18', NULL, 1, 'bimbingan_logs/1768706085_110129690_SS Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.png', '2026-01-18 03:14:45', '2026-01-18 03:17:25', 110129690),
+(66, 8, 'f', 'e', '2026-01-18', NULL, 1, 'bimbingan_logs/1768706095_110129690_SS Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.png', '2026-01-18 03:14:55', '2026-01-18 03:17:28', 110129690),
+(67, 9, 'sss', 'df', '2026-01-18', NULL, 1, 'bimbingan_logs/1768706120_110129690_SS Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.png', '2026-01-18 03:15:20', '2026-01-18 03:16:38', 110129690),
+(68, 9, 'sdf', 'sdf', '2026-01-18', NULL, 1, 'bimbingan_logs/1768706130_110129690_SS Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.png', '2026-01-18 03:15:30', '2026-01-18 03:16:40', 110129690),
+(69, 9, 'dsf', 'fg', '2026-01-18', NULL, 1, 'bimbingan_logs/1768706141_110129690_SS Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.png', '2026-01-18 03:15:41', '2026-01-18 03:16:49', 110129690),
+(70, 9, 'fsdf', 'sdf', '2026-01-18', NULL, 1, 'bimbingan_logs/1768706151_110129690_SS Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.png', '2026-01-18 03:15:51', '2026-01-18 03:16:41', 110129690),
+(71, 9, 'fg', 'fg', '2026-01-18', NULL, 1, 'bimbingan_logs/1768706168_110129690_lak.png', '2026-01-18 03:16:08', '2026-01-18 03:16:44', 110129690),
+(72, 9, 'gfg', 'qerw', '2026-01-18', NULL, 1, 'bimbingan_logs/1768706179_110129690_SS Penyisihan_Angkringan CakPik_Politeknik Negeri Semarang.png', '2026-01-18 03:16:19', '2026-01-18 03:16:42', 110129690);
 
 -- --------------------------------------------------------
 
@@ -103,11 +141,10 @@ INSERT INTO `bimbingan_log` (`id`, `bimbingan_id`, `judul`, `deskripsi`, `tangga
 -- Table structure for table `cache`
 --
 
-DROP TABLE IF EXISTS `cache`;
 CREATE TABLE `cache` (
-  `key` varchar(255) NOT NULL,
-  `value` mediumtext NOT NULL,
-  `expiration` int(11) NOT NULL
+  `key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expiration` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -116,11 +153,10 @@ CREATE TABLE `cache` (
 -- Table structure for table `cache_locks`
 --
 
-DROP TABLE IF EXISTS `cache_locks`;
 CREATE TABLE `cache_locks` (
-  `key` varchar(255) NOT NULL,
-  `owner` varchar(255) NOT NULL,
-  `expiration` int(11) NOT NULL
+  `key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `owner` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expiration` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -129,14 +165,13 @@ CREATE TABLE `cache_locks` (
 -- Table structure for table `configs`
 --
 
-DROP TABLE IF EXISTS `configs`;
 CREATE TABLE `configs` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `setting_key` varchar(255) NOT NULL,
-  `setting_label` varchar(255) NOT NULL,
-  `setting_type` enum('binary','value','ref') DEFAULT 'value',
-  `setting_value` varchar(255) NOT NULL,
-  `is_visible` tinyint(1) DEFAULT 1,
+  `id` bigint UNSIGNED NOT NULL,
+  `setting_key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `setting_label` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `setting_type` enum('binary','value','ref') COLLATE utf8mb4_unicode_ci DEFAULT 'value',
+  `setting_value` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `is_visible` tinyint(1) DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -146,7 +181,7 @@ CREATE TABLE `configs` (
 --
 
 INSERT INTO `configs` (`id`, `setting_key`, `setting_label`, `setting_type`, `setting_value`, `is_visible`, `created_at`, `updated_at`) VALUES
-(1, 'min_bimbingan', 'Minimal Bimbingan Disetujui', 'value', '8', 1, '2025-12-18 05:22:53', '2025-12-18 05:22:53');
+(1, 'min_bimbingan', 'Minimal Bimbingan Disetujui', 'value', '2', 1, '2025-12-18 05:22:53', '2025-12-18 05:22:53');
 
 -- --------------------------------------------------------
 
@@ -154,14 +189,13 @@ INSERT INTO `configs` (`id`, `setting_key`, `setting_label`, `setting_type`, `se
 -- Table structure for table `dokumen_sidang`
 --
 
-DROP TABLE IF EXISTS `dokumen_sidang`;
 CREATE TABLE `dokumen_sidang` (
-  `dokumen_id` bigint(20) UNSIGNED NOT NULL,
-  `dokumen_syarat` varchar(50) DEFAULT NULL,
-  `dokumen_file` varchar(100) DEFAULT NULL,
-  `verified` tinyint(1) NOT NULL DEFAULT 0,
-  `keterangan` text DEFAULT NULL,
-  `tipe_dokumen` varchar(50) DEFAULT NULL
+  `dokumen_id` bigint UNSIGNED NOT NULL,
+  `dokumen_syarat` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dokumen_file` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `verified` tinyint(1) NOT NULL DEFAULT '0',
+  `keterangan` text COLLATE utf8mb4_unicode_ci,
+  `tipe_dokumen` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -184,13 +218,12 @@ INSERT INTO `dokumen_sidang` (`dokumen_id`, `dokumen_syarat`, `dokumen_file`, `v
 -- Table structure for table `dosen`
 --
 
-DROP TABLE IF EXISTS `dosen`;
 CREATE TABLE `dosen` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `prodi_id` bigint(20) UNSIGNED NOT NULL,
-  `dosen_nama` varchar(255) NOT NULL,
-  `dosen_nip` varchar(255) NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `prodi_id` bigint UNSIGNED NOT NULL,
+  `dosen_nama` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `dosen_nip` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -217,12 +250,11 @@ INSERT INTO `dosen` (`id`, `user_id`, `prodi_id`, `dosen_nama`, `dosen_nip`, `cr
 -- Table structure for table `dosen_penguji`
 --
 
-DROP TABLE IF EXISTS `dosen_penguji`;
 CREATE TABLE `dosen_penguji` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `sidang_id` bigint(20) UNSIGNED NOT NULL,
-  `dosen_nip` varchar(255) NOT NULL,
-  `peran` varchar(50) NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `sidang_id` bigint UNSIGNED NOT NULL,
+  `dosen_nip` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `peran` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -242,15 +274,14 @@ INSERT INTO `dosen_penguji` (`id`, `sidang_id`, `dosen_nip`, `peran`, `created_a
 -- Table structure for table `failed_jobs`
 --
 
-DROP TABLE IF EXISTS `failed_jobs`;
 CREATE TABLE `failed_jobs` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `uuid` varchar(255) NOT NULL,
-  `connection` text NOT NULL,
-  `queue` text NOT NULL,
-  `payload` longtext NOT NULL,
-  `exception` longtext NOT NULL,
-  `failed_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` bigint UNSIGNED NOT NULL,
+  `uuid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `connection` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -259,12 +290,11 @@ CREATE TABLE `failed_jobs` (
 -- Table structure for table `jadwal_sidang`
 --
 
-DROP TABLE IF EXISTS `jadwal_sidang`;
 CREATE TABLE `jadwal_sidang` (
-  `id` bigint(20) UNSIGNED NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
   `tanggal` date NOT NULL,
-  `sesi_id` bigint(20) UNSIGNED NOT NULL,
-  `ruangan_id` bigint(20) UNSIGNED NOT NULL,
+  `sesi_id` bigint UNSIGNED NOT NULL,
+  `ruangan_id` bigint UNSIGNED NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -285,15 +315,14 @@ INSERT INTO `jadwal_sidang` (`id`, `tanggal`, `sesi_id`, `ruangan_id`, `created_
 -- Table structure for table `jobs`
 --
 
-DROP TABLE IF EXISTS `jobs`;
 CREATE TABLE `jobs` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `queue` varchar(255) NOT NULL,
-  `payload` longtext NOT NULL,
-  `attempts` tinyint(3) UNSIGNED NOT NULL,
-  `reserved_at` int(10) UNSIGNED DEFAULT NULL,
-  `available_at` int(10) UNSIGNED NOT NULL,
-  `created_at` int(10) UNSIGNED NOT NULL
+  `id` bigint UNSIGNED NOT NULL,
+  `queue` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `attempts` tinyint UNSIGNED NOT NULL,
+  `reserved_at` int UNSIGNED DEFAULT NULL,
+  `available_at` int UNSIGNED NOT NULL,
+  `created_at` int UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -302,18 +331,17 @@ CREATE TABLE `jobs` (
 -- Table structure for table `job_batches`
 --
 
-DROP TABLE IF EXISTS `job_batches`;
 CREATE TABLE `job_batches` (
-  `id` varchar(255) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `total_jobs` int(11) NOT NULL,
-  `pending_jobs` int(11) NOT NULL,
-  `failed_jobs` int(11) NOT NULL,
-  `failed_job_ids` longtext NOT NULL,
-  `options` mediumtext DEFAULT NULL,
-  `cancelled_at` int(11) DEFAULT NULL,
-  `created_at` int(11) NOT NULL,
-  `finished_at` int(11) DEFAULT NULL
+  `id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `total_jobs` int NOT NULL,
+  `pending_jobs` int NOT NULL,
+  `failed_jobs` int NOT NULL,
+  `failed_job_ids` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `options` mediumtext COLLATE utf8mb4_unicode_ci,
+  `cancelled_at` int DEFAULT NULL,
+  `created_at` int NOT NULL,
+  `finished_at` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -322,10 +350,9 @@ CREATE TABLE `job_batches` (
 -- Table structure for table `jurusan`
 --
 
-DROP TABLE IF EXISTS `jurusan`;
 CREATE TABLE `jurusan` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `nama_jurusan` varchar(255) NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `nama_jurusan` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -344,13 +371,12 @@ INSERT INTO `jurusan` (`id`, `nama_jurusan`, `created_at`, `updated_at`) VALUES
 -- Table structure for table `mahasiswa`
 --
 
-DROP TABLE IF EXISTS `mahasiswa`;
 CREATE TABLE `mahasiswa` (
-  `mhs_nim` int(11) NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `prodi_id` bigint(20) UNSIGNED NOT NULL,
-  `mhs_nama` varchar(255) NOT NULL,
-  `tahun_masuk` year(4) NOT NULL,
+  `mhs_nim` int NOT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `prodi_id` bigint UNSIGNED NOT NULL,
+  `mhs_nama` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tahun_masuk` year NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -417,14 +443,13 @@ INSERT INTO `mahasiswa` (`mhs_nim`, `user_id`, `prodi_id`, `mhs_nama`, `tahun_ma
 -- Table structure for table `menus`
 --
 
-DROP TABLE IF EXISTS `menus`;
 CREATE TABLE `menus` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `url` varchar(255) DEFAULT NULL,
-  `parent_id` int(11) DEFAULT NULL,
-  `order` int(11) DEFAULT NULL,
-  `icon` varchar(255) DEFAULT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `parent_id` int DEFAULT NULL,
+  `order` int DEFAULT NULL,
+  `icon` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -460,11 +485,10 @@ INSERT INTO `menus` (`id`, `name`, `url`, `parent_id`, `order`, `icon`, `created
 -- Table structure for table `migrations`
 --
 
-DROP TABLE IF EXISTS `migrations`;
 CREATE TABLE `migrations` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `migration` varchar(255) NOT NULL,
-  `batch` int(11) NOT NULL
+  `id` int UNSIGNED NOT NULL,
+  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `batch` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -533,7 +557,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (70, '2025_11_28_000005_update_unsur_nilai_pembimbing_structure', 14),
 (71, '2025_11_28_000006_create_or_update_unsur_nilai_penguji_structure', 14),
 (72, '2025_12_18_115101_create_configs_table', 14),
-(73, '2025_12_18_202855_add_menu_id_to_permissions_table', 14);
+(73, '2025_12_18_202855_add_menu_id_to_permissions_table', 14),
+(75, '2026_01_05_000001_create_revisi_tugas_akhir_table', 15);
 
 -- --------------------------------------------------------
 
@@ -541,11 +566,10 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 -- Table structure for table `model_has_permissions`
 --
 
-DROP TABLE IF EXISTS `model_has_permissions`;
 CREATE TABLE `model_has_permissions` (
-  `permission_id` bigint(20) UNSIGNED NOT NULL,
-  `model_type` varchar(255) NOT NULL,
-  `model_id` bigint(20) UNSIGNED NOT NULL
+  `permission_id` bigint UNSIGNED NOT NULL,
+  `model_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_id` bigint UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -562,11 +586,10 @@ INSERT INTO `model_has_permissions` (`permission_id`, `model_type`, `model_id`) 
 -- Table structure for table `model_has_roles`
 --
 
-DROP TABLE IF EXISTS `model_has_roles`;
 CREATE TABLE `model_has_roles` (
-  `role_id` bigint(20) UNSIGNED NOT NULL,
-  `model_type` varchar(255) NOT NULL,
-  `model_id` bigint(20) UNSIGNED NOT NULL
+  `role_id` bigint UNSIGNED NOT NULL,
+  `model_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_id` bigint UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -594,13 +617,12 @@ INSERT INTO `model_has_roles` (`role_id`, `model_type`, `model_id`) VALUES
 -- Table structure for table `nilai_dosen_pembimbing`
 --
 
-DROP TABLE IF EXISTS `nilai_dosen_pembimbing`;
 CREATE TABLE `nilai_dosen_pembimbing` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `sidang_id` bigint(20) UNSIGNED NOT NULL,
-  `dosen_nip` varchar(255) NOT NULL,
-  `unsur_id` bigint(20) UNSIGNED NOT NULL,
-  `nilai` int(11) NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `sidang_id` bigint UNSIGNED NOT NULL,
+  `dosen_nip` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `unsur_id` bigint UNSIGNED NOT NULL,
+  `nilai` int NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -614,10 +636,10 @@ INSERT INTO `nilai_dosen_pembimbing` (`id`, `sidang_id`, `dosen_nip`, `unsur_id`
 (2, 5, '198946122444', 2, 95, '2025-12-18 18:39:36', '2025-12-18 18:39:36'),
 (3, 5, '198946122444', 3, 78, '2025-12-18 18:39:36', '2025-12-18 18:39:36'),
 (4, 5, '198946122444', 4, 98, '2025-12-18 18:39:36', '2025-12-18 18:39:36'),
-(5, 5, '198119046338', 1, 99, '2025-12-18 18:41:28', '2025-12-18 18:41:28'),
-(6, 5, '198119046338', 2, 99, '2025-12-18 18:41:28', '2025-12-18 18:41:28'),
-(7, 5, '198119046338', 3, 99, '2025-12-18 18:41:28', '2025-12-18 18:41:28'),
-(8, 5, '198119046338', 4, 99, '2025-12-18 18:41:28', '2025-12-18 18:41:28');
+(5, 5, '198119046338', 1, 100, '2025-12-18 18:41:28', '2026-01-05 09:14:24'),
+(6, 5, '198119046338', 2, 100, '2025-12-18 18:41:28', '2026-01-05 09:14:24'),
+(7, 5, '198119046338', 3, 100, '2025-12-18 18:41:28', '2026-01-05 09:14:24'),
+(8, 5, '198119046338', 4, 100, '2025-12-18 18:41:28', '2026-01-05 09:14:24');
 
 -- --------------------------------------------------------
 
@@ -625,13 +647,12 @@ INSERT INTO `nilai_dosen_pembimbing` (`id`, `sidang_id`, `dosen_nip`, `unsur_id`
 -- Table structure for table `nilai_dosen_penguji`
 --
 
-DROP TABLE IF EXISTS `nilai_dosen_penguji`;
 CREATE TABLE `nilai_dosen_penguji` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `sidang_id` bigint(20) UNSIGNED NOT NULL,
-  `dosen_nip` varchar(255) NOT NULL,
-  `unsur_id` bigint(20) UNSIGNED NOT NULL,
-  `nilai` int(11) NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `sidang_id` bigint UNSIGNED NOT NULL,
+  `dosen_nip` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `unsur_id` bigint UNSIGNED NOT NULL,
+  `nilai` int NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -652,10 +673,9 @@ INSERT INTO `nilai_dosen_penguji` (`id`, `sidang_id`, `dosen_nip`, `unsur_id`, `
 -- Table structure for table `password_resets`
 --
 
-DROP TABLE IF EXISTS `password_resets`;
 CREATE TABLE `password_resets` (
-  `email` varchar(255) NOT NULL,
-  `token` varchar(255) NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -665,10 +685,9 @@ CREATE TABLE `password_resets` (
 -- Table structure for table `password_reset_tokens`
 --
 
-DROP TABLE IF EXISTS `password_reset_tokens`;
 CREATE TABLE `password_reset_tokens` (
-  `email` varchar(255) NOT NULL,
-  `token` varchar(255) NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -678,12 +697,11 @@ CREATE TABLE `password_reset_tokens` (
 -- Table structure for table `permissions`
 --
 
-DROP TABLE IF EXISTS `permissions`;
 CREATE TABLE `permissions` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `menu_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `name` varchar(255) NOT NULL,
-  `guard_name` varchar(255) NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `menu_id` bigint UNSIGNED DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `guard_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -707,14 +725,13 @@ INSERT INTO `permissions` (`id`, `menu_id`, `name`, `guard_name`, `created_at`, 
 -- Table structure for table `personal_access_tokens`
 --
 
-DROP TABLE IF EXISTS `personal_access_tokens`;
 CREATE TABLE `personal_access_tokens` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `tokenable_type` varchar(255) NOT NULL,
-  `tokenable_id` bigint(20) UNSIGNED NOT NULL,
-  `name` text NOT NULL,
-  `token` varchar(64) NOT NULL,
-  `abilities` text DEFAULT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `tokenable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tokenable_id` bigint UNSIGNED NOT NULL,
+  `name` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `abilities` text COLLATE utf8mb4_unicode_ci,
   `last_used_at` timestamp NULL DEFAULT NULL,
   `expires_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -1112,7 +1129,107 @@ INSERT INTO `personal_access_tokens` (`id`, `tokenable_type`, `tokenable_id`, `n
 (383, 'App\\Models\\ModelApi\\User', 33, 'auth_token_flutter_app', '6962cf37b8497a82fa9029147b1425211473bcc5ada5648bc3a782a69dac7b47', '[\"*\"]', '2025-12-12 11:40:14', NULL, '2025-12-12 11:19:45', '2025-12-12 11:40:14'),
 (384, 'App\\Models\\ModelApi\\User', 33, 'auth_token_flutter_app', 'a22c84bbeca5bef53938219ee7fa1df5c84365c62afb891d3660784dc0c09611', '[\"*\"]', NULL, NULL, '2025-12-13 22:36:38', '2025-12-13 22:36:38'),
 (385, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '8c06709d669af2ce5dfead8228923f61dda4256f4420c38e6d7e34eed223ac35', '[\"*\"]', NULL, NULL, '2025-12-14 01:39:26', '2025-12-14 01:39:26'),
-(386, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '5374910c6b876e9edb3baa053f50186042acfa47b3c6d13f332fe576feb6880a', '[\"*\"]', '2025-12-14 01:43:32', NULL, '2025-12-14 01:39:41', '2025-12-14 01:43:32');
+(386, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '5374910c6b876e9edb3baa053f50186042acfa47b3c6d13f332fe576feb6880a', '[\"*\"]', '2025-12-14 01:43:32', NULL, '2025-12-14 01:39:41', '2025-12-14 01:43:32'),
+(387, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '904a9f07ea0b913c08ef12dd36c1d8a3a9e30fdf22af99d383520251f9a4b82a', '[\"*\"]', NULL, NULL, '2025-12-25 02:59:19', '2025-12-25 02:59:19'),
+(388, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'ddce93f0db72864abb4102a88084764ceb62df45954cb81d4bcdf8cde99726a1', '[\"*\"]', '2026-01-04 09:32:19', NULL, '2025-12-25 09:59:20', '2026-01-04 09:32:19'),
+(389, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'b465dcf10c8ea5867291a6d5e0ddebf7a0a1aaf4ec2c641fd78f5f68b60abcc6', '[\"*\"]', NULL, NULL, '2026-01-01 08:41:05', '2026-01-01 08:41:05'),
+(390, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'ec1c14fef1771310ac53df89603b32378f31ac7109a6a48863afd6251a68ad17', '[\"*\"]', '2026-01-01 08:43:00', NULL, '2026-01-01 08:41:11', '2026-01-01 08:43:00'),
+(391, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'a1a86934717612470d6b7f6bba1cf71bfa6ed76555525c393d91d345fde9eb29', '[\"*\"]', '2026-01-01 08:54:49', NULL, '2026-01-01 08:45:34', '2026-01-01 08:54:49'),
+(392, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '1d23a43c08edb4dc28b55eb97906d666488d6d4cef37b8ca34925379abb437f6', '[\"*\"]', '2026-01-01 08:53:21', NULL, '2026-01-01 08:51:44', '2026-01-01 08:53:21'),
+(393, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '7cc714d27e209da528d0d0724ab84c017417235c3511091083ee1d0ee3ea1a3d', '[\"*\"]', NULL, NULL, '2026-01-03 02:56:36', '2026-01-03 02:56:36'),
+(394, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '92267c999d2305566ff6d33933968fbb16de02d0f2a1f7488f7d2da68bf09754', '[\"*\"]', NULL, NULL, '2026-01-03 02:56:41', '2026-01-03 02:56:41'),
+(395, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'f1ea8ffaf930e6afe9a9bfd2a5056ab45307ec866f9074e4a0fbe37f8016ec4a', '[\"*\"]', '2026-01-03 02:57:51', NULL, '2026-01-03 02:56:48', '2026-01-03 02:57:51'),
+(396, 'App\\Models\\ModelApi\\User', 25, 'auth_token_flutter_app', '17ec0799ad01518a0af05d71899b16070ebfa6bf4caf45b8459b9eb82c039516', '[\"*\"]', NULL, NULL, '2026-01-03 03:02:20', '2026-01-03 03:02:20'),
+(397, 'App\\Models\\ModelApi\\User', 25, 'auth_token_flutter_app', '3cddddc895ab92db0692bdd4a36a9d36367db454794f9581cc084f832e0ce7f2', '[\"*\"]', NULL, NULL, '2026-01-03 03:02:22', '2026-01-03 03:02:22'),
+(398, 'App\\Models\\ModelApi\\User', 25, 'auth_token_flutter_app', 'fed361e98e27e21c0391ef6536885fa2cdee929ce74ab6298daaa51f2fac15f8', '[\"*\"]', NULL, NULL, '2026-01-03 03:02:23', '2026-01-03 03:02:23'),
+(399, 'App\\Models\\ModelApi\\User', 25, 'auth_token_flutter_app', 'afecb3578b366b1752d13b105b6df5c23ee8a0dd882e811609e4cea9b4f3ae4c', '[\"*\"]', '2026-01-03 04:39:19', NULL, '2026-01-03 03:02:24', '2026-01-03 04:39:19'),
+(400, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'b636335bf9e51b0f08403e822e95fab7d7b179653aed20d28436adaf67950491', '[\"*\"]', '2026-01-03 04:44:25', NULL, '2026-01-03 04:44:12', '2026-01-03 04:44:25'),
+(401, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '050965caa58d21a220714ccde1a8907602b42687d98621424d7b648812e5cfbe', '[\"*\"]', '2026-01-04 09:25:53', NULL, '2026-01-04 08:59:30', '2026-01-04 09:25:53'),
+(402, 'App\\Models\\ModelApi\\User', 25, 'auth_token_flutter_app', '0be343ac061018f8fffe659e724af7b2f4bcf7cb9c75afbee1f91c48b75515fe', '[\"*\"]', '2026-01-04 14:02:24', NULL, '2026-01-04 14:01:37', '2026-01-04 14:02:24'),
+(403, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '62bb9316b15e23c584021ec1133c5209d39bcca7d45ec14e20811a98bf031c50', '[\"*\"]', NULL, NULL, '2026-01-05 08:32:44', '2026-01-05 08:32:44'),
+(404, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'e019ee121dfed3449c7a83a723dc4926e1b0848d6dc9aed985a5d798ff117a2e', '[\"*\"]', NULL, NULL, '2026-01-05 08:32:48', '2026-01-05 08:32:48'),
+(405, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'ea4c745eda74effd4dbb6266b52317a74ba959ff0e0b105f162e70a1099b906c', '[\"*\"]', NULL, NULL, '2026-01-05 08:32:50', '2026-01-05 08:32:50'),
+(406, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '54860d35b14517ab0728e140c6299bfa04b0c022d14c2b034c87b896248d01c2', '[\"*\"]', '2026-01-05 08:33:44', NULL, '2026-01-05 08:33:04', '2026-01-05 08:33:44'),
+(407, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'e50312dc0fe1d5b380bd1a5148f33d6d4bf88d74b37d718e570cd1343d1d7bb5', '[\"*\"]', '2026-01-05 14:38:08', NULL, '2026-01-05 09:19:56', '2026-01-05 14:38:08'),
+(408, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '09a94d199e81af2fea80b75bc90308be6faa084220f7954e628191779f0daad0', '[\"*\"]', '2026-01-05 14:32:17', NULL, '2026-01-05 14:28:56', '2026-01-05 14:32:17'),
+(409, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', '61a9f1a4a72d8d20bb2707987103a378615aaddc435e8ff7d40b188a0c72d26b', '[\"*\"]', '2026-01-05 14:34:56', NULL, '2026-01-05 14:34:17', '2026-01-05 14:34:56'),
+(410, 'App\\Models\\ModelApi\\User', 6, 'auth_token_flutter_app', 'da6ecf0add1103e4e7a9a0e1bd225955b484c760650ce3913b3e5b28febd25da', '[\"*\"]', '2026-01-05 14:44:22', NULL, '2026-01-05 14:44:10', '2026-01-05 14:44:22'),
+(411, 'App\\Models\\ModelApi\\User', 6, 'auth_token_flutter_app', '855046ae26514e357bf17d74edf44d2e6627118767fa672c9b0ed0fe5cafa8d4', '[\"*\"]', '2026-01-05 14:46:52', NULL, '2026-01-05 14:44:56', '2026-01-05 14:46:52'),
+(412, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', '55c71bd42557d8bcb13efd6cb6e53d27d4dbb36fc13221695f332e3ed986f887', '[\"*\"]', '2026-01-09 17:25:40', NULL, '2026-01-05 15:15:37', '2026-01-09 17:25:40'),
+(413, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '7a81f08d5c601abdea4b0c524fd86aca69fe183ae0cde50d29d9865cdd23f6d0', '[\"*\"]', '2026-01-05 15:53:24', NULL, '2026-01-05 15:48:06', '2026-01-05 15:53:24'),
+(414, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'f14b6450016d814deb79822ba0b4c5e5502e217d487482f9903aef501f6753f8', '[\"*\"]', '2026-01-05 15:58:31', NULL, '2026-01-05 15:58:23', '2026-01-05 15:58:31'),
+(415, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '0ba71d54c5f59a7469f987ec610c5a92762987991b96af0085f8f0169f4101a6', '[\"*\"]', '2026-01-05 16:34:36', NULL, '2026-01-05 16:34:20', '2026-01-05 16:34:36'),
+(416, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '86380b4e99d145e9ac4e38e5f05a4f5003ffe81d9732a6f9cc1073e95358b5cf', '[\"*\"]', '2026-01-05 17:35:17', NULL, '2026-01-05 17:35:07', '2026-01-05 17:35:17'),
+(417, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'adba37a0368d39f891634b1c3898558a923b7156a2d1157e840c1d6de1e0c30b', '[\"*\"]', '2026-01-05 18:02:52', NULL, '2026-01-05 18:02:26', '2026-01-05 18:02:52'),
+(418, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '39ce0fd3a193155dbbe6c8b1210f89a73f45f25cfa1e19d1830fd8e7539b3234', '[\"*\"]', NULL, NULL, '2026-01-06 15:42:19', '2026-01-06 15:42:19'),
+(419, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'dc373ca20f3ee4c524e7047eb4fda033d77497c97330c22e2d2ab68749e534df', '[\"*\"]', NULL, NULL, '2026-01-06 15:42:21', '2026-01-06 15:42:21'),
+(420, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '8a4e960a0192dae73d1b07891597ebee21bc94288c497ae6ded2cba528f66c74', '[\"*\"]', '2026-01-06 15:43:39', NULL, '2026-01-06 15:42:28', '2026-01-06 15:43:39'),
+(421, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '67808ce3d3459c67f23c39e4088ab7c270b2efce4af3d1a9d6bad9428680d7fa', '[\"*\"]', '2026-01-06 16:44:36', NULL, '2026-01-06 16:44:23', '2026-01-06 16:44:36'),
+(422, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '762619e871a549a842cfd65146118146113b3bf197bef60e836d062d73885175', '[\"*\"]', '2026-01-06 17:00:11', NULL, '2026-01-06 16:57:33', '2026-01-06 17:00:11'),
+(423, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'e88c5a015769cf45f880a8e10d7a9884063465e09e2f98fce9a465e499ea8330', '[\"*\"]', '2026-01-06 17:11:05', NULL, '2026-01-06 17:10:56', '2026-01-06 17:11:05'),
+(424, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '9bdc15274d34605361bb8ac5eaafd2cbc8326a513bf2032881180ff99f5ab183', '[\"*\"]', '2026-01-06 17:52:48', NULL, '2026-01-06 17:11:35', '2026-01-06 17:52:48'),
+(425, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '679b81c5d6dfb42c08b40d99afbbbc8ce882354b1004ac13dfbf9c63d5ca32cd', '[\"*\"]', '2026-01-06 17:58:42', NULL, '2026-01-06 17:56:06', '2026-01-06 17:58:42'),
+(426, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '9feea106d340dbd756b49544579cc36e7f696ed0e1b184b10a9b5bcd9a5de466', '[\"*\"]', '2026-01-06 18:09:36', NULL, '2026-01-06 18:03:41', '2026-01-06 18:09:36'),
+(427, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '5013ec3464043759823433acc302c232fb111d68121025687a7ba98f4637f389', '[\"*\"]', '2026-01-07 14:21:42', NULL, '2026-01-07 14:13:13', '2026-01-07 14:21:42'),
+(428, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'f51bcbb7ffd5a920b31030d84976e2885c0da9cac3c30f6c606c016a61d21e6a', '[\"*\"]', '2026-01-07 14:43:12', NULL, '2026-01-07 14:42:12', '2026-01-07 14:43:12'),
+(429, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', '78e41eabafc374651a3193ed34be84fc5e278c975919cd7a9331743ecb9ac0a5', '[\"*\"]', '2026-01-07 15:18:54', NULL, '2026-01-07 15:16:46', '2026-01-07 15:18:54'),
+(430, 'App\\Models\\ModelApi\\User', 21, 'auth_token_flutter_app', 'd67b44b1ec547e7064e0f5a821d68b01ccafcd5825cd50bf1b127b686680ac83', '[\"*\"]', '2026-01-07 15:19:44', NULL, '2026-01-07 15:19:35', '2026-01-07 15:19:44'),
+(431, 'App\\Models\\ModelApi\\User', 20, 'auth_token_flutter_app', '42ec47b2bb88df260b4d04f7643dba02a89341cf0d3c17cf76e565663c8c3196', '[\"*\"]', NULL, NULL, '2026-01-07 15:22:09', '2026-01-07 15:22:09'),
+(432, 'App\\Models\\ModelApi\\User', 20, 'auth_token_flutter_app', '78216ad50c2c40704d442f8e1287db426e8aadd608777c3ea17cc04d63522ae2', '[\"*\"]', NULL, NULL, '2026-01-07 15:22:11', '2026-01-07 15:22:11'),
+(433, 'App\\Models\\ModelApi\\User', 20, 'auth_token_flutter_app', '17a7e712b96c7ea6bc57c12208cf4042f9da8279b0ca36248027e710f010b3f5', '[\"*\"]', NULL, NULL, '2026-01-07 15:22:12', '2026-01-07 15:22:12'),
+(434, 'App\\Models\\ModelApi\\User', 20, 'auth_token_flutter_app', 'fd176b8742bedb24e869108ec5cc47e0ef10eac395051c9c549ba628243b1575', '[\"*\"]', '2026-01-07 15:28:56', NULL, '2026-01-07 15:22:13', '2026-01-07 15:28:56'),
+(435, 'App\\Models\\ModelApi\\User', 20, 'auth_token_flutter_app', '8c75c72ed3bd360f05b92a80209018ca696d81c4a63684c8541cf8b05e7eaec4', '[\"*\"]', NULL, NULL, '2026-01-07 15:22:43', '2026-01-07 15:22:43'),
+(436, 'App\\Models\\ModelApi\\User', 8, 'auth_token_flutter_app', '1e6b613a90093da4937acb1d1fce1db1782fd817ca70a7168caa8123fd6ba1e4', '[\"*\"]', '2026-01-07 15:30:01', NULL, '2026-01-07 15:29:52', '2026-01-07 15:30:01'),
+(437, 'App\\Models\\ModelApi\\User', 20, 'auth_token_flutter_app', '2b7c8e1e47e760e93d7ddd6e49ce0b533ef9c195a2c193dce002db7e90ffd516', '[\"*\"]', '2026-01-07 15:56:59', NULL, '2026-01-07 15:56:43', '2026-01-07 15:56:59'),
+(438, 'App\\Models\\ModelApi\\User', 8, 'auth_token_flutter_app', '167a2b01a71191148e42dc5653d68d740ca02044f65e2bd9cb31ba5fca481fce', '[\"*\"]', '2026-01-07 15:57:19', NULL, '2026-01-07 15:57:06', '2026-01-07 15:57:19'),
+(439, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', 'cac9a26723a6761f415e6dc929bdfd30d96a6a27de4f622879e9035767b4d396', '[\"*\"]', '2026-01-07 15:58:51', NULL, '2026-01-07 15:57:43', '2026-01-07 15:58:51'),
+(440, 'App\\Models\\ModelApi\\User', 8, 'auth_token_flutter_app', '42d5eda1ab72859628d37b612749bfdf454087ff7a6cf35745e91d3afa046352', '[\"*\"]', '2026-01-07 17:07:22', NULL, '2026-01-07 16:03:46', '2026-01-07 17:07:22'),
+(441, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', 'ca78afcb53a50d95d64f839b8b1b4feae94977ac93005f9ef9d876e8b5a22937', '[\"*\"]', '2026-01-07 18:32:17', NULL, '2026-01-07 17:54:36', '2026-01-07 18:32:17'),
+(442, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'a1d64885664d71e7d3eeb4945a2f26529ed6e6ea2107bf173460e16e1c7222bb', '[\"*\"]', NULL, NULL, '2026-01-08 04:38:43', '2026-01-08 04:38:43'),
+(443, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'fc3913042d27836156902d02704424cc7dd5dfec344d3d214375ddb73dda747e', '[\"*\"]', '2026-01-08 04:41:39', NULL, '2026-01-08 04:39:05', '2026-01-08 04:41:39'),
+(444, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '85fcef4f18a37d7d1dd45ae7dcd578eb55eca0a1a418772069e810cd330ef661', '[\"*\"]', '2026-01-08 12:24:22', NULL, '2026-01-08 12:23:33', '2026-01-08 12:24:22'),
+(445, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '924e81cc65d2dc51d37798e40dd2744d7fc045b70fc2465797e99c431a25b2cf', '[\"*\"]', NULL, NULL, '2026-01-09 07:03:49', '2026-01-09 07:03:49'),
+(446, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'e7396e88ea2d3450cf6fb43bf5cf0adb465e212f62614b3f089964431995b0f2', '[\"*\"]', '2026-01-09 07:04:40', NULL, '2026-01-09 07:04:02', '2026-01-09 07:04:40'),
+(447, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'eae00a1eaf5d5b4eda196eeb6ca1db91e5da63f181a4e7c7664323c6d9320274', '[\"*\"]', '2026-01-09 07:14:46', NULL, '2026-01-09 07:09:53', '2026-01-09 07:14:46'),
+(448, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'd10aa0ffb2ec3002cb291eddd1968f97e0b07a67e9f1e19a9aa330a196c1b980', '[\"*\"]', NULL, NULL, '2026-01-09 17:08:02', '2026-01-09 17:08:02'),
+(449, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '731f7a6f9ef7ea2a1b3c1dd62dfac575e0170638b5ce28658ebeabcd5b7e1d7d', '[\"*\"]', '2026-01-09 17:09:18', NULL, '2026-01-09 17:08:06', '2026-01-09 17:09:18'),
+(450, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '91c0fb7034fdfdbdd4c270414a063edb73ea9aadfec9da603b9c46c7fcc8a88c', '[\"*\"]', '2026-01-09 18:05:24', NULL, '2026-01-09 17:28:44', '2026-01-09 18:05:24'),
+(451, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', '5158d24e0e99cd6aa7bfaa9e2cd8fa81b7d4855d0241a757d868151c93563476', '[\"*\"]', '2026-01-09 18:04:59', NULL, '2026-01-09 17:30:28', '2026-01-09 18:04:59'),
+(452, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', '89d478100482d4b860ff4f2814dcdba87a630738ef66132c876e90f9215d9a84', '[\"*\"]', '2026-01-09 18:43:18', NULL, '2026-01-09 18:05:33', '2026-01-09 18:43:18'),
+(453, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '86fb476501704523691a6be69a34eb6e73236cb84741f0e656a0bafb779f2046', '[\"*\"]', '2026-01-09 18:19:10', NULL, '2026-01-09 18:06:27', '2026-01-09 18:19:10'),
+(454, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', '060cfdfa7e215c2863abd1916aed8c9af541becd8babfc75c18c425fde7ed129', '[\"*\"]', '2026-01-09 18:37:48', NULL, '2026-01-09 18:19:42', '2026-01-09 18:37:48'),
+(455, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', '9377fd62a2e33b1466e6e867c033a9cc2cf755b7c4a74a951327148678f13da6', '[\"*\"]', '2026-01-09 18:43:05', NULL, '2026-01-09 18:42:53', '2026-01-09 18:43:05'),
+(456, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '41f64493acfff60fcff3b809d2faeeb99fee9fd579f14746fae9a2c9f3f6e88d', '[\"*\"]', '2026-01-09 18:46:17', NULL, '2026-01-09 18:45:22', '2026-01-09 18:46:17'),
+(457, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', '0f8cbd28c7c45558e35f533ebd4cd7cfbc3faad503b6833ea85b7f03adb1b4af', '[\"*\"]', '2026-01-09 18:48:06', NULL, '2026-01-09 18:46:48', '2026-01-09 18:48:06'),
+(458, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', 'a2096b905e658a07dc0514c5a1454267a1bc7cf01e2d8f6378e6fdc23830ff90', '[\"*\"]', '2026-01-09 18:53:06', NULL, '2026-01-09 18:51:19', '2026-01-09 18:53:06'),
+(459, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', 'f5d6ec430ece000e31b45b442c4ff99cd4594cbd91f1805fd6de1d118129d6b3', '[\"*\"]', '2026-01-09 18:57:07', NULL, '2026-01-09 18:55:55', '2026-01-09 18:57:07');
+INSERT INTO `personal_access_tokens` (`id`, `tokenable_type`, `tokenable_id`, `name`, `token`, `abilities`, `last_used_at`, `expires_at`, `created_at`, `updated_at`) VALUES
+(460, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '7b61e36d5e1359457ded58be7991e3d012a6c099076e8ceefc73f19f5201d901', '[\"*\"]', '2026-01-09 19:02:12', NULL, '2026-01-09 18:59:30', '2026-01-09 19:02:12'),
+(461, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', 'd56764212f45359bed11b7b6c46faeb89e925f11a361a7f97374310b6d33bbd1', '[\"*\"]', NULL, NULL, '2026-01-09 19:08:59', '2026-01-09 19:08:59'),
+(462, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', '36f93ee29f37d9b18e1d3e006ff85c0f8aa0c2b2236336cb79cb02ed93056281', '[\"*\"]', NULL, NULL, '2026-01-09 19:09:03', '2026-01-09 19:09:03'),
+(463, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', 'cc176b99e60b9fe2fd4cfd941e9b29514c1839192eb12bb12d9fa5b62ffc8234', '[\"*\"]', '2026-01-09 19:09:40', NULL, '2026-01-09 19:09:06', '2026-01-09 19:09:40'),
+(464, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', '697ec6547efae9eecfff29fd975aad848dc609a02fe0c3a5fb475db5cae54686', '[\"*\"]', '2026-01-09 19:21:39', NULL, '2026-01-09 19:20:56', '2026-01-09 19:21:39'),
+(465, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '41274ba57287acd2c89611d123b7766f7dab74d147feddf47bbd8746d97ffea2', '[\"*\"]', '2026-01-11 18:02:24', NULL, '2026-01-11 17:12:52', '2026-01-11 18:02:24'),
+(466, 'App\\Models\\ModelApi\\User', 1, 'auth_token_flutter_app', '30de9d6f41a2f77d16f652d0791e871110e1fff878c6fb336df5d495bd91939a', '[\"*\"]', '2026-01-12 06:31:00', NULL, '2026-01-11 17:30:25', '2026-01-12 06:31:00'),
+(467, 'App\\Models\\ModelApi\\User', 25, 'auth_token_flutter_app', '0fc814668f1cd35c52719ba773197f9616cdd121ac9982b42ec0c1d389bd016e', '[\"*\"]', '2026-01-11 18:07:36', NULL, '2026-01-11 18:04:22', '2026-01-11 18:07:36'),
+(468, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'a51850e8989c13c45e66ba5e08f6c56c83e1ba59564ab41ac55e817986d96847', '[\"*\"]', '2026-01-12 08:14:41', NULL, '2026-01-12 05:56:13', '2026-01-12 08:14:41'),
+(469, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'cfef3047641d8146f2be40e0e3281af997b1fc27e278bdb3db01799e42412233', '[\"*\"]', NULL, NULL, '2026-01-12 06:42:16', '2026-01-12 06:42:16'),
+(470, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '9b88dbf1b10a4c6b746074390952db7794a6489354b6e61dbd12ce022380fd36', '[\"*\"]', '2026-01-13 06:34:48', NULL, '2026-01-12 06:42:35', '2026-01-13 06:34:48'),
+(471, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'c5aab0ff557a31b1872ef1598f9797714e85267587097537c7435cecd91fae41', '[\"*\"]', '2026-01-12 07:19:28', NULL, '2026-01-12 07:19:13', '2026-01-12 07:19:28'),
+(472, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '3627456e73779b26bc41beec8661fbf4a5a3fb1225c4d3c7afc68025bc10e1f0', '[\"*\"]', NULL, NULL, '2026-01-12 15:45:44', '2026-01-12 15:45:44'),
+(473, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'c23cb7af9ab62fa2334a8677c565074e604fc86be0bde9c5e03bfcce0df9519d', '[\"*\"]', '2026-01-12 17:18:55', NULL, '2026-01-12 15:45:50', '2026-01-12 17:18:55'),
+(474, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '693470bd261d0c0a1d59bcebb46670410c972626a2972ba44f2fb7f03408dd97', '[\"*\"]', '2026-01-18 01:00:55', NULL, '2026-01-18 00:41:31', '2026-01-18 01:00:55'),
+(475, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'd0d69c2ca51b57be3e4c1673cfff9f2f70e92dca78e99b91e4454ea7be077d63', '[\"*\"]', '2026-01-18 01:28:28', NULL, '2026-01-18 01:28:10', '2026-01-18 01:28:28'),
+(476, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '536279c7364de22576c9ce5b8b2ea278d3806f3351c35140bbc58e21b816aee5', '[\"*\"]', '2026-01-18 01:48:15', NULL, '2026-01-18 01:46:46', '2026-01-18 01:48:15'),
+(477, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', '88d968900c4eaad972ea32bf4e8ad693b6430f23e2c3c861b6c783742e71c507', '[\"*\"]', '2026-01-18 01:57:39', NULL, '2026-01-18 01:53:25', '2026-01-18 01:57:39'),
+(478, 'App\\Models\\ModelApi\\User', 23, 'auth_token_flutter_app', 'f2163249305a161915a5242a6622c9f33810e3ae88fc530463473c389644393f', '[\"*\"]', '2026-01-18 02:27:41', NULL, '2026-01-18 02:02:44', '2026-01-18 02:27:41'),
+(479, 'App\\Models\\ModelApi\\User', 8, 'auth_token_flutter_app', '880467b9731efcb480cf1b072ac03e1a3f347f2c693f9734b282564753a8041b', '[\"*\"]', '2026-01-18 02:42:55', NULL, '2026-01-18 02:34:20', '2026-01-18 02:42:55'),
+(480, 'App\\Models\\ModelApi\\User', 8, 'auth_token_flutter_app', '83c370d6081a46626967f9b215509fd790f964c840ee7be1f1c2b0944c80f948', '[\"*\"]', '2026-01-18 02:52:36', NULL, '2026-01-18 02:51:26', '2026-01-18 02:52:36'),
+(481, 'App\\Models\\ModelApi\\User', 8, 'auth_token_flutter_app', '6ecf5e609e471bd73dcfc54c69a6cf0e8e772e3477efaeec498771acaedf46de', '[\"*\"]', '2026-01-18 03:01:32', NULL, '2026-01-18 02:55:53', '2026-01-18 03:01:32'),
+(482, 'App\\Models\\ModelApi\\User', 8, 'auth_token_flutter_app', '36d55f5887a4b8514fdd726ccd935e15c2838b76399825f78962dd66aef60733', '[\"*\"]', '2026-01-18 03:10:11', NULL, '2026-01-18 03:04:20', '2026-01-18 03:10:11'),
+(483, 'App\\Models\\ModelApi\\User', 8, 'auth_token_flutter_app', '04acca3fe2f18e27091fc48d1f19454c995f076f7a4d1ba80cdf248bf0034af0', '[\"*\"]', '2026-01-18 03:17:56', NULL, '2026-01-18 03:12:43', '2026-01-18 03:17:56'),
+(484, 'App\\Models\\ModelApi\\User', 8, 'auth_token_flutter_app', '815e06350d3c9b1d2eb74c0291d5892704aedf08029f4079e74cb75887332efd', '[\"*\"]', '2026-01-18 03:29:04', NULL, '2026-01-18 03:21:09', '2026-01-18 03:29:04'),
+(485, 'App\\Models\\ModelApi\\User', 8, 'auth_token_flutter_app', '55c3764065e41ea8cea1653c3a044483a43aa049dd67a9affe1d3775c1b3e56f', '[\"*\"]', '2026-01-18 04:35:19', NULL, '2026-01-18 04:34:41', '2026-01-18 04:35:19');
 
 -- --------------------------------------------------------
 
@@ -1120,11 +1237,10 @@ INSERT INTO `personal_access_tokens` (`id`, `tokenable_type`, `tokenable_id`, `n
 -- Table structure for table `prodi`
 --
 
-DROP TABLE IF EXISTS `prodi`;
 CREATE TABLE `prodi` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `jurusan_id` bigint(20) UNSIGNED NOT NULL,
-  `nama_prodi` varchar(255) NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `jurusan_id` bigint UNSIGNED NOT NULL,
+  `nama_prodi` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1145,11 +1261,10 @@ INSERT INTO `prodi` (`id`, `jurusan_id`, `nama_prodi`, `created_at`, `updated_at
 -- Table structure for table `prodi_dosen`
 --
 
-DROP TABLE IF EXISTS `prodi_dosen`;
 CREATE TABLE `prodi_dosen` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `prodi_id` bigint(20) UNSIGNED NOT NULL,
-  `dosen_nip` varchar(255) NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `prodi_id` bigint UNSIGNED NOT NULL,
+  `dosen_nip` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1160,16 +1275,25 @@ CREATE TABLE `prodi_dosen` (
 -- Table structure for table `revisi_tugas_akhir`
 --
 
-DROP TABLE IF EXISTS `revisi_tugas_akhir`;
 CREATE TABLE `revisi_tugas_akhir` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `tugas_akhir_id` bigint(20) UNSIGNED NOT NULL,
-  `dosen_nip` varchar(255) NOT NULL,
-  `catatan_revisi` text NOT NULL,
-  `status_revisi` varchar(255) NOT NULL DEFAULT 'Belum Selesai',
+  `id` bigint UNSIGNED NOT NULL,
+  `tugas_akhir_id` bigint UNSIGNED NOT NULL,
+  `mhs_nim` int DEFAULT NULL,
+  `dosen_nip` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `catatan_revisi` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status_revisi` int NOT NULL,
+  `file_revisi` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `revisi_tugas_akhir`
+--
+
+INSERT INTO `revisi_tugas_akhir` (`id`, `tugas_akhir_id`, `mhs_nim`, `dosen_nip`, `catatan_revisi`, `status_revisi`, `file_revisi`, `created_at`, `updated_at`) VALUES
+(2, 1, 110127515, '198159090874', 'test catatan', 3, 'revisi_tugas_akhir/1768701827_696c3f8374db2.pdf', '2026-01-09 17:25:43', '2026-01-18 02:03:47'),
+(3, 1, 110122601, '198617040828', 'sdfsdf', 3, 'revisi_tugas_akhir/1767986494_6961553e13a94.pdf', '2026-01-09 18:34:25', '2026-01-13 06:26:56');
 
 -- --------------------------------------------------------
 
@@ -1177,11 +1301,10 @@ CREATE TABLE `revisi_tugas_akhir` (
 -- Table structure for table `roles`
 --
 
-DROP TABLE IF EXISTS `roles`;
 CREATE TABLE `roles` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `guard_name` varchar(255) NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `guard_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1202,10 +1325,9 @@ INSERT INTO `roles` (`id`, `name`, `guard_name`, `created_at`, `updated_at`) VAL
 -- Table structure for table `role_has_menus`
 --
 
-DROP TABLE IF EXISTS `role_has_menus`;
 CREATE TABLE `role_has_menus` (
-  `role_id` bigint(20) UNSIGNED NOT NULL,
-  `menu_id` bigint(20) UNSIGNED NOT NULL
+  `role_id` bigint UNSIGNED NOT NULL,
+  `menu_id` bigint UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -1222,8 +1344,11 @@ INSERT INTO `role_has_menus` (`role_id`, `menu_id`) VALUES
 (1, 7),
 (1, 8),
 (1, 9),
+(2, 9),
 (1, 10),
+(2, 10),
 (1, 11),
+(2, 11),
 (1, 12),
 (1, 13),
 (1, 14),
@@ -1231,10 +1356,7 @@ INSERT INTO `role_has_menus` (`role_id`, `menu_id`) VALUES
 (1, 16),
 (1, 17),
 (1, 18),
-(1, 19),
-(2, 9),
-(2, 10),
-(2, 11);
+(1, 19);
 
 -- --------------------------------------------------------
 
@@ -1242,10 +1364,9 @@ INSERT INTO `role_has_menus` (`role_id`, `menu_id`) VALUES
 -- Table structure for table `role_has_permissions`
 --
 
-DROP TABLE IF EXISTS `role_has_permissions`;
 CREATE TABLE `role_has_permissions` (
-  `permission_id` bigint(20) UNSIGNED NOT NULL,
-  `role_id` bigint(20) UNSIGNED NOT NULL
+  `permission_id` bigint UNSIGNED NOT NULL,
+  `role_id` bigint UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -1254,8 +1375,8 @@ CREATE TABLE `role_has_permissions` (
 
 INSERT INTO `role_has_permissions` (`permission_id`, `role_id`) VALUES
 (1, 1),
-(1, 2),
 (2, 1),
+(1, 2),
 (3, 2),
 (4, 2),
 (5, 2),
@@ -1268,10 +1389,9 @@ INSERT INTO `role_has_permissions` (`permission_id`, `role_id`) VALUES
 -- Table structure for table `ruangan`
 --
 
-DROP TABLE IF EXISTS `ruangan`;
 CREATE TABLE `ruangan` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `nama_ruangan` varchar(255) NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `nama_ruangan` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1290,10 +1410,9 @@ INSERT INTO `ruangan` (`id`, `nama_ruangan`, `created_at`, `updated_at`) VALUES
 -- Table structure for table `sesi`
 --
 
-DROP TABLE IF EXISTS `sesi`;
 CREATE TABLE `sesi` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `nama_sesi` varchar(255) NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `nama_sesi` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `waktu_mulai` time NOT NULL,
   `waktu_selesai` time NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -1315,14 +1434,13 @@ INSERT INTO `sesi` (`id`, `nama_sesi`, `waktu_mulai`, `waktu_selesai`, `created_
 -- Table structure for table `sessions`
 --
 
-DROP TABLE IF EXISTS `sessions`;
 CREATE TABLE `sessions` (
-  `id` varchar(255) NOT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `ip_address` varchar(45) DEFAULT NULL,
-  `user_agent` text DEFAULT NULL,
-  `payload` longtext NOT NULL,
-  `last_activity` int(11) NOT NULL
+  `id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` bigint UNSIGNED DEFAULT NULL,
+  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text COLLATE utf8mb4_unicode_ci,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_activity` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -1370,27 +1488,27 @@ INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, 
 -- Table structure for table `sidang_tugas_akhir`
 --
 
-DROP TABLE IF EXISTS `sidang_tugas_akhir`;
 CREATE TABLE `sidang_tugas_akhir` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `tugas_akhir_id` bigint(20) UNSIGNED NOT NULL,
-  `jadwal_sidang_id` bigint(20) UNSIGNED NOT NULL,
-  `sekretaris_nip` varchar(30) DEFAULT NULL,
-  `status` varchar(50) NOT NULL,
-  `nilai_akhir` double DEFAULT 0,
+  `id` bigint UNSIGNED NOT NULL,
+  `tugas_akhir_id` bigint UNSIGNED NOT NULL,
+  `jadwal_sidang_id` bigint UNSIGNED NOT NULL,
+  `sekretaris_nip` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nilai_akhir` double DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `mhs_nim` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `sidang_tugas_akhir`
 --
 
-INSERT INTO `sidang_tugas_akhir` (`id`, `tugas_akhir_id`, `jadwal_sidang_id`, `sekretaris_nip`, `status`, `nilai_akhir`, `created_at`, `updated_at`) VALUES
-(2, 2, 2, NULL, '0', 0, '2025-11-09 04:54:21', '2025-11-09 04:54:21'),
-(3, 3, 3, NULL, '0', 0, '2025-11-09 04:59:10', NULL),
-(5, 1, 2, '198617040828', '0', 94.19, '2025-12-12 10:00:10', '2025-12-19 07:04:27'),
-(6, 29, 4, NULL, '0', 0, '2025-12-12 11:37:20', '2025-12-12 11:37:20');
+INSERT INTO `sidang_tugas_akhir` (`id`, `tugas_akhir_id`, `jadwal_sidang_id`, `sekretaris_nip`, `status`, `nilai_akhir`, `created_at`, `updated_at`, `mhs_nim`) VALUES
+(2, 2, 2, NULL, '0', 0, '2025-11-09 04:54:21', '2025-11-09 04:54:21', NULL),
+(3, 3, 3, '198617040828', '0', 0, '2025-11-09 04:59:10', NULL, NULL),
+(5, 1, 2, '198617040828', '2', 47.16, '2025-12-12 10:00:10', '2026-01-05 09:14:25', 110127515),
+(7, 1, 2, NULL, 'Aktif', 0, '2026-01-09 18:20:20', '2026-01-09 18:20:20', 110122601);
 
 -- --------------------------------------------------------
 
@@ -1398,14 +1516,13 @@ INSERT INTO `sidang_tugas_akhir` (`id`, `tugas_akhir_id`, `jadwal_sidang_id`, `s
 -- Table structure for table `syarat_sidang`
 --
 
-DROP TABLE IF EXISTS `syarat_sidang`;
 CREATE TABLE `syarat_sidang` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `tugas_akhir_id` bigint(20) UNSIGNED NOT NULL,
-  `dokumen_id` bigint(20) UNSIGNED NOT NULL,
-  `dokumen_file_original` varchar(255) NOT NULL,
-  `dokumen_file` varchar(255) NOT NULL,
-  `verified` int(11) NOT NULL DEFAULT 0,
+  `id` bigint UNSIGNED NOT NULL,
+  `tugas_akhir_id` bigint UNSIGNED NOT NULL,
+  `dokumen_id` bigint UNSIGNED NOT NULL,
+  `dokumen_file_original` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `dokumen_file` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `verified` int NOT NULL DEFAULT '0',
   `tanggal_upload` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1422,14 +1539,14 @@ INSERT INTO `syarat_sidang` (`id`, `tugas_akhir_id`, `dokumen_id`, `dokumen_file
 (39, 1, 7, 'cv', 'cv', 1, NULL),
 (40, 1, 8, 'dvdf', 'vcv', 1, NULL),
 (41, 1, 6, 'ddf', 'dff', 1, NULL),
-(42, 29, 1, '1-s2.0-S2665917424002812-main (1).pdf', 'dokumen_sidang/1765563775_693c5d7f1cb86.pdf', 1, '2025-12-12 11:22:58'),
-(43, 29, 2, 'Laporan Mqtt Raspberry Pi Update.docx', 'dokumen_sidang/1765563791_693c5d8fb8382.docx', 1, '2025-12-12 11:23:11'),
-(44, 29, 3, '33424202_Akbar Ramadhan_JobsheetKMC.pdf', 'dokumen_sidang/1765563806_693c5d9eb7cda.pdf', 1, '2025-12-12 11:23:26'),
-(45, 29, 4, 'Laporan Mqtt Raspberry Pi Update.docx', 'dokumen_sidang/1765563817_693c5da969986.docx', 1, '2025-12-12 11:23:37'),
-(46, 29, 5, 'Laporan_Konfigurasi_MQTT_Access_Control.docx', 'dokumen_sidang/1765563827_693c5db3b6eae.docx', 1, '2025-12-12 11:23:47'),
-(47, 29, 6, 'Laporan_Pembatasan_Hak_Akses_MQTT.docx', 'dokumen_sidang/1765563861_693c5dd5e2ae4.docx', 1, '2025-12-12 11:24:22'),
-(48, 29, 7, '33424202_Akbar Ramadhan_JobsheetKMC.pdf', 'dokumen_sidang/1765563878_693c5de619f4b.pdf', 1, '2025-12-12 11:24:38'),
-(49, 29, 8, '33424215_M.NaufalArifki_JobsheetKMC.docx', 'dokumen_sidang/1765563886_693c5dee4f8f1.docx', 1, '2025-12-12 11:24:46');
+(50, 5, 1, '1767810714_110122601_3.34.24.2.02_Akbar Ramadhan_IK 2C - Copy.docx', 'dokumen_sidang/1768703715_696c46e3d4254.docx', 1, '2026-01-18 02:35:15'),
+(51, 5, 2, '1767810714_110122601_3.34.24.2.02_Akbar Ramadhan_IK 2C - Copy.docx', 'dokumen_sidang/1768703722_696c46ea5e1f3.docx', 1, '2026-01-18 02:35:22'),
+(52, 5, 3, '1767810714_110122601_3.34.24.2.02_Akbar Ramadhan_IK 2C - Copy.docx', 'dokumen_sidang/1768703729_696c46f16c80c.docx', 1, '2026-01-18 02:35:29'),
+(53, 5, 4, 'Laporan_Praktikum_MikroTik_Final.docx', 'dokumen_sidang/1768703736_696c46f87a84b.docx', 1, '2026-01-18 02:35:36'),
+(54, 5, 5, '1767810714_110122601_3.34.24.2.02_Akbar Ramadhan_IK 2C - Copy.docx', 'dokumen_sidang/1768703743_696c46ffa1098.docx', 1, '2026-01-18 02:35:43'),
+(55, 5, 6, 'Laporan_Praktikum_MikroTik_Final.docx', 'dokumen_sidang/1768703750_696c47066a44d.docx', 1, '2026-01-18 02:35:50'),
+(56, 5, 7, '1767810714_110122601_3.34.24.2.02_Akbar Ramadhan_IK 2C - Copy.docx', 'dokumen_sidang/1768703757_696c470dceea8.docx', 0, '2026-01-18 02:35:57'),
+(57, 5, 8, '1767810714_110122601_3.34.24.2.02_Akbar Ramadhan_IK 2C - Copy.docx', 'dokumen_sidang/1768703764_696c47143d335.docx', 1, '2026-01-18 02:36:04');
 
 -- --------------------------------------------------------
 
@@ -1437,13 +1554,12 @@ INSERT INTO `syarat_sidang` (`id`, `tugas_akhir_id`, `dokumen_id`, `dokumen_file
 -- Table structure for table `tugas_akhir`
 --
 
-DROP TABLE IF EXISTS `tugas_akhir`;
 CREATE TABLE `tugas_akhir` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `judul` varchar(500) NOT NULL,
-  `deskripsi` text DEFAULT NULL,
-  `status` varchar(50) NOT NULL,
-  `tahun_akademik` varchar(9) NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `judul` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `deskripsi` text COLLATE utf8mb4_unicode_ci,
+  `status` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tahun_akademik` varchar(9) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1453,14 +1569,14 @@ CREATE TABLE `tugas_akhir` (
 --
 
 INSERT INTO `tugas_akhir` (`id`, `judul`, `deskripsi`, `status`, `tahun_akademik`, `created_at`, `updated_at`) VALUES
-(1, 'test', 'test', 'Bimbingan', '2024/2025', '2025-10-26 15:32:55', '2025-12-12 10:00:10'),
-(2, 'Ini Judul TA Punya Rosario', 'deskripsi ta rosario', 'Bimbingan', '2024/2025', '2025-10-29 19:31:48', '2025-10-29 19:31:48'),
-(3, 'Testing Ta ke 3', 'hallo mates', 'Bimbingan', '2024/2025', '2025-11-09 04:55:16', NULL),
-(4, 'Judul TA', 'Deskripsi TA', 'Diajukan', '2024/2025', '2025-11-19 01:47:51', '2025-11-19 01:47:51'),
-(5, 'sdfsdf', 'asddfd', 'Diajukan', '2024/2025', '2025-11-19 07:38:15', '2025-11-19 07:38:15'),
-(6, 'asdsd', 'dfgfg', 'Diajukan', '2024/2025', '2025-11-19 08:26:05', '2025-11-19 08:26:05'),
-(7, 'Sistem Informasi Akademik Berbasis Web', 'Pengembangan aplikasi web untuk mengelola data akademik mahasiswa dan dosen.', 'Diajukan', '2024/2025', '2025-11-23 20:57:17', '2025-11-23 20:57:17'),
-(29, 'asd', 'olndsds', 'Diajukan', '2024/2025', '2025-12-10 19:19:20', '2025-12-12 11:37:20');
+(1, 'test', 'test', '2', '2024/2025', '2025-10-26 15:32:55', '2026-01-09 18:20:20'),
+(2, 'Ini Judul TA Punya Rosario', 'deskripsi ta rosario', '1', '2024/2025', '2025-10-29 19:31:48', '2025-10-29 19:31:48'),
+(3, 'Testing Ta ke 3', 'hallo mates', '1', '2024/2025', '2025-11-09 04:55:16', NULL),
+(4, 'Judul TA', 'Deskripsi TA', '1', '2024/2025', '2025-11-19 01:47:51', '2025-11-19 01:47:51'),
+(5, 'sdfsdf', 'asddfd', '1', '2024/2025', '2025-11-19 07:38:15', '2025-11-19 07:38:15'),
+(6, 'asdsd', 'dfgfg', '1', '2024/2025', '2025-11-19 08:26:05', '2025-11-19 08:26:05'),
+(7, 'Sistem Informasi Akademik Berbasis Web', 'Pengembangan aplikasi web untuk mengelola data akademik mahasiswa dan dosen.', '1', '2024/2025', '2025-11-23 20:57:17', '2025-11-23 20:57:17'),
+(31, 'dfgdfgdfg', 'wrwe3546546etr', '1', '2024/2025', '2026-01-11 18:04:42', '2026-01-11 18:07:26');
 
 -- --------------------------------------------------------
 
@@ -1468,11 +1584,10 @@ INSERT INTO `tugas_akhir` (`id`, `judul`, `deskripsi`, `status`, `tahun_akademik
 -- Table structure for table `tugas_akhir_anggota`
 --
 
-DROP TABLE IF EXISTS `tugas_akhir_anggota`;
 CREATE TABLE `tugas_akhir_anggota` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `tugas_akhir_id` bigint(20) UNSIGNED NOT NULL,
-  `mhs_nim` int(11) NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `tugas_akhir_id` bigint UNSIGNED NOT NULL,
+  `mhs_nim` int NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1490,7 +1605,9 @@ INSERT INTO `tugas_akhir_anggota` (`id`, `tugas_akhir_id`, `mhs_nim`, `created_a
 (7, 4, 110126447, NULL, NULL),
 (8, 5, 110122154, NULL, NULL),
 (9, 6, 110125663, NULL, NULL),
-(41, 29, 110125213, NULL, NULL);
+(41, 3, 110125213, NULL, NULL),
+(43, 5, 110129690, '2026-01-07 15:20:48', '2026-01-07 15:20:48'),
+(44, 31, 110128963, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1498,18 +1615,17 @@ INSERT INTO `tugas_akhir_anggota` (`id`, `tugas_akhir_id`, `mhs_nim`, `created_a
 -- Table structure for table `unsur_nilai_dosen_pembimbing`
 --
 
-DROP TABLE IF EXISTS `unsur_nilai_dosen_pembimbing`;
 CREATE TABLE `unsur_nilai_dosen_pembimbing` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `dosen_nip` varchar(255) NOT NULL,
-  `sidang_id` bigint(20) UNSIGNED NOT NULL,
-  `unsur_id` int(11) DEFAULT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `dosen_nip` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sidang_id` bigint UNSIGNED NOT NULL,
+  `unsur_id` int DEFAULT NULL,
   `nilai` decimal(5,2) DEFAULT NULL,
-  `kerajinan_nilai` int(11) DEFAULT NULL,
-  `keteguhan_nilai` int(11) DEFAULT NULL,
-  `kemajuan_nilai` int(11) DEFAULT NULL,
-  `total_nilai` int(11) DEFAULT NULL,
-  `catatan` text DEFAULT NULL,
+  `kerajinan_nilai` int DEFAULT NULL,
+  `keteguhan_nilai` int DEFAULT NULL,
+  `kemajuan_nilai` int DEFAULT NULL,
+  `total_nilai` int DEFAULT NULL,
+  `catatan` text COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1520,10 +1636,9 @@ CREATE TABLE `unsur_nilai_dosen_pembimbing` (
 -- Table structure for table `unsur_nilai_pembimbing`
 --
 
-DROP TABLE IF EXISTS `unsur_nilai_pembimbing`;
 CREATE TABLE `unsur_nilai_pembimbing` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `nama_unsur` varchar(255) NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `nama_unsur` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `bobot` double NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -1545,10 +1660,9 @@ INSERT INTO `unsur_nilai_pembimbing` (`id`, `nama_unsur`, `bobot`, `created_at`,
 -- Table structure for table `unsur_nilai_penguji`
 --
 
-DROP TABLE IF EXISTS `unsur_nilai_penguji`;
 CREATE TABLE `unsur_nilai_penguji` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `nama_unsur` varchar(255) NOT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `nama_unsur` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `bobot` double NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -1570,14 +1684,13 @@ INSERT INTO `unsur_nilai_penguji` (`id`, `nama_unsur`, `bobot`, `created_at`, `u
 -- Table structure for table `user`
 --
 
-DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `role` varchar(20) NOT NULL,
-  `remember_token` varchar(100) DEFAULT NULL,
+  `id` bigint UNSIGNED NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1587,14 +1700,14 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `name`, `email`, `password`, `role`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'Wika Dwi Aprilia', 'wika@example.net', '$2y$10$J61aMw5YiiPaWwI/1lfmO.5ceymuryBkWLiG.Q5lJtl2.1cktiMCW', 'mahasiswa', 'PQLzMcRS1Ybebt1rAsxfufBaZK1LerWAHcmVhx1dBWQFVWe0YEFMujdcgd3e', '2025-10-22 06:09:22', '2025-12-18 15:06:10'),
+(1, 'Wika Dwi Aprilia', 'wika@example.net', '$2y$10$J61aMw5YiiPaWwI/1lfmO.5ceymuryBkWLiG.Q5lJtl2.1cktiMCW', 'mahasiswa', 'OWp2oWQx3Xp9WYTh60iDvahubkn1acWg5v0UjA9w8mV5leJtgLBDicVu7HIO', '2025-10-22 06:09:22', '2025-12-18 15:06:10'),
 (2, 'Andromeda Elang Buana', 'elang@example.org', '$2y$10$TKVO7wVOkieItTWCVeonLezFh8/t09S6LBf2Kjbf6E7V.LtVW/tvi', 'mahasiswa', 'yrEOoXhQMd', '2025-10-22 06:09:22', '2025-12-18 16:02:21'),
 (3, 'Akbar Romadon', 'akbar@example.com', '$2y$10$fR99xuJa/cLJw2gQ44RSP.8je2iOgxPTgkN1tUhaD9OtmzNN1q71q', 'mahasiswa', 'ge2cftNDN0', '2025-10-22 06:09:22', '2025-12-18 16:03:02'),
 (4, 'Haikal Al Waly', 'haikal@example.org', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'gDIGTUBLMH', '2025-10-22 06:09:22', '2025-10-22 06:09:22'),
 (5, 'Farhan Rabbani', 'farhan@example.net', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'U8QeTxfbHn', '2025-10-22 06:09:22', '2025-10-22 06:09:22'),
-(6, 'Selvi Rahmasari', 'selvi@example.net', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'Mrm2LWWxbL', '2025-10-22 06:09:22', '2025-10-22 06:09:22'),
+(6, 'Selvi Rahmasari', 'selvi@example.net', '$2y$10$3mjMddX4mZLu52Vq3q3M2efsCsr.qAsMUHXwJ7NEkNBExY8LH6ME6', 'mahasiswa', 'Mrm2LWWxbL', '2025-10-22 06:09:22', '2026-01-05 14:44:10'),
 (7, 'Malcolm Kovacek', 'bernier.velva@example.net', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'PoaCy9APO2', '2025-10-22 06:09:22', '2025-10-22 06:09:22'),
-(8, 'Eriberto Kuhic', 'baumbach.brooke@example.org', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'UG9ywyFTTG', '2025-10-22 06:09:22', '2025-10-22 06:09:22'),
+(8, 'Eriberto Kuhic', 'baumbach.brooke@example.org', '$2y$10$3Xrt01jPfwBYjgDHemUH0ugTcvpWoKnOtaFWDJ3t14wYipJHaTneK', 'mahasiswa', 'UG9ywyFTTG', '2025-10-22 06:09:22', '2026-01-07 15:29:52'),
 (9, 'Miss Theresa Von', 'erika67@example.com', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', '6B2e2CdswC', '2025-10-22 06:09:22', '2025-10-22 06:09:22'),
 (10, 'Willis Denesik', 'ukris@example.net', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'qLFayO1tS7', '2025-10-22 06:09:23', '2025-10-22 06:09:23'),
 (11, 'Theron Hickle', 'garry.parker@example.net', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'l2FZrQzJN1', '2025-10-22 06:09:23', '2025-10-22 06:09:23'),
@@ -1606,12 +1719,12 @@ INSERT INTO `user` (`id`, `name`, `email`, `password`, `role`, `remember_token`,
 (17, 'Thora Kuhn', 'uparisian@example.org', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'Pt7U2Bm5nD', '2025-10-22 06:09:23', '2025-10-22 06:09:23'),
 (18, 'Levi Dickens DDS', 'julie94@example.org', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'UyZVNlnYJH', '2025-10-22 06:09:23', '2025-10-22 06:09:23'),
 (19, 'Haskell Cronin', 'katrine.bartoletti@example.net', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'stKW05CzXm', '2025-10-22 06:09:24', '2025-10-22 06:09:24'),
-(20, 'Kristina D\'Amore', 'hermiston.rosanna@example.org', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'fD1AzEv2Ga', '2025-10-22 06:09:24', '2025-10-22 06:09:24'),
-(21, 'Kip Gleichner', 'elvis87@example.net', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'MnMBC7c4NI', '2025-10-22 06:09:24', '2025-10-22 06:09:24'),
+(20, 'Kristina D\'Amore', 'hermiston.rosanna@example.org', '$2y$10$GUBQt2vhzRn3r.deGtSOaeqgo.mtt43/.HRnoJzOxY6nBHKabUY26', 'mahasiswa', 'fD1AzEv2Ga', '2025-10-22 06:09:24', '2026-01-07 15:22:08'),
+(21, 'Kip Gleichner', 'elvis87@example.net', '$2y$10$2IZhBnokUkEIMx6FDEOQtOd3Jr/RErtla/AMo1SmybzkBRacWtPgy', 'mahasiswa', 'MnMBC7c4NI', '2025-10-22 06:09:24', '2026-01-07 15:19:35'),
 (22, 'Nedra Dickens', 'kmurray@example.org', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'LDoAv65aUA', '2025-10-22 06:09:24', '2025-10-22 06:09:24'),
-(23, 'Gennaro Kutch DVM', 'eloy43@example.org', '$2y$12$BNeQE4EpctoySEvDeu/qpekywneQ3hjR08CjrssFGouSQD/l7Hz.i', 'mahasiswa', 'c3NHqlzZt5', '2025-10-22 06:09:24', '2025-12-02 02:22:10'),
+(23, 'Gennaro Kutch DVM', 'eloy43@example.org', '$2y$10$0Vm4wTpW21iunk3Qj0bOHODxOpTo048HmgV5OlTsbD9QuS.4qdasm', 'mahasiswa', 'QnIkkKaBQZgn9czg6Hcdc0tsWxcKbgszLBn2VoL9kSAxd8fg6Kxv0MBKHVXT', '2025-10-22 06:09:24', '2025-12-25 09:59:20'),
 (24, 'Emil Macejkovic', 'providenci26@example.org', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'UhYDQbrNUz', '2025-10-22 06:09:24', '2025-10-22 06:09:24'),
-(25, 'Ms. Jailyn Kshlerin I', 'reece.feeney@example.org', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', '18je3LxuBq', '2025-10-22 06:09:24', '2025-10-22 06:09:24'),
+(25, 'Ms. Jailyn Kshlerin I', 'reece.feeney@example.org', '$2y$10$vL7JxnJO/SnZLilBQdVywOObu9vjkF7fjr60BiTlLcYyAa2aTxp3i', 'mahasiswa', '18je3LxuBq', '2025-10-22 06:09:24', '2026-01-03 03:02:19'),
 (26, 'Bernhard Oberbrunner', 'earnest41@example.net', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', '6frRQqwFZv', '2025-10-22 06:09:24', '2025-10-22 06:09:24'),
 (27, 'Alanis Ratke', 'lfriesen@example.com', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'gPFVFdgkND', '2025-10-22 06:09:24', '2025-10-22 06:09:24'),
 (28, 'Heloise Hane', 'candido.larkin@example.com', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'o9grdgpaiE', '2025-10-22 06:09:25', '2025-10-22 06:09:25'),
@@ -1637,12 +1750,12 @@ INSERT INTO `user` (`id`, `name`, `email`, `password`, `role`, `remember_token`,
 (48, 'Adah Cassin DDS', 'sbeahan@example.net', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'z5jGhBgc1J', '2025-10-22 06:09:27', '2025-10-22 06:09:27'),
 (49, 'Irwin Bayer', 'pfannerstill.sam@example.com', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'Kl2Z1w2RpJ', '2025-10-22 06:09:27', '2025-10-22 06:09:27'),
 (50, 'Prof. Gregory Reynolds DDS', 'zboncak.tamia@example.net', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'mahasiswa', 'Vi1n4g3o0i', '2025-10-22 06:09:27', '2025-10-22 06:09:27'),
-(51, 'Muttabik Fathul Latief', 'pakabik@example.org', '$2y$10$ApNCgZlbQxlfqgDjGLu4POWvAAGzrHFNtopo6nEB8Ryk1vIoV7fom', 'dosen', 'cMGYd1bUzdFksPhBhoLaHAaSgehRdi8YuQ3wY3dhOgqrcyE5YG61af7F1drs', '2025-10-22 06:09:31', '2025-12-18 16:19:04'),
-(52, 'Amran Yobioktabera', 'pakamran@example.net', '$2y$10$Z43YpoovpHSa82kpJg2OLOZsptP7lbhrW.3YwfW0DYAYVcEEHBWmC', 'dosen', '1yIrmahosp2brEwXe82rzdRWXrGGaZK2pPwrfgcAghjKvMbz3Sa3aQdfacve', '2025-10-22 06:09:31', '2025-12-18 05:59:09'),
-(53, 'Suko Tyas P', 'paksuko@example.com', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'dosen', 'GG192jDvG2', '2025-10-22 06:09:31', '2025-10-22 06:09:31'),
+(51, 'Muttabik Fathul Latief', 'pakabik@example.org', '$2y$10$ApNCgZlbQxlfqgDjGLu4POWvAAGzrHFNtopo6nEB8Ryk1vIoV7fom', 'dosen', '5XqeIYaIVAZQTwLzptUGanAgOOEpoyQ6ls4t56lGi5fSvxz49rJuEN9XOTyb', '2025-10-22 06:09:31', '2025-12-18 16:19:04'),
+(52, 'Amran Yobioktabera', 'pakamran@example.net', '$2y$10$Z43YpoovpHSa82kpJg2OLOZsptP7lbhrW.3YwfW0DYAYVcEEHBWmC', 'dosen', 'X8mSuyVNjghsDKaIUpK4Rky18sKSPAk45KgkIVJ6CSPtYS1D3gIClomT1f3L', '2025-10-22 06:09:31', '2025-12-18 05:59:09'),
+(53, 'Suko Tyas P', 'paksuko@example.com', '$2y$10$9vXBgbGvpBT29rVoJZMnu.edj3hhVEWC0mUr9OdbZvBFJ5gwbvSDO', 'dosen', 'VECV2P9L51CndzC9TJwV9uDBwHTqndC72Bf4vdrvr4QT6OfLUJnlbx7Ksj5h', '2025-10-22 06:09:31', '2026-01-07 16:02:20'),
 (54, 'Sukamto', 'pakkamto@example.com', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'dosen', 'E8dn517lKA', '2025-10-22 06:09:31', '2025-10-22 06:09:31'),
-(55, 'Eri Lavandi', 'bueri@example.com', '$2y$10$5iF6wAUZoC1s63HBqnP1fuVrCwM.dqFjVkRW3bQ6sBhOfUyJEdxEO', 'dosen', 'W0sAbMYBJ0Tdl3zBhVjHPu5RIvagYE6Dhf3QcHbrdSzvcQAo7aP6Xav6GbdB', '2025-10-22 06:09:31', '2025-12-19 07:02:09'),
-(56, 'Liliek Triyono', 'paklilik@example.org', '$2y$10$NCSRyJiykWa6vwMUjzsMF.Ob3Q1H6mYeDYRY1WOrqrmDp05TnSfk.', 'dosen', 'TZ0k1uAkpd7RrI6ZcX6GjeX7Kv0wfcfYNekHc0GhVW0FhDuwS8vdkRJPwSmF', '2025-10-22 06:09:31', '2025-12-15 03:04:51'),
+(55, 'Eri Lavandi', 'bueri@example.com', '$2y$10$5iF6wAUZoC1s63HBqnP1fuVrCwM.dqFjVkRW3bQ6sBhOfUyJEdxEO', 'dosen', 'aHlcXKuUTvBd8VXzIutgGppB58F5wrsmoZN8DgnHBYwhTzg6HIBBLgg2ganI', '2025-10-22 06:09:31', '2025-12-19 07:02:09'),
+(56, 'Liliek Triyono', 'paklilik@example.org', '$2y$10$NCSRyJiykWa6vwMUjzsMF.Ob3Q1H6mYeDYRY1WOrqrmDp05TnSfk.', 'dosen', 'TYmHEwga8u9UcDq32bAwHlt2PtJrrSnPRd3bcvVOGMfCQMC0cBjSFTvMrVBV', '2025-10-22 06:09:31', '2025-12-15 03:04:51'),
 (57, 'Teresa Orn', 'myrtis.nikolaus@example.org', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'dosen', '9ckPTS450y', '2025-10-22 06:09:32', '2025-10-22 06:09:32'),
 (58, 'Bryana Langworth DDS', 'kwhite@example.com', '$2y$12$8xD3pkAHvm45wN2221LrrOkt3LofJibyTau/1k30HN5i5co5nYwhW', 'dosen', 'ZTUqiZdPOO', '2025-10-22 06:09:32', '2025-10-22 06:09:32'),
 (59, 'Victoria Smith', 'miller.myra@example.net', '$2y$10$Vv5RhVLq7LzYNXsh1QWRNeZH7Y74OzKFjr.i9viJpK8FBhF49TXOy', 'dosen', 'CjVxTiUgeHF50FttktzMdOmqwOJNomloIXTSBcMRH9iR8r1DfEM1wzlwTtBc', '2025-10-22 06:09:32', '2025-12-14 10:01:06'),
@@ -1851,7 +1964,9 @@ ALTER TABLE `prodi_dosen`
 --
 ALTER TABLE `revisi_tugas_akhir`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `revisi_tugas_akhir_tugas_akhir_id_foreign` (`tugas_akhir_id`);
+  ADD KEY `revisi_tugas_akhir_tugas_akhir_id_foreign` (`tugas_akhir_id`),
+  ADD KEY `revisi_tugas_akhir_dosen_nip_foreign` (`dosen_nip`),
+  ADD KEY `fk_revisi_mahasiswa` (`mhs_nim`);
 
 --
 -- Indexes for table `roles`
@@ -1900,7 +2015,8 @@ ALTER TABLE `sessions`
 ALTER TABLE `sidang_tugas_akhir`
   ADD PRIMARY KEY (`id`),
   ADD KEY `sidang_tugas_akhir_tugas_akhir_id_foreign` (`tugas_akhir_id`),
-  ADD KEY `sidang_tugas_akhir_jadwal_sidang_id_foreign` (`jadwal_sidang_id`);
+  ADD KEY `sidang_tugas_akhir_jadwal_sidang_id_foreign` (`jadwal_sidang_id`),
+  ADD KEY `fk_sidang_mahasiswa` (`mhs_nim`);
 
 --
 -- Indexes for table `syarat_sidang`
@@ -1959,187 +2075,187 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `admin_prodi`
 --
 ALTER TABLE `admin_prodi`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `bimbingan`
 --
 ALTER TABLE `bimbingan`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `bimbingan_log`
 --
 ALTER TABLE `bimbingan_log`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=73;
 
 --
 -- AUTO_INCREMENT for table `configs`
 --
 ALTER TABLE `configs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `dokumen_sidang`
 --
 ALTER TABLE `dokumen_sidang`
-  MODIFY `dokumen_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `dokumen_id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `dosen`
 --
 ALTER TABLE `dosen`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `dosen_penguji`
 --
 ALTER TABLE `dosen_penguji`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `failed_jobs`
 --
 ALTER TABLE `failed_jobs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `jadwal_sidang`
 --
 ALTER TABLE `jadwal_sidang`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `jobs`
 --
 ALTER TABLE `jobs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `jurusan`
 --
 ALTER TABLE `jurusan`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `menus`
 --
 ALTER TABLE `menus`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
 
 --
 -- AUTO_INCREMENT for table `nilai_dosen_pembimbing`
 --
 ALTER TABLE `nilai_dosen_pembimbing`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `nilai_dosen_penguji`
 --
 ALTER TABLE `nilai_dosen_penguji`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `permissions`
 --
 ALTER TABLE `permissions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `personal_access_tokens`
 --
 ALTER TABLE `personal_access_tokens`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=387;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=486;
 
 --
 -- AUTO_INCREMENT for table `prodi`
 --
 ALTER TABLE `prodi`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `prodi_dosen`
 --
 ALTER TABLE `prodi_dosen`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `revisi_tugas_akhir`
 --
 ALTER TABLE `revisi_tugas_akhir`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `roles`
 --
 ALTER TABLE `roles`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `ruangan`
 --
 ALTER TABLE `ruangan`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `sesi`
 --
 ALTER TABLE `sesi`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `sidang_tugas_akhir`
 --
 ALTER TABLE `sidang_tugas_akhir`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `syarat_sidang`
 --
 ALTER TABLE `syarat_sidang`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT for table `tugas_akhir`
 --
 ALTER TABLE `tugas_akhir`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `tugas_akhir_anggota`
 --
 ALTER TABLE `tugas_akhir_anggota`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT for table `unsur_nilai_dosen_pembimbing`
 --
 ALTER TABLE `unsur_nilai_dosen_pembimbing`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `unsur_nilai_pembimbing`
 --
 ALTER TABLE `unsur_nilai_pembimbing`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `unsur_nilai_penguji`
 --
 ALTER TABLE `unsur_nilai_penguji`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
 
 --
 -- Constraints for dumped tables
@@ -2244,6 +2360,7 @@ ALTER TABLE `prodi_dosen`
 -- Constraints for table `revisi_tugas_akhir`
 --
 ALTER TABLE `revisi_tugas_akhir`
+  ADD CONSTRAINT `fk_revisi_mahasiswa` FOREIGN KEY (`mhs_nim`) REFERENCES `mahasiswa` (`mhs_nim`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `revisi_tugas_akhir_dosen_nip_foreign` FOREIGN KEY (`dosen_nip`) REFERENCES `dosen` (`dosen_nip`) ON DELETE CASCADE,
   ADD CONSTRAINT `revisi_tugas_akhir_tugas_akhir_id_foreign` FOREIGN KEY (`tugas_akhir_id`) REFERENCES `tugas_akhir` (`id`) ON DELETE CASCADE;
 
@@ -2265,6 +2382,7 @@ ALTER TABLE `role_has_permissions`
 -- Constraints for table `sidang_tugas_akhir`
 --
 ALTER TABLE `sidang_tugas_akhir`
+  ADD CONSTRAINT `fk_sidang_mahasiswa` FOREIGN KEY (`mhs_nim`) REFERENCES `mahasiswa` (`mhs_nim`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `sidang_tugas_akhir_jadwal_sidang_id_foreign` FOREIGN KEY (`jadwal_sidang_id`) REFERENCES `jadwal_sidang` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `sidang_tugas_akhir_tugas_akhir_id_foreign` FOREIGN KEY (`tugas_akhir_id`) REFERENCES `tugas_akhir` (`id`) ON DELETE CASCADE;
 

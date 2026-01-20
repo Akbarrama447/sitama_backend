@@ -9,6 +9,7 @@ use App\Models\NilaiDosenPembimbing;
 use App\Models\NilaiDosenPenguji;
 use App\Models\UnsurPenilaianPembimbing;
 use App\Models\UnsurPenilaianPenguji;
+use App\Models\RevisiTugasAkhir;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -273,6 +274,58 @@ class SidangController extends Controller
             'status' => $request->status_kelulusan
         ]);
 
+        // Ambil tugas akhir dan mahasiswa terkait
+        $tugasAkhir = $sidang->tugasAkhir;
+
+        // Ambil semua mahasiswa yang tergabung dalam tugas akhir ini
+        $mahasiswaList = $tugasAkhir->mahasiswa()->get(); // Panggil metodenya dan ambil hasilnya
+
+        // Simpan status ke tabel revisi_tugas_akhir untuk setiap mahasiswa dalam kelompok
+        foreach ($mahasiswaList as $mahasiswa) {
+            // Cek apakah sudah ada entri untuk tugas akhir ini dan mahasiswa ini
+            $revisi = RevisiTugasAkhir::where('tugas_akhir_id', $tugasAkhir->id)
+                ->where('mhs_nim', $mahasiswa->mhs_nim)
+                ->first();
+
+            if ($revisi) {
+                // Jika sudah ada, update statusnya
+                $revisi->update([
+                    'status_revisi' => $request->status_kelulusan,
+                    'dosen_nip' => $dosen->dosen_nip, // Gunakan NIP dosen sekretaris
+                    'catatan_revisi' => 'Status kelulusan sidang: ' . $this->getStatusText($request->status_kelulusan) // Tambahkan catatan
+                ]);
+            } else {
+                // Jika belum ada, buat entri baru
+                RevisiTugasAkhir::create([
+                    'tugas_akhir_id' => $tugasAkhir->id,
+                    'mhs_nim' => $mahasiswa->mhs_nim,
+                    'dosen_nip' => $dosen->dosen_nip,
+                    'catatan_revisi' => 'Status kelulusan sidang: ' . $this->getStatusText($request->status_kelulusan),
+                    'status_revisi' => $request->status_kelulusan,
+                    'file_revisi' => null // Tidak ada file untuk status kelulusan
+                ]);
+            }
+        }
+
         return redirect()->back()->with('success', 'Keputusan sidang berhasil disimpan!');
+    }
+
+    /**
+     * Helper function untuk mendapatkan teks status berdasarkan angka
+     */
+    private function getStatusText($statusNumber)
+    {
+        switch ($statusNumber) {
+            case 1:
+                return 'Lulus';
+            case 2:
+                return 'Lulus dengan Revisi';
+            case 3:
+                return 'Revisi / Mengulang';
+            case 4:
+                return 'Tidak Lulus';
+            default:
+                return 'Status Tidak Dikenal';
+        }
     }
 }

@@ -12,6 +12,7 @@ use App\Models\ModelApi\Bimbingan;
 use App\Models\ModelApi\TugasAkhirAnggota;
 use App\Models\ModelApi\Mahasiswa;
 use App\Models\ModelApi\SidangTugasAkhir;
+use App\Models\ModelApi\LogBimbingan; // Tambahkan import ini untuk method semuaAnggotaSelesaiBimbingan
 
 class TugasAkhir extends Model
 {
@@ -115,5 +116,48 @@ class TugasAkhir extends Model
 
         // Syarat sidang lengkap kalau semua dokumen wajib udah verified
         return $dokumenLengkap === $totalDokumenWajib;
+    }
+
+    /**
+     * Method untuk mengecek apakah semua anggota dalam kelompok Tugas Akhir
+     * sudah selesai bimbingan (semua log bimbingan disetujui).
+     *
+     * @return bool
+     */
+    public function semuaAnggotaSelesaiBimbingan(): bool
+    {
+        // Ambil semua anggota kelompok
+        $anggotaKelompok = $this->mahasiswa()->get();
+
+        // Jika tidak ada anggota, anggap belum selesai
+        if ($anggotaKelompok->isEmpty()) {
+            return false;
+        }
+
+        // Cek setiap anggota apakah semua log bimbingannya sudah disetujui
+        foreach ($anggotaKelompok as $anggota) {
+            // Ambil semua log bimbingan milik anggota ini untuk tugas akhir ini
+            $logBimbingan = LogBimbingan::whereHas('bimbingan', function ($query) {
+                    $query->where('tugas_akhir_id', $this->id);
+                })
+                ->where('mhs_nim', $anggota->mhs_nim)
+                ->get();
+
+            // Jika tidak ada log bimbingan, anggap belum selesai
+            if ($logBimbingan->isEmpty()) {
+                return false;
+            }
+
+            // Cek apakah semua log bimbingan sudah disetujui (status = 1 atau 2)
+            // Berdasarkan data di database, status 1 = disetujui, status 2 = disetujui
+            foreach ($logBimbingan as $log) {
+                if ($log->status != 1 && $log->status != 2) {
+                    return false; // Jika ada satu log yang belum disetujui, maka belum selesai
+                }
+            }
+        }
+
+        // Jika semua anggota sudah selesai bimbingan, kembalikan true
+        return true;
     }
 }

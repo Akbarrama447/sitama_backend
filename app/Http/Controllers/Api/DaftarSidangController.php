@@ -129,6 +129,14 @@ class DaftarSidangController extends Controller
                 ], 400);
             }
 
+            // Cek apakah semua anggota dalam kelompok Tugas Akhir sudah selesai bimbingan
+            if (!$tugasAkhir->semuaAnggotaSelesaiBimbingan()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Belum semua anggota kelompok selesai bimbingan. Semua anggota harus selesai bimbingan terlebih dahulu sebelum mendaftar sidang.'
+                ], 400);
+            }
+
             // Cek apakah jadwal sidang yang dipilih masih tersedia
             $jadwalSidang = JadwalSidang::find($request->jadwal_sidang_id);
             if (!$jadwalSidang) {
@@ -227,12 +235,23 @@ class DaftarSidangController extends Controller
                 ->with(['jadwalSidang.sesi', 'jadwalSidang.ruangan', 'tugasAkhir'])
                 ->first();
 
+            // Konversi status ke format yang lebih mudah dimengerti
+            $statusValue = $tugasAkhir->status;
+            $statusText = match($statusValue) {
+                '0', 'Diajukan' => 'diajukan',
+                '1', 'Bimbingan' => 'bimbingan',
+                '2', 'Bimbingan Terpenuhi' => 'Bimbingan Terpenuhi',
+                'Selesai' => 'selesai',
+                default => $statusValue // Jika tidak cocok dengan aturan, kembalikan nilai aslinya
+            };
+
             $responseData = [
                 'tugas_akhir' => [
                     'id' => $tugasAkhir->id,
                     'judul' => $tugasAkhir->judul,
-                    'status' => $tugasAkhir->status,
-                    'syarat_sidang_lengkap' => $tugasAkhir->syaratSidangLengkap()
+                    'status' => $statusText,
+                    'syarat_sidang_lengkap' => $tugasAkhir->syaratSidangLengkap(),
+                    'semua_anggota_selesai_bimbingan' => $tugasAkhir->semuaAnggotaSelesaiBimbingan()
                 ]
             ];
 

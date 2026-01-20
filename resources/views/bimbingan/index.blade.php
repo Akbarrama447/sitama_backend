@@ -116,4 +116,59 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Fungsi untuk menghasilkan warna berdasarkan string
+    function getColorFromString(str) {
+        // Fungsi hash sederhana
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        // Konversi hash ke hue
+        const hue = Math.abs(hash) % 360;
+
+        // Variasikan saturation dan lightness untuk warna yang lebih bervariasi
+        // Gunakan hash tambahan untuk menghasilkan nilai acak yang konsisten
+        let satHash = 0;
+        for (let i = 0; i < str.length; i++) {
+            satHash = str.charCodeAt(i) * (i + 1) + satHash;
+        }
+
+        let lightHash = 0;
+        for (let i = 0; i < str.length; i++) {
+            lightHash = str.charCodeAt(i) * (str.length - i) + lightHash;
+        }
+
+        // Variasikan saturation antara 40%-70%
+        const saturation = 40 + (satHash % 31);
+        // Variasikan lightness antara 85%-95%
+        const lightness = 85 + (lightHash % 11);
+
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    }
+
+    // Kumpulkan semua judul TA unik dan berikan warna
+    const titleColors = {};
+    const rows = document.querySelectorAll('tbody tr');
+
+    rows.forEach(row => {
+        const titleElement = row.querySelector('td:nth-child(4)'); // Kolom judul TA adalah kolom ke-4
+        if (titleElement) {
+            const title = titleElement.textContent.trim();
+
+            // Jika belum ada warna untuk judul ini, buatkan
+            if (!titleColors[title]) {
+                titleColors[title] = getColorFromString(title);
+            }
+
+            // Terapkan warna ke baris
+            row.style.backgroundColor = titleColors[title];
+        }
+    });
+});
+</script>
+
 @endsection
