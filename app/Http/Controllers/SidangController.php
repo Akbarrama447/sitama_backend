@@ -20,7 +20,7 @@ class SidangController extends Controller
     {
         $user = auth()->user();
         $dosen = Dosen::where('user_id', $user->id)->first();
-        
+
         // Jika bukan dosen (misal admin murni), tampilkan semua atau kosongkan (tergantung kebijakan)
         // Di sini diasumsikan kalau admin mau liat semua, tapi kalau dosen hanya yg terkait
         if (!$dosen) {
@@ -67,9 +67,9 @@ class SidangController extends Controller
         $sidangs->getCollection()->transform(function ($sidang) use ($dosen) {
             // Kalau admin login tanpa data dosen, peran_user null/admin
             $nipCheck = $dosen ? $dosen->dosen_nip : null;
-            
+
             $sidang->peran_user = $nipCheck ? $sidang->getPeranDosen($nipCheck) : 'Admin';
-            
+
             $status = strtolower($sidang->status);
             $sidang->badge_status = match($status) {
                 'lulus' => 'success',
@@ -87,7 +87,7 @@ class SidangController extends Controller
     public function show($id)
     {
         $user = Auth::user();
-        
+
         // 1. AMBIL DATA SIDANG
         $sidang = SidangTugasAkhir::with('tugasAkhir.mahasiswa')->findOrFail($id);
 
@@ -105,7 +105,7 @@ class SidangController extends Controller
             // PERBAIKAN: Tambahkan 'dosen' di dalam array with()
             $nilaiPembimbing = NilaiDosenPembimbing::with(['unsur', 'dosen'])->where('sidang_id', $id)->get();
             $nilaiPenguji = NilaiDosenPenguji::with(['unsur', 'dosen'])->where('sidang_id', $id)->get();
-            
+
             return view('sidang.show_sekretaris', compact('sidang', 'nilaiPembimbing', 'nilaiPenguji'));
         }
 
@@ -115,15 +115,15 @@ class SidangController extends Controller
         if (!$myNip) {
             return abort(403, "Akses ditolak. Akun Anda tidak terhubung dengan Data Dosen.");
         }
-        
+
         // Cek Penguji (Prioritas 1)
         $isPenguji = DB::table('dosen_penguji')
                      ->where('sidang_id', $id)
                      ->where('dosen_nip', $myNip)
                      ->exists();
 
-        $ta_id = optional($sidang->tugasAkhir)->id; 
-        
+        $ta_id = optional($sidang->tugasAkhir)->id;
+
         // Cek Pembimbing (Prioritas 2)
         $isPembimbing = DB::table('bimbingan')
                         ->where('tugas_akhir_id', $ta_id)
@@ -136,7 +136,7 @@ class SidangController extends Controller
             $contextRole = 'dosen_penguji';
             $unsurList = UnsurPenilaianPenguji::all();
             $existingNilai = NilaiDosenPenguji::where('sidang_id', $id)
-                            ->where('dosen_nip', $myNip) 
+                            ->where('dosen_nip', $myNip)
                             ->pluck('nilai', 'unsur_id')
                             ->toArray();
 
@@ -162,7 +162,7 @@ class SidangController extends Controller
         // 1. Hitung Rata-rata Pembimbing
         $nilaiPembimbing = NilaiDosenPembimbing::with('unsur')->where('sidang_id', $sidang_id)->get();
         $groupedPembimbing = $nilaiPembimbing->groupBy('dosen_nip');
-        
+
         $totalRataPembimbing = 0;
         $countPembimbing = $groupedPembimbing->count();
 
@@ -208,7 +208,7 @@ class SidangController extends Controller
         $sidang = SidangTugasAkhir::find($sidang_id);
         if ($sidang) {
             // PERBAIKAN: Kembali ke 'nilai_akhir'
-            $sidang->nilai_akhir = round($nilaiAkhir, 2); 
+            $sidang->nilai_akhir = round($nilaiAkhir, 2);
             $sidang->save();
         }
     }
@@ -266,7 +266,7 @@ class SidangController extends Controller
 
         // Validasi HANYA status kelulusan
         $request->validate([
-            'status_kelulusan' => 'required|int',
+            'status_kelulusan' => 'required|integer|between:1,4',
         ]);
 
         // Update Status saja, Nilai tidak disentuh
@@ -274,36 +274,76 @@ class SidangController extends Controller
             'status' => $request->status_kelulusan
         ]);
 
-        // Ambil tugas akhir dan mahasiswa terkait
+        // Ambil tugas akhir dan mahasiswa yang terlibat dalam sidang ini
         $tugasAkhir = $sidang->tugasAkhir;
 
-        // Ambil semua mahasiswa yang tergabung dalam tugas akhir ini
-        $mahasiswaList = $tugasAkhir->mahasiswa()->get(); // Panggil metodenya dan ambil hasilnya
+        // Ambil mahasiswa yang terlibat dalam sidang ini (menggunakan mhs_nim dari tabel sidang_tugas_akhir)
+        // Jika mhs_nim tidak tersedia di tabel sidang_tugas_akhir, kita gunakan mahasiswa pertama dari kelompok
+        $mhs_nim = $sidang->mhs_nim; // Ambil nim mahasiswa dari kolom mhs_nim di tabel sidang_tugas_akhir
 
-        // Simpan status ke tabel revisi_tugas_akhir untuk setiap mahasiswa dalam kelompok
-        foreach ($mahasiswaList as $mahasiswa) {
-            // Cek apakah sudah ada entri untuk tugas akhir ini dan mahasiswa ini
-            $revisi = RevisiTugasAkhir::where('tugas_akhir_id', $tugasAkhir->id)
-                ->where('mhs_nim', $mahasiswa->mhs_nim)
-                ->first();
+        if ($mhs_nim) {
+            // Jika ada nim mahasiswa spesifik di record sidang, hanya update untuk mahasiswa tersebut
+            $mahasiswa = $tugasAkhir->mahasiswa()->where('mahasiswa.mhs_nim', $mhs_nim)->first();
 
-            if ($revisi) {
-                // Jika sudah ada, update statusnya
-                $revisi->update([
-                    'status_revisi' => $request->status_kelulusan,
-                    'dosen_nip' => $dosen->dosen_nip, // Gunakan NIP dosen sekretaris
-                    'catatan_revisi' => 'Status kelulusan sidang: ' . $this->getStatusText($request->status_kelulusan) // Tambahkan catatan
-                ]);
-            } else {
-                // Jika belum ada, buat entri baru
-                RevisiTugasAkhir::create([
-                    'tugas_akhir_id' => $tugasAkhir->id,
-                    'mhs_nim' => $mahasiswa->mhs_nim,
-                    'dosen_nip' => $dosen->dosen_nip,
-                    'catatan_revisi' => 'Status kelulusan sidang: ' . $this->getStatusText($request->status_kelulusan),
-                    'status_revisi' => $request->status_kelulusan,
-                    'file_revisi' => null // Tidak ada file untuk status kelulusan
-                ]);
+            if ($mahasiswa) {
+                // Cek apakah sudah ada entri untuk tugas akhir ini dan mahasiswa ini
+                $revisi = RevisiTugasAkhir::where('tugas_akhir_id', $tugasAkhir->id)
+                    ->where('mhs_nim', $mahasiswa->mhs_nim)
+                    ->first();
+
+                if ($revisi) {
+                    // Jika sudah ada, update statusnya
+                    $revisi->update([
+                        'status_revisi' => $request->status_kelulusan,
+                        'dosen_nip' => $dosen->dosen_nip, // Gunakan NIP dosen sekretaris
+                        'catatan_revisi' => 'Status kelulusan sidang: ' . $this->getStatusText($request->status_kelulusan), // Tambahkan catatan
+                        'updated_at' => now() // Memastikan timestamp terbaru
+                    ]);
+                } else {
+                    // Jika belum ada, buat entri baru
+                    RevisiTugasAkhir::create([
+                        'tugas_akhir_id' => $tugasAkhir->id,
+                        'mhs_nim' => $mahasiswa->mhs_nim,
+                        'dosen_nip' => $dosen->dosen_nip,
+                        'catatan_revisi' => 'Status kelulusan sidang: ' . $this->getStatusText($request->status_kelulusan),
+                        'status_revisi' => $request->status_kelulusan,
+                        'file_revisi' => null, // Tidak ada file untuk status kelulusan
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+            }
+        } else {
+            // Jika tidak ada nim mahasiswa spesifik, kita tetap hanya update untuk mahasiswa pertama dari kelompok
+            $mahasiswa = $tugasAkhir->mahasiswa()->first();
+
+            if ($mahasiswa) {
+                // Cek apakah sudah ada entri untuk tugas akhir ini dan mahasiswa ini
+                $revisi = RevisiTugasAkhir::where('tugas_akhir_id', $tugasAkhir->id)
+                    ->where('mhs_nim', $mahasiswa->mhs_nim)
+                    ->first();
+
+                if ($revisi) {
+                    // Jika sudah ada, update statusnya
+                    $revisi->update([
+                        'status_revisi' => $request->status_kelulusan,
+                        'dosen_nip' => $dosen->dosen_nip, // Gunakan NIP dosen sekretaris
+                        'catatan_revisi' => 'Status kelulusan sidang: ' . $this->getStatusText($request->status_kelulusan), // Tambahkan catatan
+                        'updated_at' => now() // Memastikan timestamp terbaru
+                    ]);
+                } else {
+                    // Jika belum ada, buat entri baru
+                    RevisiTugasAkhir::create([
+                        'tugas_akhir_id' => $tugasAkhir->id,
+                        'mhs_nim' => $mahasiswa->mhs_nim,
+                        'dosen_nip' => $dosen->dosen_nip,
+                        'catatan_revisi' => 'Status kelulusan sidang: ' . $this->getStatusText($request->status_kelulusan),
+                        'status_revisi' => $request->status_kelulusan,
+                        'file_revisi' => null, // Tidak ada file untuk status kelulusan
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
             }
         }
 

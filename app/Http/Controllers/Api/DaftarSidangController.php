@@ -167,7 +167,7 @@ class DaftarSidangController extends Controller
                 'tugas_akhir_id' => $tugasAkhir->id,
                 'mhs_nim' => $mahasiswa->mhs_nim, // Tambahkan ini
                 'jadwal_sidang_id' => $request->jadwal_sidang_id,
-                'status' => 'Aktif'
+                'status' => 'Terdaftar'
             ]);
 
             // Perbarui status tugas akhir ke 'Sidang' (2) saat mendaftar sidang
