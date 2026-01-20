@@ -35,12 +35,10 @@ Auth::routes();
 
 // Route untuk halaman download aplikasi Flutter (publik)
 Route::get('/download', [\App\Http\Controllers\DownloadController::class, 'index'])->name('download.index');
-Route::get('/* The `/download/flutter-app` route is responsible for serving the download of a Flutter
-application. When a user accesses this route, it will trigger the `downloadApp` method
-in the `DownloadController` class, which will handle the download process of the Flutter
-application file (e.g., an APK file). This route allows users to download the Flutter
-application file from the server. */
-/download/flutter-app', [\App\Http\Controllers\DownloadController::class, 'downloadApp'])->name('download.app');
+Route::get('/download/flutter-app', [\App\Http\Controllers\DownloadController::class, 'downloadApp'])->name('download.app');
+
+// Route untuk download file sitama.apk dari direktori public
+Route::get('/download/apk', [\App\Http\Controllers\DownloadController::class, 'downloadApk'])->name('download.apk');
 
 // Route debugging untuk cek file
 Route::get('/debug/check-file', function() {
