@@ -33,10 +33,10 @@
                             <div class="card-body">
                                 <div class="form-group">
                                     <label>Nama Menu</label>
-                                    <input type="text" name="nama_menu"
-                                        class="form-control @error('nama_menu')is-invalid @enderror" placeholder="Nama Menu"
-                                        value="{{ $menu->nama_menu }}">
-                                    @error('nama_menu')
+                                    <input type="text" name="name"
+                                        class="form-control @error('name')is-invalid @enderror" placeholder="Nama Menu"
+                                        value="{{ $menu->name }}">
+                                    @error('name')
                                         <div class="invalid-feedback" role="alert">
                                             <span>{{ $message }}</span>
                                         </div>
@@ -60,7 +60,7 @@
                                             <option value="{{ $item->id }}"
                                                 {{ $item->id == $menu->parent_id ? 'selected' : '' }}>
                                                 Child dari menu
-                                                {{ $item->parent_id == 0 ? strtoupper($item->nama_menu) : ucwords($item->nama_menu) }}
+                                                {{ $item->parent_id == 0 ? strtoupper($item->name) : ucwords($item->name) }}
                                             </option>
                                         @endforeach
                                     </select>

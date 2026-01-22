@@ -10,6 +10,8 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SidangController; // Pastikan ini di-use
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BimbinganController;
+use App\Http\Controllers\JurusanController;
+use App\Http\Controllers\ProdiController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -116,3 +118,6 @@ Route::post('nilai/penguji/{sidang_id}', [SidangController::class, 'storePenguji
 // Kalau yang sekretaris mau disesuaikan juga (opsional):
 Route::post('nilai/sekretaris/{sidang_id}', [SidangController::class, 'storeSekretaris'])
     ->name('sidang.storeSekretaris');
+
+Route::resource('jurusan', JurusanController::class);
+Route::resource('prodi', ProdiController::class);

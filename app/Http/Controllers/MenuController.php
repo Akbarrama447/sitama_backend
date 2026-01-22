@@ -46,7 +46,7 @@ class MenuController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'nama_menu' => 'required|string',
+            'name' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -59,11 +59,11 @@ class MenuController extends Controller
         try {
             Menu::insert(
                 [
-                    'nama_menu' => $request->nama_menu,
+                    'name' => $request->name,
                     'url' => $request->url,
                     'parent_id' => $request->parent_id,
                     'icon' => $request->icon,
-                    'urutan' => 1,
+                    'order' => 1,
                 ]
             );
             toastr()->success('Menu berhasil disimpan');
@@ -109,7 +109,7 @@ class MenuController extends Controller
     {
         try {
             $menu = Menu::findorfail($id);
-            $menu->nama_menu = $request->post('nama_menu');
+            $menu->name = $request->post('name');
             $menu->url = $request->post('url');
             $menu->icon = $request->post('icon');
             $menu->parent_id = $request->post('parent_id');

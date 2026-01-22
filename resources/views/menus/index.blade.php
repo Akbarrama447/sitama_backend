@@ -27,7 +27,7 @@
                         <div class="card-header">
                             <h5 class="m-0"></h5>
                             <div class="card-tools">
-                                <a href="{{ route('manage-menu.create') }}" class="btn btn-tool"><i
+                                <a href="{{ route('manage-menu.create') }}" class="btn btn-sm btn-success"><i
                                         class="fas fa-plus-circle"></i></a>
                             </div>
                         </div>
@@ -46,13 +46,13 @@
                                     @foreach ($menus as $item)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $item->nama_menu }}</td>
+                                            <td>{{ $item->name }}</td>
                                             <td>{{ $item->url }}</td>
                                             <td>{{ $item->icon ? $item->icon : '-' }}</td>
-                                            <td>{{ $item->parent ? $item->parent->nama_menu : '-' }}</td>
+                                            <td>{{ $item->parent ? $item->parent->name : '-' }}</td>
                                             <td>
                                                 @if (count($item->permissions) < 1)
-                                                    {!! '-' !!}
+                                                   {!! '-' !!}
                                                 @else
                                                     @foreach ($item->permissions as $permission)
                                                         <form method="POST"
@@ -90,7 +90,7 @@
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title">Permissions {{ $item->nama_menu }} </h5>
+                                                        <h5 class="modal-title">Permissions {{ $item->name }} </h5>
                                                         <button type="button" class="close" data-dismiss="modal"
                                                             aria-label="Close">
                                                             <span aria-hidden="true">&times;</span>
