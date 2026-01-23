@@ -48,11 +48,11 @@
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $item->name }}</td>
                                             <td>{{ $item->url }}</td>
-                                            <td>{{ $item->icon ? $item->icon : '-' }}</td>
+                                            <td class="text-center">{!! $item->icon ? "<i class='" . $item->icon . "'></i>" : '-' !!}</td>
                                             <td>{{ $item->parent ? $item->parent->name : '-' }}</td>
                                             <td>
                                                 @if (count($item->permissions) < 1)
-                                                   {!! '-' !!}
+                                                    {!! '-' !!}
                                                 @else
                                                     @foreach ($item->permissions as $permission)
                                                         <form method="POST"
