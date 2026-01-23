@@ -6,6 +6,7 @@ use App\Models\Prodi;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\ProdiRequest;
+use App\Models\Jurusan;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
@@ -28,8 +29,9 @@ class ProdiController extends Controller
     public function create(): View
     {
         $prodi = new Prodi();
+        $jurusan = Jurusan::all();
 
-        return view('prodi.create', compact('prodi'));
+        return view('prodi.create', compact('prodi', 'jurusan'));
     }
 
     /**
@@ -59,8 +61,9 @@ class ProdiController extends Controller
     public function edit($id): View
     {
         $prodi = Prodi::find($id);
+        $jurusan = Jurusan::all();
 
-        return view('prodi.edit', compact('prodi'));
+        return view('prodi.edit', compact('prodi','jurusan'));
     }
 
     /**

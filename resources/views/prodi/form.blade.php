@@ -1,9 +1,13 @@
 <div class="row padding-1 p-1">
     <div class="col-md-12">
-        
         <div class="form-group mb-2 mb20">
-            <label for="jurusan_id" class="form-label">{{ __('Jurusan Id') }}</label>
-            <input type="text" name="jurusan_id" class="form-control @error('jurusan_id') is-invalid @enderror" value="{{ old('jurusan_id', $prodi?->jurusan_id) }}" id="jurusan_id" placeholder="Jurusan Id">
+            <label for="jurusan_id" class="form-label">{{ __('Jurusan') }}</label>
+    <select name="jurusan_id" id="jurusan_id" class="form-control @error('jurusan_id') is-invalid @enderror">
+        <option value="">Pilih Jurusan</option>
+        @foreach ($jurusan as $j)
+            <option value="{{ $j['id'] }}" @selected(old('jurusan_id', $prodi->jurusan_id) == $j['id'])>{{ $j['nama_jurusan'] }}</option>
+        @endforeach
+    </select>
             {!! $errors->first('jurusan_id', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
         </div>
         <div class="form-group mb-2 mb20">

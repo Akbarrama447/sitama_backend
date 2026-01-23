@@ -32,7 +32,7 @@
 
                              <div class="float-right">
                                 <a href="{{ route('{{modelRoute}}.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Tambah Jurusan') }}
+                                  {{ __('Tambah') }}  {{ __('{{modelTitlePlural}}') }}
                                 </a>
                               </div>
                         </div>

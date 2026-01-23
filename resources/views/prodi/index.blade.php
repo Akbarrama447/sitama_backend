@@ -9,7 +9,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6 text-uppercase">
-                    <h4 class="m-0">{{ __('Prodi') }}</h4>
+                    <h4 class="m-0">Program Studi</h4>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -27,12 +27,12 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
 
                             <span id="card_title">
-                                {{ __('Prodis') }}
+                                Daftar Program Studi
                             </span>
 
                              <div class="float-right">
                                 <a href="{{ route('prodi.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Tambah Jurusan') }}
+                                  {{ __('Tambah Prodi') }}
                                 </a>
                               </div>
                         </div>
