@@ -9,7 +9,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6 text-uppercase">
-                    <h4 class="m-0">{{ __('Bimbingans') }}</h4>
+                    <h4 class="m-0">{{ __('Plotting Penguji') }}</h4>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -26,7 +26,7 @@
                         <div class="card-header">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span id="card_title">
-                                {{ __('Bimbingans') }}
+                                {{ __('Daftar Penguji') }}
                             </span>
                             </div>
                         </div>
@@ -44,7 +44,7 @@
                                         <th>No</th>
 
                                         <th>Judul Tugas Akhir</th>
-                                        <th>Dosen Pembimbing</th>
+                                        <th>Dosen Penguji</th>
 
                                         <th></th>
                                     </tr>

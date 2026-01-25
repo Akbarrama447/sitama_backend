@@ -9,7 +9,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6 text-uppercase">
-                    <h4 class="m-0">Ubah {{ __('Bimbingans') }}</h4>
+                    <h4 class="m-0">Ubah {{ __('Penguji') }}</h4>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -25,7 +25,7 @@
 
                 <div class="card card-default">
                     <div class="card-header">
-                        <span class="card-title">{{ __('Ubah') }} Bimbingan</span>
+                        <span class="card-title">{{ __('Ubah') }} Penguji</span>
                     </div>
                     <div class="card-body bg-white">
                         <form method="POST" action="{{ route('ta-penguji.update', $id) }}"  role="form" enctype="multipart/form-data">
