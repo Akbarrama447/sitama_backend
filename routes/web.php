@@ -1,17 +1,19 @@
 <?php
 
+use App\Http\Controllers\AdminBimbinganController;
+use App\Http\Controllers\AdminProdiController;
+use App\Http\Controllers\BimbinganController;
 use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\DBBackupController;
-use App\Models\User;
+use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\ProdiController; // Pastikan ini di-use
+use App\Http\Controllers\ProdiDosenController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\SidangController; // Pastikan ini di-use
+use App\Http\Controllers\SidangController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\BimbinganController;
-use App\Http\Controllers\JurusanController;
-use App\Http\Controllers\ProdiController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -30,7 +32,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
 Route::permanentRedirect('/', '/login');
 
 Auth::routes();
@@ -43,34 +44,33 @@ Route::get('/download/flutter-app', [\App\Http\Controllers\DownloadController::c
 Route::get('/download/apk', [\App\Http\Controllers\DownloadController::class, 'downloadApk'])->name('download.apk');
 
 // Route debugging untuk cek file
-Route::get('/debug/check-file', function() {
+Route::get('/debug/check-file', function () {
     // use Illuminate\Support\Facades\Storage;
 
     $filePath = 'public/flutter_apps/flutter_app.apk';
     $fileExists = Storage::exists($filePath);
 
-    echo "File Path: " . $filePath . "<br>";
-    echo "File Exists: " . ($fileExists ? 'YES' : 'NO') . "<br>";
+    echo 'File Path: '.$filePath.'<br>';
+    echo 'File Exists: '.($fileExists ? 'YES' : 'NO').'<br>';
 
     if ($fileExists) {
         $fileSize = Storage::size($filePath);
         $lastModified = Storage::lastModified($filePath);
 
-        echo "File Size: " . $fileSize . " bytes<br>";
-        echo "Last Modified: " . date('d M Y H:i:s', $lastModified) . "<br>";
+        echo 'File Size: '.$fileSize.' bytes<br>';
+        echo 'Last Modified: '.date('d M Y H:i:s', $lastModified).'<br>';
     } else {
-        echo "File tidak ditemukan oleh Storage facade<br>";
-        echo "Mencoba mencari file secara langsung...<br>";
+        echo 'File tidak ditemukan oleh Storage facade<br>';
+        echo 'Mencoba mencari file secara langsung...<br>';
 
-        $fullPath = storage_path('app/' . $filePath);
-        echo "Full Path: " . $fullPath . "<br>";
-        echo "File exists (direct): " . (file_exists($fullPath) ? 'YES' : 'NO') . "<br>";
+        $fullPath = storage_path('app/'.$filePath);
+        echo 'Full Path: '.$fullPath.'<br>';
+        echo 'File exists (direct): '.(file_exists($fullPath) ? 'YES' : 'NO').'<br>';
     }
 });
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::resource('profil', ProfilController::class)->except('destroy');
-
 
 // Route for config management - to be implemented later
 // Route::group(['middleware' => ['role:admin']], function () {
@@ -80,7 +80,6 @@ Route::resource('profil', ProfilController::class)->except('destroy');
 Route::group(['middleware' => ['role:admin']], function () {
     Route::get('/configs', [\App\Http\Controllers\ConfigController::class, 'index']);
 });
-
 
 Route::resource('manage-user', UserController::class);
 Route::resource('manage-role', RoleController::class);
@@ -121,3 +120,6 @@ Route::post('nilai/sekretaris/{sidang_id}', [SidangController::class, 'storeSekr
 
 Route::resource('jurusan', JurusanController::class);
 Route::resource('prodi', ProdiController::class);
+Route::resource('prodi-admin', AdminProdiController::class);
+Route::resource('prodi-dosen', ProdiDosenController::class);
+Route::resource('ta-pembimbing', AdminBimbinganController::class);

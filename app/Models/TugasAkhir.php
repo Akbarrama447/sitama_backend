@@ -24,6 +24,10 @@ class TugasAkhir extends Model
         );
     }
 
+    public function anggota(){
+        return $this->hasMany(TugasAkhirAnggota::class, 'tugas_akhir_id');
+    }
+
     public function getMahasiswaAttribute()
     {
         if ($this->relationLoaded('mahasiswa')) {
@@ -42,7 +46,7 @@ class TugasAkhir extends Model
         return $this->hasOne(SidangTugasAkhir::class, 'tugas_akhir_id');
     }
 
-    public function cekKelayakanSidang($mhs_nim) 
+    public function cekKelayakanSidang($mhs_nim)
     {
 
         $minBimbingan = Config::getValue('min_bimbingan', 8);
@@ -60,7 +64,7 @@ class TugasAkhir extends Model
                     ->where('bimbingan_id', $item->id)
                     ->where('status', 2) // Hanya yang disetujui
                     ->count();
-                
+
                 return [
                     'pembimbing_ke' => $item->urutan,
                     'jumlah' => $jumlahApproved,

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 class Bimbingan extends Model
 {
     use HasFactory;
+
     protected $table = 'bimbingan';
 
     public function tugasAkhir()
@@ -85,5 +86,27 @@ class Bimbingan extends Model
             ->withLatestLog()
             ->withGroupedByTa()
             ->orderByMahasiswaName();
+    }
+
+    public static function getBimbinganForAdmin()
+    {
+        $results = DB::select("SELECT
+                        A.id,
+                        A.judul,
+                        GROUP_CONCAT(DISTINCT(B.mhs_nama) SEPARATOR ', ') mahasiswa,
+                        GROUP_CONCAT(DISTINCT(CONCAT(C.urutan,'. ',D.dosen_nama)) ORDER BY C.urutan SEPARATOR '<br>') pembimbing
+                    FROM tugas_akhir A
+                    JOIN tugas_akhir_anggota AA
+                        ON A.id = AA.tugas_akhir_id
+                    JOIN mahasiswa B
+                        ON AA.mhs_nim = B.mhs_nim
+                    LEFT JOIN bimbingan C
+                        ON A.id = C.tugas_akhir_id
+                    LEFT JOIN dosen D
+                        ON C.dosen_nip = D.dosen_nip
+                    GROUP BY A.id;", []);
+
+        return $results;
+
     }
 }
