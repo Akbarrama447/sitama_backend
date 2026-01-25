@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminBimbinganController;
+use App\Http\Controllers\AdminPengujiController;
 use App\Http\Controllers\AdminProdiController;
 use App\Http\Controllers\BimbinganController;
 use App\Http\Controllers\ConfigController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\ProdiDosenController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SidangController;
+use App\Http\Controllers\SyaratSidangController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -123,3 +125,5 @@ Route::resource('prodi', ProdiController::class);
 Route::resource('prodi-admin', AdminProdiController::class);
 Route::resource('prodi-dosen', ProdiDosenController::class);
 Route::resource('ta-pembimbing', AdminBimbinganController::class);
+Route::resource('ta-penguji', AdminPengujiController::class);
+Route::resource('ta-approval', SyaratSidangController::class);

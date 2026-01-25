@@ -107,6 +107,5 @@ class Bimbingan extends Model
                     GROUP BY A.id;", []);
 
         return $results;
-
     }
 }

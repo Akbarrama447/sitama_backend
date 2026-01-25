@@ -53,7 +53,7 @@
                                     <?php
                                     $i = 0;
                                     ?>
-                                    @foreach ($bimbingans as $bimbingan)
+                                    @foreach ($penguji as $bimbingan)
                                         <tr>
                                             <td>{{ ++$i }}</td>
 
@@ -67,7 +67,7 @@
                                             </td>
                                             <td class="text-center">
                                                 <a class="btn btn-sm btn-success"
-                                                   href="{{ route('ta-pembimbing.edit', $bimbingan->id) }}"><i
+                                                   href="{{ route('ta-penguji.edit', $bimbingan->id) }}"><i
                                                         class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
                                             </td>
                                         </tr>
