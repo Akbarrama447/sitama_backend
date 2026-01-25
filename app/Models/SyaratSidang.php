@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\DB;
 class SyaratSidang extends Model
 {
 
+    public $timestamps = false;
     protected $table = 'syarat_sidang';
     protected $perPage = 20;
 

@@ -1,6 +1,6 @@
 <div class="row padding-1 p-1">
     <div class="col-md-12">
-        
+
         <div class="form-group mb-2 mb20">
             <label for="tugas_akhir_id" class="form-label">{{ __('Tugas Akhir Id') }}</label>
             <input type="text" name="tugas_akhir_id" class="form-control @error('tugas_akhir_id') is-invalid @enderror" value="{{ old('tugas_akhir_id', $syaratSidang?->tugas_akhir_id) }}" id="tugas_akhir_id" placeholder="Tugas Akhir Id">
@@ -28,7 +28,11 @@
         </div>
         <div class="form-group mb-2 mb20">
             <label for="verified" class="form-label">{{ __('Verified') }}</label>
-            <input type="text" name="verified" class="form-control @error('verified') is-invalid @enderror" value="{{ old('verified', $syaratSidang?->verified) }}" id="verified" placeholder="Verified">
+            <select name="verified" class="form-control @error('verified') is-invalid @enderror" id="verified">
+                <option value="0" {{ (old('verified', $syaratSidang?->verified) === 0) ? 'selected' : '' }}>Belum Diverifikasi</option>
+                <option value="1" {{ (old('verified', $syaratSidang?->verified) == 1) ? 'selected' : '' }}>Disetujui</option>
+                <option value="2" {{ (old('verified', $syaratSidang?->verified) == 2) ? 'selected' : '' }}>Tidak Disetujui</option>
+            </select>
             {!! $errors->first('verified', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
         </div>
         <div class="form-group mb-2 mb20">

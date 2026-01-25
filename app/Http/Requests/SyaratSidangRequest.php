@@ -26,7 +26,7 @@ class SyaratSidangRequest extends FormRequest
 			'dokumen_id' => 'required',
 			'dokumen_file_original' => 'required|string',
 			'dokumen_file' => 'required|string',
-			'verified' => 'required',
+			'verified' => 'required|integer|in:0,1,2',
         ];
     }
 }

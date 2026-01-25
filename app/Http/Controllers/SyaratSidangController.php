@@ -67,9 +67,25 @@ class SyaratSidangController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(SyaratSidangRequest $request, SyaratSidang $syaratSidang): RedirectResponse
+    public function update(SyaratSidangRequest $request, $id): RedirectResponse
     {
+        $syaratSidang = SyaratSidang::findOrFail($id);
+
+        $oldVerified = $syaratSidang->verified;
+        $newVerified = $request->verified;
+
         $syaratSidang->update($request->validated());
+
+        // Refresh model untuk mendapatkan data terbaru
+        $syaratSidang->refresh();
+
+        // Log untuk debugging
+        \Log::info('SyaratSidang updated', [
+            'id' => $syaratSidang->id,
+            'old_verified' => $oldVerified,
+            'new_verified' => $newVerified,
+            'final_verified' => $syaratSidang->verified
+        ]);
 
         return Redirect::route('ta-approval.index')
             ->with('success', 'SyaratSidang updated successfully');
