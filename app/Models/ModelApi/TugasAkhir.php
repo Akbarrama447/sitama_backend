@@ -13,6 +13,7 @@ use App\Models\ModelApi\TugasAkhirAnggota;
 use App\Models\ModelApi\Mahasiswa;
 use App\Models\ModelApi\SidangTugasAkhir;
 use App\Models\ModelApi\LogBimbingan; // Tambahkan import ini untuk method semuaAnggotaSelesaiBimbingan
+use App\Models\Config; // Tambahkan import ini untuk mengakses konfigurasi
 
 class TugasAkhir extends Model
 {
@@ -120,12 +121,15 @@ class TugasAkhir extends Model
 
     /**
      * Method untuk mengecek apakah semua anggota dalam kelompok Tugas Akhir
-     * sudah selesai bimbingan (semua log bimbingan disetujui).
+     * sudah selesai bimbingan (minimal jumlah log bimbingan disetujui sesuai konfigurasi).
      *
      * @return bool
      */
     public function semuaAnggotaSelesaiBimbingan(): bool
     {
+        // Ambil nilai minimal bimbingan dari konfigurasi, default ke 2 jika tidak ditemukan
+        $minBimbingan = (int) Config::getValue('min_bimbingan', 2);
+
         // Ambil semua anggota kelompok
         $anggotaKelompok = $this->mahasiswa()->get();
 
@@ -134,30 +138,26 @@ class TugasAkhir extends Model
             return false;
         }
 
-        // Cek setiap anggota apakah semua log bimbingannya sudah disetujui
+        // Cek setiap anggota apakah jumlah log bimbingan yang disetujui sudah mencapai minimum
         foreach ($anggotaKelompok as $anggota) {
-            // Ambil semua log bimbingan milik anggota ini untuk tugas akhir ini
-            $logBimbingan = LogBimbingan::whereHas('bimbingan', function ($query) {
+            // Ambil jumlah log bimbingan yang disetujui milik anggota ini untuk tugas akhir ini
+            $jumlahLogDisetujui = LogBimbingan::whereHas('bimbingan', function ($query) {
                     $query->where('tugas_akhir_id', $this->id);
                 })
                 ->where('mhs_nim', $anggota->mhs_nim)
-                ->get();
+                ->whereIn('status', [1, 2]) // Status 1 = disetujui, 2 = disetujui (sesuai dengan data di database)
+                ->count();
 
-            // Jika tidak ada log bimbingan, anggap belum selesai
-            if ($logBimbingan->isEmpty()) {
+            // Debug: Log jumlah log bimbingan per anggota
+            \Log::info("TA ID: {$this->id}, Anggota: {$anggota->mhs_nim}, Jumlah log disetujui: {$jumlahLogDisetujui}, Minimal: {$minBimbingan}");
+
+            // Jika jumlah log bimbingan yang disetujui kurang dari minimum, anggap belum selesai
+            if ($jumlahLogDisetujui < $minBimbingan) {
                 return false;
-            }
-
-            // Cek apakah semua log bimbingan sudah disetujui (status = 1 atau 2)
-            // Berdasarkan data di database, status 1 = disetujui, status 2 = disetujui
-            foreach ($logBimbingan as $log) {
-                if ($log->status != 1 && $log->status != 2) {
-                    return false; // Jika ada satu log yang belum disetujui, maka belum selesai
-                }
             }
         }
 
-        // Jika semua anggota sudah selesai bimbingan, kembalikan true
+        // Jika semua anggota sudah memiliki minimal jumlah log bimbingan yang disetujui, kembalikan true
         return true;
     }
 }

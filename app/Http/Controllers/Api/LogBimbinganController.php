@@ -10,6 +10,7 @@ use App\Models\ModelApi\Mahasiswa;
 use App\Models\ModelApi\TugasAkhir;
 use App\Models\ModelApi\Bimbingan;
 use App\Models\ModelApi\LogBimbingan;
+use App\Models\Config; // Tambahkan import ini untuk mengakses konfigurasi
 
 class LogBimbinganController extends Controller
 {
@@ -103,7 +104,7 @@ class LogBimbinganController extends Controller
             $q->where('mhs_nim', $mahasiswa->mhs_nim);
         })->latest()->first();
 
-        if (!$ta) return response()->json([], 404);
+        if (!$ta) return response()->json(['message' => 'Belum ada Tugas Akhir'], 404);
 
         $bimbinganIds = Bimbingan::where('tugas_akhir_id', $ta->id)
             ->where('dosen_nip', $dosenNip)
@@ -206,19 +207,74 @@ class LogBimbinganController extends Controller
             'catatan'     => $request->catatan,
             'tanggal'     => $request->tanggal,
             'file_path'   => $filePath,
-            'status'      => 0,
+            'status'      => 0, // Status awal masih menunggu approval
         ]);
-
-        // Perbarui status tugas akhir ke 'Bimbingan' (1) jika sebelumnya 'Diajukan' (0)
-        $tugasAkhir = $log->bimbingan->tugasAkhir;
-        if ($tugasAkhir->status === 'Diajukan' || $tugasAkhir->status === '0') {
-            $tugasAkhir->update(['status' => '1']); // Ubah ke status 'Bimbingan'
-        }
 
         return response()->json([
             'message' => 'Log bimbingan berhasil ditambahkan',
             'data'    => $log
         ], 201);
+    }
+
+    // GET /api/log-bimbingan/status
+    public function getStatus(Request $request)
+    {
+        $user = Auth::user();
+        $mahasiswa = Mahasiswa::where('user_id', $user->id)->first();
+        if (!$mahasiswa) return response()->json(['message' => 'Mahasiswa tidak valid'], 403);
+
+        $ta = TugasAkhir::whereHas('anggota', function ($q) use ($mahasiswa) {
+            $q->where('mhs_nim', $mahasiswa->mhs_nim);
+        })->latest()->first();
+
+        if (!$ta) return response()->json(['message' => 'Anda belum memiliki Tugas Akhir'], 403);
+
+        // Ambil nilai minimal bimbingan dari konfigurasi
+        $minBimbingan = (int) Config::getValue('min_bimbingan', 2);
+
+        // Hitung jumlah log bimbingan yang disetujui untuk mahasiswa ini
+        $jumlahLogDisetujui = LogBimbingan::whereHas('bimbingan', function ($query) use ($ta) {
+                $query->where('tugas_akhir_id', $ta->id);
+            })
+            ->where('mhs_nim', $mahasiswa->mhs_nim)
+            ->whereIn('status', [1, 2]) // Status 1 = disetujui, 2 = disetujui
+            ->count();
+
+        // Hitung total jumlah bimbingan yang seharusnya (jumlah pembimbing * minimal bimbingan per pembimbing)
+        $jumlahPembimbing = $ta->bimbingan()->count();
+        $totalBimbinganHarusnya = $jumlahPembimbing * $minBimbingan;
+
+        $sudahMemenuhi = $jumlahLogDisetujui >= $minBimbingan;
+
+        // Debug logging
+        \Log::info("getStatus called for mahasiswa: {$mahasiswa->mhs_nim}");
+        \Log::info("TA ID: {$ta->id}, Jumlah log disetujui: {$jumlahLogDisetujui}, Jumlah pembimbing: {$jumlahPembimbing}, Min bimbingan: {$minBimbingan}");
+
+        $response = [
+            'jumlah_disetujui' => $jumlahLogDisetujui,
+            'total_yang_dibutuhkan' => $totalBimbinganHarusnya, // Ini buat nampilin di UI kayak 3/8
+            'minimal_dibutuhkan_per_pembimbing' => $minBimbingan,
+            'jumlah_pembimbing' => $jumlahPembimbing,
+            'sudah_memenuhi_syarat' => $sudahMemenuhi,
+            'sisa_kebutuhan' => max(0, $totalBimbinganHarusnya - $jumlahLogDisetujui) // Sisa total yang dibutuhkan
+        ];
+
+        \Log::info("getStatus response: " . json_encode($response));
+
+        return response()->json($response);
+    }
+
+    // GET /api/configs/min-bimbingan
+    public function getConfigMinBimbingan()
+    {
+        $minBimbingan = Config::getValue('min_bimbingan', 2);
+
+        \Log::info("getConfigMinBimbingan called, returning: " . $minBimbingan);
+
+        return response()->json([
+            'setting_key' => 'min_bimbingan',
+            'setting_value' => (int)$minBimbingan
+        ]);
     }
 
     // PUT /api/log-bimbingan/{id}
@@ -304,5 +360,110 @@ class LogBimbinganController extends Controller
 
         $log->delete();
         return response()->json(['message' => 'Log bimbingan berhasil dihapus'], 200);
+    }
+
+    // PATCH /api/log-bimbingan/{id}/approve
+    public function approve(Request $request, $id)
+    {
+        $log = LogBimbingan::find($id);
+        if (!$log) return response()->json(['message' => 'Log bimbingan tidak ditemukan'], 404);
+
+        // Update status log menjadi disetujui (1)
+        $log->status = 1;
+        $log->save();
+
+        // Ambil tugas akhir terkait
+        $tugasAkhir = $log->bimbingan->tugasAkhir;
+
+        // Cek apakah semua anggota sudah selesai bimbingan sesuai konfigurasi
+        if ($tugasAkhir->semuaAnggotaSelesaiBimbingan()) {
+            // Update status tugas akhir ke 'Bimbingan' (1) jika sebelumnya 'Diajukan' (0)
+            // atau ke 'Sidang' (2) jika sebelumnya 'Bimbingan' (1)
+            if ($tugasAkhir->status === '0' || $tugasAkhir->status === 'Diajukan') {
+                $tugasAkhir->update(['status' => '1']); // Ubah ke status 'Bimbingan'
+            } elseif ($tugasAkhir->status === '1' || $tugasAkhir->status === 'Bimbingan') {
+                $tugasAkhir->update(['status' => '2']); // Ubah ke status 'Sidang'
+            }
+        }
+
+        return response()->json([
+            'message' => 'Log bimbingan berhasil disetujui',
+            'data'    => $log
+        ]);
+    }
+
+    // PATCH /api/log-bimbingan/{id}/reject
+    public function reject(Request $request, $id)
+    {
+        $log = LogBimbingan::find($id);
+        if (!$log) return response()->json(['message' => 'Log bimbingan tidak ditemukan'], 404);
+
+        // Update status log menjadi ditolak (0)
+        $log->status = 0;
+        $log->save();
+
+        return response()->json([
+            'message' => 'Log bimbingan berhasil ditolak',
+            'data'    => $log
+        ]);
+    }
+
+    // DEBUG: GET /api/debug-status
+    public function debugStatus(Request $request)
+    {
+        $user = Auth::user();
+
+        // Cek user
+        \Log::info("Debug Status - User: " . json_encode($user ? $user->toArray() : null));
+
+        $mahasiswa = Mahasiswa::where('user_id', $user->id)->first();
+        \Log::info("Debug Status - Mahasiswa: " . json_encode($mahasiswa ? $mahasiswa->toArray() : null));
+
+        if (!$mahasiswa) {
+            return response()->json(['message' => 'Mahasiswa tidak valid'], 403);
+        }
+
+        $ta = TugasAkhir::whereHas('anggota', function ($q) use ($mahasiswa) {
+            $q->where('mhs_nim', $mahasiswa->mhs_nim);
+        })->latest()->first();
+
+        \Log::info("Debug Status - TA: " . json_encode($ta ? $ta->toArray() : null));
+
+        if (!$ta) {
+            return response()->json(['message' => 'Anda belum memiliki Tugas Akhir'], 403);
+        }
+
+        // Ambil nilai minimal bimbingan dari konfigurasi
+        $minBimbingan = (int) Config::getValue('min_bimbingan', 2);
+        \Log::info("Debug Status - Min Bimbingan: " . $minBimbingan);
+
+        // Hitung jumlah log bimbingan yang disetujui untuk mahasiswa ini
+        $jumlahLogDisetujui = LogBimbingan::whereHas('bimbingan', function ($query) use ($ta) {
+                $query->where('tugas_akhir_id', $ta->id);
+            })
+            ->where('mhs_nim', $mahasiswa->mhs_nim)
+            ->whereIn('status', [1, 2])
+            ->count();
+
+        \Log::info("Debug Status - Jumlah Log Disetujui: " . $jumlahLogDisetujui);
+
+        // Hitung total jumlah bimbingan yang seharusnya
+        $jumlahPembimbing = $ta->bimbingan()->count();
+        \Log::info("Debug Status - Jumlah Pembimbing: " . $jumlahPembimbing);
+
+        $totalBimbinganHarusnya = $jumlahPembimbing * $minBimbingan;
+
+        $sudahMemenuhi = $jumlahLogDisetujui >= $minBimbingan;
+
+        return response()->json([
+            'user' => $user->toArray(),
+            'mahasiswa' => $mahasiswa->toArray(),
+            'ta' => $ta->toArray(),
+            'jumlah_log_disetujui' => $jumlahLogDisetujui,
+            'jumlah_pembimbing' => $jumlahPembimbing,
+            'min_bimbingan' => $minBimbingan,
+            'total_yang_dibutuhkan' => $totalBimbinganHarusnya,
+            'sudah_memenuhi_syarat' => $sudahMemenuhi
+        ]);
     }
 }

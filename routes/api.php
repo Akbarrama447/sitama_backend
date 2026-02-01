@@ -63,6 +63,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/log-bimbingan/{id}', [LogBimbinganController::class, 'update']);
     Route::patch('/log-bimbingan/{id}', [LogBimbinganController::class, 'update']);
     Route::delete('/log-bimbingan/{id}', [LogBimbinganController::class, 'destroy']);
+    // Approval dan rejection log bimbingan
+    Route::patch('/log-bimbingan/{id}/approve', [LogBimbinganController::class, 'approve']);
+    Route::patch('/log-bimbingan/{id}/reject', [LogBimbinganController::class, 'reject']);
+    // Status log bimbingan
+    Route::get('/log-bimbingan/status', [LogBimbinganController::class, 'getStatus']);
+    // DEBUG: Route untuk debug status
+    Route::get('/debug-status', [LogBimbinganController::class, 'debugStatus']);
+    // Endpoint untuk mendapatkan nilai konfigurasi minimal bimbingan
+    Route::get('/configs/min-bimbingan', [LogBimbinganController::class, 'getConfigMinBimbingan']);
 
     // Daftar Sidang
     Route::post('/daftar-sidang', [DaftarSidangController::class, 'daftarSidang']);

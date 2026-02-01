@@ -131,9 +131,39 @@ class DaftarSidangController extends Controller
 
             // Cek apakah semua anggota dalam kelompok Tugas Akhir sudah selesai bimbingan
             if (!$tugasAkhir->semuaAnggotaSelesaiBimbingan()) {
+                // Ambil nilai minimal bimbingan dari konfigurasi
+                $minBimbingan = (int) \App\Models\Config::getValue('min_bimbingan', 2);
+
+                // Hitung jumlah log bimbingan yang disetujui tiap anggota
+                $anggotaKelompok = $tugasAkhir->mahasiswa()->get();
+                $anggotaBelumLengkap = [];
+
+                foreach ($anggotaKelompok as $anggota) {
+                    $jumlahLogDisetujui = \App\Models\ModelApi\LogBimbingan::whereHas('bimbingan', function ($query) use ($tugasAkhir) {
+                            $query->where('tugas_akhir_id', $tugasAkhir->id);
+                        })
+                        ->where('mhs_nim', $anggota->mhs_nim)
+                        ->whereIn('status', [1, 2]) // Status 1 = disetujui, 2 = disetujui
+                        ->count();
+
+                    if ($jumlahLogDisetujui < $minBimbingan) {
+                        $anggotaBelumLengkap[] = [
+                            'nama' => $anggota->mhs_nama,
+                            'nim' => $anggota->mhs_nim,
+                            'jumlah_saat_ini' => $jumlahLogDisetujui,
+                            'minimal_dibutuhkan' => $minBimbingan,
+                            'kurang' => $minBimbingan - $jumlahLogDisetujui
+                        ];
+                    }
+                }
+
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Belum semua anggota kelompok selesai bimbingan. Semua anggota harus selesai bimbingan terlebih dahulu sebelum mendaftar sidang.'
+                    'message' => 'Belum semua anggota kelompok selesai bimbingan. Semua anggota harus menyelesaikan minimal ' . $minBimbingan . ' bimbingan yang disetujui sebelum mendaftar sidang.',
+                    'details' => [
+                        'minimal_bimbingan_per_orang' => $minBimbingan,
+                        'anggota_belum_lengkap' => $anggotaBelumLengkap
+                    ]
                 ], 400);
             }
 
