@@ -20,8 +20,15 @@ use App\Http\Controllers\TestApiController;
 |--------------------------------------------------------------------------
 */
 
+// Rute test
+Route::get('/test-api', function() {
+    return response()->json(['message' => 'API test successful']);
+});
+
 // Rute publik
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 // Rute yang dilindungi
 Route::middleware('auth:sanctum')->group(function () {

@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use App\Models\ModelApi\User;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -62,5 +65,103 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Logout berhasil'
         ], 200);
+    }
+
+    /**
+     * Mengirim OTP reset password ke user.
+     */
+    public function forgotPassword(Request $request)
+    {
+        try {
+            $request->validate([
+                'email' => 'required|email|exists:user,email',
+            ]);
+
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Email tidak ditemukan.'
+                ], 404);
+            }
+
+            // Generate OTP 6 digit
+            $otp = rand(100000, 999999);
+
+            // Simpan OTP ke database (gunakan table password_reset_tokens)
+            DB::table('password_reset_tokens')->updateOrInsert(
+                ['email' => $request->email],
+                [
+                    'email' => $request->email,
+                    'token' => hash('sha256', $otp), // Hash OTP untuk keamanan
+                    'created_at' => now(),
+                ]
+            );
+
+            // Kirim OTP lewat email
+            $user->notify(new \App\Notifications\OtpResetPasswordNotification($otp));
+
+            return response()->json([
+                'message' => 'OTP reset password telah dikirim ke email Anda.'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Mereset password user dengan OTP.
+     */
+    public function resetPassword(Request $request)
+    {
+        try {
+            $request->validate([
+                'otp' => 'required|numeric|digits:6', // Validasi OTP 6 digit
+                'email' => 'required|email|exists:user,email',
+                'password' => 'required|min:8|confirmed',
+            ]);
+
+            // Cek apakah OTP valid
+            $otpRecord = DB::table('password_reset_tokens')
+                ->where('email', $request->email)
+                ->first();
+
+            if (!$otpRecord || !hash_equals(hash('sha256', $request->otp), $otpRecord->token)) {
+                return response()->json([
+                    'message' => 'OTP reset password tidak valid.'
+                ], 400);
+            }
+
+            // Cek apakah OTP masih berlaku (misalnya dalam 10 menit terakhir)
+            $createdAt = Carbon::parse($otpRecord->created_at);
+            $now = Carbon::now();
+
+            if ($now->diffInMinutes($createdAt) > 10) { // OTP berlaku selama 10 menit
+                // Hapus OTP yang kadaluarsa
+                DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+                return response()->json([
+                    'message' => 'OTP reset password telah kadaluarsa.'
+                ], 400);
+            }
+
+            // Update password user
+            $user = User::where('email', $request->email)->first();
+            $user->password = Hash::make($request->password);
+            $user->save();
+
+            // Hapus OTP setelah digunakan
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+            return response()->json([
+                'message' => 'Password berhasil direset.'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
